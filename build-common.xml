@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="build-common" default="all" basedir=".">
+
+	<property name="binDir" value="bin" />
+	
+	<target name="all" depends="copyResources, makeJar" description="Create a plugin jar for the project">
+	</target>
+
+	<target name="copyResources" description="Copies needed files to the build location">
+		<copy todir="${binDir}">
+			<fileset file="plugin.yml" />
+		</copy>
+	</target>
+
+	<target name="makeJar" description="Create the jar">
+		<jar jarfile="../${jarDir}/${ant.project.name}.jar" basedir="${binDir}" />
+	</target>
+
+</project>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="MachinaCraft" default="all" basedir=".">
+
+	<property name="jarDir" value="jar" />
+
+	<target name="all" description="Build all jars for the project">
+		<ant dir="MachinaCore" />
+		<ant dir="MachinaBuilder" />
+		<ant dir="MachinaDrill" />
+		<ant dir="MachinaPump" />
+	</target>
+
+	<target name="clean">
+		<delete verbose="true" includeemptydirs="true" failonerror="false">
+			<fileset dir="${jarDir}" />
+		</delete>
+	</target>
+
+</project>

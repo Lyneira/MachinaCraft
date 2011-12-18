@@ -1,0 +1,43 @@
+name: MachinaPump
+version: 1.6
+description: A Machina that drains or fills an area of water or lava.
+author: Lyneira
+main: me.lyneira.MachinaPump.MachinaPump
+depend: [MachinaCore]
+permissions:
+    machinapump.*:
+        children:
+            machinapump.all: true
+    machinapump.all:
+        description: Gives access to all basic pump functionality, including deactivating another player's pump.
+        children:
+            machinapump.activate: true
+            machinapump.deactivate-own: true
+            machinapump.deactivate-all: true
+    machinapump.activate:
+        description: Allows activating a pump.
+        default: op
+    machinapump.deactivate-own:
+        description: Allows deactivating the player's own pump.
+        default: op
+    machinapump.deactivate-all:
+        description: Allows deactivating any pump.
+        default: op
+    machinapump.nether-water:
+        description: Allows a pump to pour water in the Nether.
+        default: op
+    machinapump.lava.*:
+        children:
+            machinapump.lava.all: true
+    machinapump.lava.all:
+        description: Gives access to using a pump with lava.
+        children:
+            machinapump.lava.drain: true
+            machinapump.lava.fill: true    
+    machinapump.lava.drain:
+        description: Allows a pump to drain lava with a tube made of iron blocks.
+        default: op
+    machinapump.lava.fill:
+        description: Allows a pump to pour lava with a tube made of iron blocks.
+        default: op
+    

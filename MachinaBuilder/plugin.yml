@@ -1,0 +1,25 @@
+name: MachinaBuilder
+version: 1.6
+description: A Machina that moves forward and lays blocks under the iron heads at its front.
+author: Lyneira
+main: me.lyneira.MachinaBuilder.MachinaBuilder
+depend: [MachinaCore]
+permissions:
+    machinabuilder.*:
+        children:
+            machinabuilder.all: true
+    machinabuilder.all:
+        description: Gives full access to using a builder, including deactivating another player's builder.
+        children:
+            machinabuilder.activate: true
+            machinabuilder.deactivate-own: true
+            machinabuilder.deactivate-all: true
+    machinabuilder.activate:
+        description: Allows activating a builder.
+        default: op
+    machinabuilder.deactivate-own:
+        description: Allows deactivating the player's own builder.
+        default: op
+    machinabuilder.deactivate-all:
+        description: Allows deactivating any builder.
+        default: op

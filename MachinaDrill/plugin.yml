@@ -1,0 +1,25 @@
+name: MachinaDrill
+version: 1.6
+description: A Machina that moves forward and breaks blocks in its path.
+author: Lyneira
+main: me.lyneira.MachinaDrill.MachinaDrill
+depend: [MachinaCore]
+permissions:
+    machinadrill.*:
+        children:
+            machinadrill.all: true
+    machinadrill.all:
+        description: Gives full access to using a drill, including deactivating another player's drill.
+        children:
+            machinadrill.activate: true
+            machinadrill.deactivate-own: true
+            machinadrill.deactivate-all: true
+    machinadrill.activate:
+        description: Allows activating a drill.
+        default: op
+    machinadrill.deactivate-own:
+        description: Allows deactivating the player's own drill.
+        default: op
+    machinadrill.deactivate-all:
+        description: Allows deactivating any drill.
+        default: op
