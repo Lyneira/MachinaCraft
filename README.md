@@ -19,15 +19,23 @@ good starting point.
 
 [tutorial]: http://wiki.bukkit.org/Plugin_Tutorial
 
-There's no build system included for now, so you'll need to import it as a
-project into Eclipse. Add a current bukkit snapshot jar as an external library,
-then right click on your project and choose Export... -> Java -> Jar File.
-Make sure only the plugin.yml and src items are ticked, choose your destination
-file and click Finish!
+File -> Import... -> General -> Existing Projects into Workspace, select the
+MachinaCraft root folder. Repeat this process for each plugin folder contained
+in it. Eclipse should automatically compile each plugin when it's imported.
+
+Building the Plugins
+--------------------
+A rudimentary ant build system is included that can take care of packaging the
+plugins into jarfiles. In the MachinaCraft project, rightclick on build.xml and
+select Run As -> Ant Build (without the ...)
+
+The jar files will appear in a 'jar' folder under the MachinaCraft root folder.
+Advanced: Create a new builder for the MachinaCraft project under properties so
+that you can just select the project and in the top menu choose Project ->
+ Build Project.
 
 Developing a Machina Plugin
 ---------------------------
-
-Add MachinaCraft as a project to your Eclipse workspace, then right click on
-your new plugin and choose Properties. Go to Java Build Path -> Projects tab,
-and add MachinaCraft to the list here.
+When you've created a new java plugin project, right click your new project and
+choose Properties. Go to Java Build Path -> Projects tab, and add MachinaCore
+to the list.
