@@ -1,5 +1,8 @@
 package me.lyneira.MachinaCore;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 import org.bukkit.Material;
 
 /**
@@ -7,15 +10,18 @@ import org.bukkit.Material;
  * 
  * @author Lyneira
  */
-class BlueprintBlock {
+public class BlueprintBlock {
     /**
      * Where this block is located in relation to the anchor.
      */
-    public final BlockVector vector;
+    private final Map<BlockRotation, BlockVector> vectors = new EnumMap<BlockRotation, BlockVector>(BlockRotation.class);
+    public final BlockVector south;
+
     /**
      * The type of this block
      */
     public final int typeId;
+
     /**
      * Whether this block needs special handling during detection.
      */
@@ -29,7 +35,7 @@ class BlueprintBlock {
     /**
      * Constructs a new {@link BlueprintBlock} from the given parameters.
      * 
-     * @param vector
+     * @param south
      *            {@link BlockVector} specifying where this block is located in
      *            relation to the anchor
      * @param type
@@ -37,34 +43,31 @@ class BlueprintBlock {
      * @param key
      *            Whether this block needs special handling during detection
      */
-    BlueprintBlock(BlockVector vector, Material type, boolean key) {
-        this.vector = vector;
+    BlueprintBlock(BlockVector south, Material type, boolean key) {
+        this.south = south;
+        vectors.put(BlockRotation.ROTATE_0, south);
+        vectors.put(BlockRotation.ROTATE_90, south.rotated(BlockRotation.ROTATE_90));
+        vectors.put(BlockRotation.ROTATE_180, south.rotated(BlockRotation.ROTATE_180));
+        vectors.put(BlockRotation.ROTATE_270, south.rotated(BlockRotation.ROTATE_270));
         this.typeId = type.getId();
         this.key = key;
         this.attached = BlockData.isAttached(this.typeId);
     }
 
     /**
-     * Constructs a new {@link BlueprintBlock} from the given vector and another
-     * {@link BlueprintBlock}.
+     * Returns the {@link BlockVector} for this {@link BlueprintBlock} at the
+     * specified yaw.
      * 
-     * @param vector
-     *            {@link BlockVector} specifying where this block is located in
-     *            relation to the anchor
-     * @param other
-     *            {@link BlueprintBlock} that will be copied, except from the
-     *            vector
+     * @param yaw
+     * @return
      */
-    BlueprintBlock(BlockVector vector, BlueprintBlock other) {
-        this.vector = vector;
-        this.typeId = other.typeId;
-        this.key = other.key;
-        this.attached = other.attached;
+    public BlockVector vector(BlockRotation yaw) {
+        return vectors.get(yaw);
     }
 
     @Override
     public int hashCode() {
-        return vector.hashCode();
+        return south.hashCode();
     }
 
     @Override
@@ -77,6 +80,6 @@ class BlueprintBlock {
         }
         final BlueprintBlock other = (BlueprintBlock) obj;
 
-        return this.vector == other.vector;
+        return this.south.equals(other.south);
     }
 }

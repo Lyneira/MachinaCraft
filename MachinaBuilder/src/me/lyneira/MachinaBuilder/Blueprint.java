@@ -2,7 +2,6 @@ package me.lyneira.MachinaBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
@@ -13,7 +12,9 @@ import me.lyneira.MachinaCore.BlockData;
 import me.lyneira.MachinaCore.BlockLocation;
 import me.lyneira.MachinaCore.BlockRotation;
 import me.lyneira.MachinaCore.BlockVector;
+import me.lyneira.MachinaCore.BlueprintBlock;
 import me.lyneira.MachinaCore.BlueprintFactory;
+import me.lyneira.MachinaCore.ModuleFactory;
 import me.lyneira.MachinaCore.Machina;
 import me.lyneira.MachinaCore.MovableBlueprint;
 
@@ -23,10 +24,10 @@ import me.lyneira.MachinaCore.MovableBlueprint;
  * @author Lyneira
  */
 public class Blueprint extends MovableBlueprint {
-    private static List<BlueprintFactory> blueprints;
-    final static int mainModuleIndex;
-    final static int leftModuleIndex;
-    final static int rightModuleIndex;
+    private static BlueprintFactory blueprint;
+    final static int mainModuleId;
+    final static int leftModuleId;
+    final static int rightModuleId;
 
     final static Material headMaterial = Material.IRON_BLOCK;
     private final static Material baseMaterial = Material.WOOD;
@@ -35,55 +36,47 @@ public class Blueprint extends MovableBlueprint {
     private final static Material supplyContainerMaterial = Material.CHEST;
     final static Material rotateMaterial = Material.STICK;
 
-    final static int leverIndex;
-    final static int centralBaseIndex;
-    final static int furnaceIndex;
-    final static int containerIndex;
-    final static int primaryHeadIndex;
-
-    final static int leftHeadIndex;
-    final static int rightHeadIndex;
+    final static BlueprintBlock centralBase;
+    final static BlueprintBlock chest;
+    final static BlueprintBlock furnace;
+    final static BlueprintBlock primaryHead;
+    final static BlueprintBlock leftHead;
+    final static BlueprintBlock rightHead;
 
     static {
-        blueprints = new ArrayList<BlueprintFactory>(3);
+        blueprint = new BlueprintFactory(3);
 
-        mainModuleIndex = blueprints.size();
-        BlueprintFactory mainModule = new BlueprintFactory();
-        blueprints.add(mainModule);
+        ModuleFactory mainModule = blueprint.newModule();
+        mainModuleId = mainModule.id;
+        
+        ModuleFactory leftModule = blueprint.newModule();
+        leftModuleId = leftModule.id;
+        
+        ModuleFactory rightModule = blueprint.newModule();
+        rightModuleId = rightModule.id;
 
-        leftModuleIndex = blueprints.size();
-        BlueprintFactory leftModule = new BlueprintFactory();
-        blueprints.add(leftModule);
+        // The lever is always key.
+        mainModule.addKey(new BlockVector(0, 1, 0), Material.LEVER);
+        // Central base, used for ground detection
+        centralBase = mainModule.addKey(new BlockVector(0, 0, 0), baseMaterial);
+        // Furnace determines direction
+        furnace = mainModule.addKey(new BlockVector(-1, 0, 0), burningFurnaceMaterial);
 
-        rightModuleIndex = blueprints.size();
-        BlueprintFactory rightModule = new BlueprintFactory();
-        blueprints.add(rightModule);
+        chest = mainModule.add(new BlockVector(1, 1, 0), supplyContainerMaterial);
+        primaryHead = mainModule.add(new BlockVector(1, 0, 0), headMaterial);
 
-        mainModule.addKey(new BlockVector(0, 1, 0), Material.LEVER).addKey(new BlockVector(0, 0, 0), baseMaterial).addKey(new BlockVector(-1, 0, 0), burningFurnaceMaterial)
-                .addKey(new BlockVector(1, 1, 0), supplyContainerMaterial).addKey(new BlockVector(1, 0, 0), headMaterial);
+        leftHead = leftModule.add(new BlockVector(1, 0, -1), headMaterial);
+        leftModule.add(new BlockVector(0, 0, -1), baseMaterial);
 
-        leftModule.addKey(new BlockVector(1, 0, -1), headMaterial).add(new BlockVector(0, 0, -1), baseMaterial);
-
-        rightModule.addKey(new BlockVector(1, 0, 1), headMaterial).add(new BlockVector(0, 0, 1), baseMaterial);
-
-        // Get handles to key blocks now. This finalizes the blueprints.
-        ListIterator<Integer> handles = mainModule.getHandlesFinal().listIterator();
-        leverIndex = handles.next();
-        centralBaseIndex = handles.next();
-        furnaceIndex = handles.next();
-        containerIndex = handles.next();
-        primaryHeadIndex = handles.next();
-        handles = leftModule.getHandlesFinal().listIterator();
-        leftHeadIndex = handles.next();
-        handles = rightModule.getHandlesFinal().listIterator();
-        rightHeadIndex = handles.next();
+        rightHead = rightModule.add(new BlockVector(1, 0, 1), headMaterial);
+        rightModule.add(new BlockVector(0, 0, 1), baseMaterial);
     }
 
     public final static Blueprint instance = new Blueprint();
 
     private Blueprint() {
-        super(blueprints);
-        blueprints = null;
+        super(blueprint);
+        blueprint = null;
     }
 
     /**
@@ -94,45 +87,47 @@ public class Blueprint extends MovableBlueprint {
         if (leverFace != BlockFace.UP)
             return null;
 
+        if (!anchor.checkType(baseMaterial))
+            return null;
+
         // Check if the Builder is on solid ground.
         if (!BlockData.isSolid(anchor.getRelative(BlockFace.DOWN).getTypeId()))
             return null;
 
-        if (anchor.checkType(baseMaterial)) {
-            // Search for a furnace around the anchor.
-            for (BlockRotation i : BlockRotation.values()) {
-                if (anchor.getRelative(i.getYawFace()).checkType(furnaceMaterial)) {
-                    BlockRotation yaw = i.getOpposite();
-                    BlockLocation primaryHead = anchor.getRelative(yaw.getYawFace());
-                    if (primaryHead.checkType(headMaterial) && primaryHead.getRelative(BlockFace.UP).checkType(supplyContainerMaterial)) {
-                        if (!player.hasPermission("machinabuilder.activate")) {
-                            player.sendMessage("You do not have permission to activate a builder.");
-                            return null;
-                        }
+        // Search for a furnace around the anchor.
+        for (BlockRotation i : BlockRotation.values()) {
+            if (!anchor.getRelative(i.getYawFace()).checkType(furnaceMaterial))
+                continue;
 
-                        List<Integer> detectedModules = new ArrayList<Integer>(3);
-                        detectedModules.add(mainModuleIndex);
-                        // Detect optional modules here.
-                        BlockLocation head = primaryHead.getRelative(yaw.getLeft().getYawFace());
-                        if (head.checkType(headMaterial) && detectOther(anchor, yaw, leftModuleIndex)) {
-                            detectedModules.add(leftModuleIndex);
-                        }
-                        head = primaryHead.getRelative(yaw.getRight().getYawFace());
-                        if (head.checkType(headMaterial) && detectOther(anchor, yaw, rightModuleIndex)) {
-                            detectedModules.add(rightModuleIndex);
-                        }
+            BlockRotation yaw = i.getOpposite();
+            if (!detectOther(anchor, yaw, mainModuleId))
+                continue;
 
-                        Builder builder = new Builder(instance, detectedModules, yaw, player, anchor);
-                        if (itemInHand != null && itemInHand.getType() == rotateMaterial) {
-                            builder.doRotate(anchor, BlockRotation.yawFromLocation(player.getLocation()));
-                            builder.onDeActivate(anchor);
-                            builder = null;
-                        }
-                        return builder;
-                    }
-                }
+            if (!player.hasPermission("machinabuilder.activate")) {
+                player.sendMessage("You do not have permission to activate a builder.");
+                return null;
             }
+
+            List<Integer> detectedModules = new ArrayList<Integer>(3);
+            detectedModules.add(mainModuleId);
+
+            // Detect optional modules here.
+            if (detectOther(anchor, yaw, leftModuleId)) {
+                detectedModules.add(leftModuleId);
+            }
+            if (detectOther(anchor, yaw, rightModuleId)) {
+                detectedModules.add(rightModuleId);
+            }
+
+            Builder builder = new Builder(this, detectedModules, yaw, player, anchor);
+            if (itemInHand != null && itemInHand.getType() == rotateMaterial) {
+                builder.doRotate(anchor, BlockRotation.yawFromLocation(player.getLocation()));
+                builder.onDeActivate(anchor);
+                builder = null;
+            }
+            return builder;
         }
+
         return null;
     }
 

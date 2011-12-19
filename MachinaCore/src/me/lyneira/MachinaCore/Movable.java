@@ -4,7 +4,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -16,7 +15,7 @@ import org.bukkit.inventory.ItemStack;
  */
 public abstract class Movable implements Machina {
     protected final MovableBlueprint blueprint;
-    protected final List<Integer> moduleIndices;
+    private final List<Integer> modules;
     private final int moduleCount;
 
     private final BlueprintBlock[] unifiedBlueprint;
@@ -57,7 +56,7 @@ public abstract class Movable implements Machina {
         this.player = player;
         this.blueprint = blueprint;
         this.yaw = yaw;
-        this.moduleIndices = moduleIndices;
+        this.modules = moduleIndices;
 
         moduleCount = moduleIndices.size();
         moveData = new MoveData[moduleCount];
@@ -216,7 +215,7 @@ public abstract class Movable implements Machina {
         BlockLocation newAnchor = oldAnchor.getRelative(face);
 
         for (int i = 0; i < moduleCount; i++) {
-            moveData[i].get(oldAnchor, moduleIndices.get(i));
+            moveData[i].get(oldAnchor, modules.get(i));
         }
 
         // * Destroy the negative difference, with attachables included
@@ -226,7 +225,7 @@ public abstract class Movable implements Machina {
         put(newAnchor);
 
         for (int i = 0; i < moduleCount; i++) {
-            moveData[i].put(newAnchor, moduleIndices.get(i));
+            moveData[i].put(newAnchor, modules.get(i));
         }
         return newAnchor;
     }
@@ -241,7 +240,7 @@ public abstract class Movable implements Machina {
      */
     protected void teleport(final BlockLocation oldAnchor, final BlockLocation newAnchor) {
         for (int i = 0; i < moduleCount; i++) {
-            moveData[i].get(oldAnchor, moduleIndices.get(i));
+            moveData[i].get(oldAnchor, modules.get(i));
         }
 
         // * Destroy the negative difference, with attachables included
@@ -251,7 +250,7 @@ public abstract class Movable implements Machina {
         put(newAnchor);
 
         for (int i = 0; i < moduleCount; i++) {
-            moveData[i].put(newAnchor, moduleIndices.get(i));
+            moveData[i].put(newAnchor, modules.get(i));
         }
     }
 
@@ -269,7 +268,7 @@ public abstract class Movable implements Machina {
         }
 
         for (int i = 0; i < moduleCount; i++) {
-            moveData[i].get(anchor, moduleIndices.get(i));
+            moveData[i].get(anchor, modules.get(i));
         }
 
         // * Destroy the negative difference, with attachables included
@@ -278,13 +277,13 @@ public abstract class Movable implements Machina {
 
         yaw = yaw.add(rotateBy);
         // Re-initialize the vectors
-        blueprint.unifyVectors(moduleIndices, yaw, unifiedVectors);
+        blueprint.unifyVectors(modules, yaw, unifiedVectors);
 
         // * Put new blocks, attachables last
         put(anchor);
 
         for (int i = 0; i < moduleCount; i++) {
-            moveData[i].put(anchor, moduleIndices.get(i));
+            moveData[i].put(anchor, modules.get(i));
         }
     }
 
@@ -305,11 +304,10 @@ public abstract class Movable implements Machina {
      *            The Material to place.
      * @return True if the player may place a block at the location.
      */
-    protected boolean canMove(BlockLocation newAnchor, int keyIndex, Material material, int moduleIndex) {
-        BlockLocation target = newAnchor.getRelative(blueprint.getByIndex(keyIndex, yaw, moduleIndex));
-        int typeId = material.getId();
+    protected boolean canMove(BlockLocation newAnchor, BlueprintBlock block) {
+        BlockLocation target = newAnchor.getRelative(block.vector(yaw));
         BlockLocation placedAgainst = target.getRelative(yaw.getOpposite().getYawFace());
-        return EventSimulator.blockPlaceNoTrace(target, typeId, placedAgainst, player);
+        return EventSimulator.blockPlaceNoTrace(target, block.typeId, placedAgainst, player);
     }
 
     /**
@@ -326,5 +324,14 @@ public abstract class Movable implements Machina {
      */
     protected boolean canPlace(BlockLocation target, int typeId, BlockLocation placedAgainst) {
         return EventSimulator.blockPlace(target, typeId, placedAgainst, player);
+    }
+    
+    /**
+     * Checks if the given module id is active for this machina.
+     * @param id
+     * @return True if the module is active.
+     */
+    protected boolean hasModule(int id) {
+        return modules.contains(id);
     }
 }

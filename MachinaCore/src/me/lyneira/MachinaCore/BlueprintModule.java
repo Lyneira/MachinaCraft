@@ -16,7 +16,7 @@ import org.bukkit.inventory.ItemStack;
  */
 class BlueprintModule {
     final BlueprintBlock[] blueprint;
-    final Map<BlockRotation, BlockVector[]> blueprintVectors;
+    final Map<BlockRotation, BlockVector[]> blueprintVectors = new EnumMap<BlockRotation, BlockVector[]>(BlockRotation.class);
     final int size;
     private final int[] dataIndices;
     private final int[] inventoryIndices;
@@ -27,17 +27,16 @@ class BlueprintModule {
      * @param blueprintSouth
      *            The blueprint to use
      */
-    protected BlueprintModule(final BlueprintFactory blueprintSouth) {
+    BlueprintModule(final ModuleFactory blueprintSouth) {
         List<BlueprintBlock> blueprintFinal = blueprintSouth.getBlueprintFinal();
         size = blueprintFinal.size();
         blueprint = blueprintFinal.toArray(new BlueprintBlock[0]);
-        blueprintVectors = new EnumMap<BlockRotation, BlockVector[]>(BlockRotation.class);
 
         // Initialize the vector arrays for each rotation.
         for (BlockRotation rotation : BlockRotation.values()) {
             BlockVector[] vectors = new BlockVector[size];
             for (int i = 0; i < size; i++) {
-                vectors[i] = blueprint[i].vector.rotated(rotation);
+                vectors[i] = blueprint[i].vector(rotation);
             }
             blueprintVectors.put(rotation, vectors);
         }
@@ -53,7 +52,7 @@ class BlueprintModule {
      *            {@link BlockLocation} to detect at
      * @return True if the non-key blocks are present.
      */
-    protected boolean detectOther(final BlockLocation anchor, final BlockRotation yaw) {
+    boolean detectOther(final BlockLocation anchor, final BlockRotation yaw) {
         BlockVector[] vectors = blueprintVectors.get(yaw);
         for (int i = 0; i < size; i++) {
             if (!blueprint[i].key) {
@@ -66,24 +65,13 @@ class BlueprintModule {
     }
 
     /**
-     * Returns the {@link BlockVector} from the blueprint at the given index.
-     * 
-     * @param index
-     *            The index to retrieve from
-     * @return The {@link BlockVector} at the given index
-     */
-    protected BlockVector getByIndex(final int index, final BlockRotation yaw) {
-        return blueprintVectors.get(yaw)[index];
-    }
-
-    /**
      * Returns an array of bytes containing the block data for this blueprint.
      * 
      * @param anchor
      *            The anchor for which to grab data from the blocks
      * @return An array of bytes of block data
      */
-    protected byte[] getBlockData(final BlockLocation anchor, final BlockRotation yaw) {
+    byte[] getBlockData(final BlockLocation anchor, final BlockRotation yaw) {
         BlockVector[] vectors = blueprintVectors.get(yaw);
         byte[] result = new byte[dataIndices.length];
         for (int i = 0; i < dataIndices.length; i++) {
@@ -102,7 +90,7 @@ class BlueprintModule {
      * @param data
      *            The byte array to use
      */
-    protected void setBlockData(final BlockLocation anchor, final byte[] data, final BlockRotation yaw) {
+    void setBlockData(final BlockLocation anchor, final byte[] data, final BlockRotation yaw) {
         BlockVector[] vectors = blueprintVectors.get(yaw);
         for (int i = 0; i < dataIndices.length; i++) {
             Block block = anchor.getRelative(vectors[dataIndices[i]]).getBlock();
@@ -119,7 +107,7 @@ class BlueprintModule {
      *            The anchor for which to grab inventory from the blocks
      * @return A {@link List} of {@link ItemStack} arrays
      */
-    protected ItemStack[][] getBlockInventories(final BlockLocation anchor, final BlockRotation yaw) {
+    ItemStack[][] getBlockInventories(final BlockLocation anchor, final BlockRotation yaw) {
         BlockVector[] vectors = blueprintVectors.get(yaw);
         ItemStack[][] result = new ItemStack[inventoryIndices.length][];
         for (int i = 0; i < inventoryIndices.length; i++) {
@@ -140,7 +128,7 @@ class BlueprintModule {
      * @param inventories
      *            The inventory array to use
      */
-    protected void setBlockInventories(final BlockLocation anchor, final ItemStack[][] inventories, final BlockRotation yaw) {
+    void setBlockInventories(final BlockLocation anchor, final ItemStack[][] inventories, final BlockRotation yaw) {
         BlockVector[] vectors = blueprintVectors.get(yaw);
         for (int i = 0; i < inventoryIndices.length; i++) {
             Block block = anchor.getRelative(vectors[inventoryIndices[i]]).getBlock();

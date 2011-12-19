@@ -3,14 +3,15 @@ package me.lyneira.MachinaDrill;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 
 import me.lyneira.MachinaCore.BlockData;
 import me.lyneira.MachinaCore.BlockLocation;
 import me.lyneira.MachinaCore.BlockRotation;
 import me.lyneira.MachinaCore.BlockVector;
+import me.lyneira.MachinaCore.BlueprintBlock;
 import me.lyneira.MachinaCore.BlueprintFactory;
+import me.lyneira.MachinaCore.ModuleFactory;
 import me.lyneira.MachinaCore.Machina;
 import me.lyneira.MachinaCore.MovableBlueprint;
 
@@ -25,8 +26,8 @@ import org.bukkit.inventory.ItemStack;
  * @author Lyneira
  */
 final class Blueprint extends MovableBlueprint {
-    private static List<BlueprintFactory> blueprints;
-    final static int mainModuleIndex;
+    private static BlueprintFactory blueprint;
+    final static int mainModuleId;
     final static Map<BlockRotation, BlockVector[]> drillPattern = new EnumMap<BlockRotation, BlockVector[]>(BlockRotation.class);
 
     final static int drillPatternSize;
@@ -38,39 +39,35 @@ final class Blueprint extends MovableBlueprint {
     final static Material chestMaterial = Material.CHEST;
     final static Material rotateMaterial = Material.STICK;
 
-    final static int leverIndex;
-    final static int centralBaseIndex;
-    final static int furnaceIndex;
-    final static int chestIndex;
-    final static int drillHeadIndex;
+    final static BlueprintBlock chest;
+    final static BlueprintBlock centralBase;
+    final static BlueprintBlock head;
+    final static BlueprintBlock furnace;
 
     static {
-        blueprints = new ArrayList<BlueprintFactory>(1);
-        mainModuleIndex = blueprints.size();
-        BlueprintFactory mainModule = new BlueprintFactory();
-        blueprints.add(mainModule);
-        mainModule
-        // Add key blocks
-        // Lever
-                .addKey(new BlockVector(0, 1, 0), Material.LEVER)
-                // Central base, used for ground detection
-                .addKey(new BlockVector(0, -1, 0), baseMaterial)
-                // Furnace
-                .addKey(new BlockVector(-1, -1, 0), burningFurnaceMaterial)
-                // Output chest
-                .addKey(new BlockVector(-1, 0, 0), chestMaterial)
-                // Head
-                .addKey(new BlockVector(1, 0, 0), headMaterial)
-                // Add non-key blocks
-                .add(new BlockVector(0, 0, 0), anchorMaterial).add(new BlockVector(0, -1, 1), baseMaterial).add(new BlockVector(0, -1, -1), baseMaterial);
-        // Get handles to key blocks now. This finalizes the blueprint.
-        ListIterator<Integer> handles = mainModule.getHandlesFinal().listIterator();
-        leverIndex = handles.next();
-        centralBaseIndex = handles.next();
-        furnaceIndex = handles.next();
-        chestIndex = handles.next();
-        drillHeadIndex = handles.next();
+        blueprint = new BlueprintFactory(1);
+        
+        ModuleFactory mainModule = blueprint.newModule();
+        mainModuleId = mainModule.id;
+        
+        // Add key blocks to the blueprint
+        // The lever is always key.
+        mainModule.addKey(new BlockVector(0, 1, 0), Material.LEVER);
+        // Anchor
+        mainModule.addKey(new BlockVector(0, 0, 0), anchorMaterial);
+        // Central base, used for ground detection
+        centralBase = mainModule.addKey(new BlockVector(0, -1, 0), baseMaterial);
+        // Furnace determines direction
+        furnace = mainModule.addKey(new BlockVector(-1, -1, 0), burningFurnaceMaterial);
 
+        // Add non-key blocks
+        // Output chest
+        chest = mainModule.add(new BlockVector(-1, 0, 0), chestMaterial);
+        // Head
+        head = mainModule.add(new BlockVector(1, 0, 0), headMaterial);
+        mainModule.add(new BlockVector(0, -1, 1), baseMaterial);
+        mainModule.add(new BlockVector(0, -1, -1), baseMaterial);
+        
         // Add drill pattern data 3x3
         drillPatternSize = 9;
         BlockVector[] basePattern = new BlockVector[drillPatternSize];
@@ -95,8 +92,8 @@ final class Blueprint extends MovableBlueprint {
     public final static Blueprint instance = new Blueprint();
 
     private Blueprint() {
-        super(blueprints);
-        blueprints = null;
+        super(blueprint);
+        blueprint = null;
     }
 
     /**
@@ -107,12 +104,15 @@ final class Blueprint extends MovableBlueprint {
         if (leverFace != BlockFace.UP)
             return null;
 
-        // Check if the drill is on solid ground.
-        if (!BlockData.isSolid(anchor.getRelative(BlockFace.DOWN, 2).getTypeId()))
+        if (!anchor.checkType(anchorMaterial))
             return null;
 
         BlockLocation centralBase = anchor.getRelative(BlockFace.DOWN);
         if (!centralBase.checkType(baseMaterial))
+            return null;
+
+        // Check if the drill is on solid ground.
+        if (!BlockData.isSolid(centralBase.getRelative(BlockFace.DOWN).getTypeId()))
             return null;
 
         // Search for a furnace around the central base.
@@ -120,27 +120,20 @@ final class Blueprint extends MovableBlueprint {
             if (!centralBase.getRelative(i.getYawFace()).checkType(furnaceMaterial))
                 continue;
 
-            if (!anchor.getRelative(i.getYawFace()).checkType(chestMaterial))
-                continue;
-
             BlockRotation yaw = i.getOpposite();
-            if (!anchor.getRelative(yaw.getYawFace()).checkType(headMaterial))
+            if (!detectOther(anchor, yaw, mainModuleId))
                 continue;
 
-            // The key blocks and yaw have been detected, now we can
-            // leave the rest to the MovableBlueprint framework.
-            if (!detectOther(anchor, yaw, mainModuleIndex))
-                continue;
-            
-            if (!player.hasPermission("machinadrill.activate")) {
+             if (!player.hasPermission("machinadrill.activate")) {
                 player.sendMessage("You do not have permission to activate a drill.");
                 return null;
             }
 
             // Detection was a success, now make the new drill.
             List<Integer> detectedModules = new ArrayList<Integer>(1);
-            detectedModules.add(mainModuleIndex);
-            Drill drill = new Drill(instance, detectedModules, yaw, player, anchor);
+            detectedModules.add(mainModuleId);
+
+            Drill drill = new Drill(this, detectedModules, yaw, player, anchor);
             if (itemInHand != null && itemInHand.getType() == rotateMaterial) {
                 // Support for rotation on a non-activated drill
                 drill.doRotate(anchor, BlockRotation.yawFromLocation(player.getLocation()));

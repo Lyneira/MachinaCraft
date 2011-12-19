@@ -16,15 +16,15 @@ public abstract class MovableBlueprint implements MachinaBlueprint {
 
     /**
      * Constructs a new MovableBlueprint using the given
-     * {@link BlueprintFactory} List.
+     * {@link ModuleFactory} List.
      * 
      * @param blueprintSouth
      */
-    protected MovableBlueprint(final List<BlueprintFactory> blueprintsSouth) {
-        modules = new ArrayList<BlueprintModule>(blueprintsSouth.size());
+    protected MovableBlueprint(final BlueprintFactory blueprint) {
+        modules = new ArrayList<BlueprintModule>(blueprint.modules.size());
 
-        for (BlueprintFactory blueprint : blueprintsSouth) {
-            modules.add(new BlueprintModule(blueprint));
+        for (ModuleFactory module : blueprint.modules) {
+            modules.add(new BlueprintModule(module));
         }
     }
 
@@ -42,19 +42,6 @@ public abstract class MovableBlueprint implements MachinaBlueprint {
      */
     public boolean detectOther(final BlockLocation anchor, final BlockRotation yaw, final int module) {
         return modules.get(module).detectOther(anchor, yaw);
-    }
-
-    /**
-     * Returns the {@link BlockVector} from the blueprint at the given index.
-     * 
-     * @param index
-     *            The index to retrieve from
-     * @param module
-     *            The module to retrieve from.
-     * @return The {@link BlockVector} at the given index
-     */
-    public BlockVector getByIndex(final int index, final BlockRotation yaw, final int module) {
-        return modules.get(module).getByIndex(index, yaw);
     }
 
     /**

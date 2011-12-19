@@ -107,7 +107,7 @@ final class Drill extends Movable {
      */
     private boolean doDrill(final BlockLocation anchor) {
         if (BlockData.isDrillable(nextTypeId)) {
-            Block chest = anchor.getRelative(blueprint.getByIndex(Blueprint.chestIndex, yaw, Blueprint.mainModuleIndex)).getBlock();
+            Block chest = anchor.getRelative(Blueprint.chest.vector(yaw)).getBlock();
             Inventory inventory = ((Chest) chest.getState()).getInventory();
             if (inventory.firstEmpty() < 0)
                 return false;
@@ -140,7 +140,7 @@ final class Drill extends Movable {
         // Check for ground at the new base
         BlockFace face = yaw.getYawFace();
         BlockLocation newAnchor = anchor.getRelative(face);
-        BlockLocation ground = newAnchor.getRelative(blueprint.getByIndex(Blueprint.centralBaseIndex, yaw, Blueprint.mainModuleIndex).add(BlockFace.DOWN));
+        BlockLocation ground = newAnchor.getRelative(Blueprint.centralBase.vector(yaw).add(BlockFace.DOWN));
         if (!BlockData.isSolid(ground.getTypeId())) {
             return null;
         }
@@ -152,7 +152,7 @@ final class Drill extends Movable {
 
         // Simulate a block place event to give protection plugins a chance to
         // stop the drill move
-        if (!canMove(newAnchor, Blueprint.drillHeadIndex, Blueprint.headMaterial, Blueprint.mainModuleIndex)) {
+        if (!canMove(newAnchor, Blueprint.head)) {
             return null;
         }
 
@@ -235,7 +235,7 @@ final class Drill extends Movable {
      */
     private boolean useEnergy(final BlockLocation anchor, final int energy) {
         while (currentEnergy < energy) {
-            int newFuel = Fuel.consume((Furnace) anchor.getRelative(blueprint.getByIndex(Blueprint.furnaceIndex, yaw, Blueprint.mainModuleIndex)).getBlock().getState());
+            int newFuel = Fuel.consume((Furnace) anchor.getRelative(Blueprint.furnace.vector(yaw)).getBlock().getState());
             if (newFuel > 0) {
                 currentEnergy += newFuel;
             } else {
@@ -280,7 +280,7 @@ final class Drill extends Movable {
      *            Whether the furnace should be burning.
      */
     void setFurnace(final BlockLocation anchor, final boolean burning) {
-        Block furnace = anchor.getRelative(blueprint.getByIndex(Blueprint.furnaceIndex, yaw, Blueprint.mainModuleIndex)).getBlock();
+        Block furnace = anchor.getRelative(Blueprint.furnace.vector(yaw)).getBlock();
         Fuel.setFurnace(furnace, yaw.getOpposite().getYawFace(), burning);
     }
 }

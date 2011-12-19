@@ -54,11 +54,11 @@ public class Builder extends Movable {
      *            The anchor location of the drill
      * @param yaw
      *            The direction of the drill
-     * @param moduleIndices
+     * @param modules
      *            The active modules for the drill
      */
-    Builder(final Blueprint blueprint, final List<Integer> moduleIndices, final BlockRotation yaw, Player player, BlockLocation anchor) {
-        super(blueprint, moduleIndices, yaw, player);
+    Builder(final Blueprint blueprint, final List<Integer> modules, final BlockRotation yaw, Player player, BlockLocation anchor) {
+        super(blueprint, modules, yaw, player);
 
         this.player = player;
         // Set furnace to burning state.
@@ -114,7 +114,7 @@ public class Builder extends Movable {
      *         on.
      */
     private boolean doBuild(final BlockLocation anchor) {
-        Block chestBlock = anchor.getRelative(blueprint.getByIndex(Blueprint.containerIndex, yaw, Blueprint.mainModuleIndex)).getBlock();
+        Block chestBlock = anchor.getRelative(Blueprint.chest.vector(yaw)).getBlock();
         Inventory inventory = ((Chest) chestBlock.getState()).getInventory();
         ItemStack[] contents = inventory.getContents();
         for (int i = 0; i < contents.length; i++) {
@@ -152,18 +152,18 @@ public class Builder extends Movable {
      */
     private BlockLocation nextBuild(final BlockLocation anchor) {
 
-        BlockLocation head = anchor.getRelative(blueprint.getByIndex(Blueprint.primaryHeadIndex, yaw, Blueprint.mainModuleIndex));
+        BlockLocation head = anchor.getRelative(Blueprint.primaryHead.vector(yaw));
 
         // Check below main head
         BlockLocation result = nextHeadBuild(head);
         // If no success there, check below left head.
-        if (result == null && moduleIndices.contains(Blueprint.leftModuleIndex)) {
-            head = anchor.getRelative(blueprint.getByIndex(Blueprint.leftHeadIndex, yaw, Blueprint.leftModuleIndex));
+        if (result == null && hasModule(Blueprint.leftModuleId)) {
+            head = anchor.getRelative(Blueprint.leftHead.vector(yaw));
             result = nextHeadBuild(head);
         }
         // If no success there, check below right head.
-        if (result == null && moduleIndices.contains(Blueprint.rightModuleIndex)) {
-            head = anchor.getRelative(blueprint.getByIndex(Blueprint.rightHeadIndex, yaw, Blueprint.rightModuleIndex));
+        if (result == null && hasModule(Blueprint.rightModuleId)) {
+            head = anchor.getRelative(Blueprint.rightHead.vector(yaw));
             result = nextHeadBuild(head);
         }
         return result;
@@ -206,7 +206,7 @@ public class Builder extends Movable {
         // Check for ground at the new base
         BlockFace face = yaw.getYawFace();
         BlockLocation newAnchor = anchor.getRelative(face);
-        BlockLocation ground = newAnchor.getRelative(blueprint.getByIndex(Blueprint.centralBaseIndex, yaw, Blueprint.mainModuleIndex).add(BlockFace.DOWN));
+        BlockLocation ground = newAnchor.getRelative(Blueprint.centralBase.vector(yaw).add(BlockFace.DOWN));
         if (!BlockData.isSolid(ground.getTypeId())) {
             return null;
         }
@@ -218,7 +218,7 @@ public class Builder extends Movable {
 
         // Simulate a block place event to give protection plugins a chance to
         // stop the move
-        if (!canMove(newAnchor, Blueprint.primaryHeadIndex, Blueprint.headMaterial, Blueprint.mainModuleIndex)) {
+        if (!canMove(newAnchor, Blueprint.primaryHead)) {
             return null;
         }
 
@@ -266,7 +266,7 @@ public class Builder extends Movable {
      */
     private boolean useEnergy(final BlockLocation anchor, final int energy) {
         while (currentEnergy < energy) {
-            int newFuel = Fuel.consume((Furnace) anchor.getRelative(blueprint.getByIndex(Blueprint.furnaceIndex, yaw, Blueprint.mainModuleIndex)).getBlock().getState());
+            int newFuel = Fuel.consume((Furnace) anchor.getRelative(Blueprint.furnace.vector(yaw)).getBlock().getState());
             if (newFuel > 0) {
                 currentEnergy += newFuel;
             } else {
@@ -311,7 +311,7 @@ public class Builder extends Movable {
      *            Whether the furnace should be burning.
      */
     void setFurnace(final BlockLocation anchor, final boolean burning) {
-        Block furnace = anchor.getRelative(blueprint.getByIndex(Blueprint.furnaceIndex, yaw, Blueprint.mainModuleIndex)).getBlock();
+        Block furnace = anchor.getRelative(Blueprint.furnace.vector(yaw)).getBlock();
         Fuel.setFurnace(furnace, yaw.getOpposite().getYawFace(), burning);
     }
 }
