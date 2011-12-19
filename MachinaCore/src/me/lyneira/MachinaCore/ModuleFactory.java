@@ -6,18 +6,16 @@ import java.util.List;
 import org.bukkit.Material;
 
 /**
- * Class for constructing a blueprint for a {@link Machina}. If it has a
- * direction, this blueprint represents it pointing towards the south.
+ * Factory class for constructing a module for a {@link Movable} machina. The
+ * module is specified using the add or addKey functions, pointing towards the
+ * south.
  * <p>
  * x+ is forward, y+ is up, z+ is right
- * <p>
- * An instance of this class should be set to null once a
- * {@link MovableBlueprint} has been created with it.
  * 
  * @author Lyneira
- * 
+ *
  */
-public final class ModuleFactory {
+final class ModuleFactory {
 
     private List<BlueprintBlock> moduleAttached = new ArrayList<BlueprintBlock>();
     private List<BlueprintBlock> module = new ArrayList<BlueprintBlock>();
@@ -25,13 +23,7 @@ public final class ModuleFactory {
     private List<BlueprintBlock> moduleFinal;
 
     private boolean finalized = false;
-    
-    public final int id;
 
-    ModuleFactory(int id) {
-        this.id = id;
-    }
-    
     /**
      * Adds the given Blueprint block to the blueprint storage.
      * 
@@ -111,7 +103,7 @@ public final class ModuleFactory {
      * 
      * @return A List of BlueprintBlocks.
      */
-    public final List<BlueprintBlock> getBlueprintFinal() {
+    final List<BlueprintBlock> getBlueprintFinal() {
         if (!finalized)
             makeFinal();
         return moduleFinal;

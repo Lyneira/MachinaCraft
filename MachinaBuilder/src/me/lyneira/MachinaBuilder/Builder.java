@@ -157,12 +157,12 @@ public class Builder extends Movable {
         // Check below main head
         BlockLocation result = nextHeadBuild(head);
         // If no success there, check below left head.
-        if (result == null && hasModule(Blueprint.leftModuleId)) {
+        if (result == null && hasModule(Blueprint.leftModule)) {
             head = anchor.getRelative(Blueprint.leftHead.vector(yaw));
             result = nextHeadBuild(head);
         }
         // If no success there, check below right head.
-        if (result == null && hasModule(Blueprint.rightModuleId)) {
+        if (result == null && hasModule(Blueprint.rightModule)) {
             head = anchor.getRelative(Blueprint.rightHead.vector(yaw));
             result = nextHeadBuild(head);
         }
