@@ -13,7 +13,7 @@ import org.bukkit.material.Lever;
  * 
  * @author Lyneira
  */
-class MachinaCorePlayerListener extends PlayerListener {
+final class MachinaCorePlayerListener extends PlayerListener {
     private final MachinaCore plugin;
 
     MachinaCorePlayerListener(final MachinaCore plugin) {

@@ -88,7 +88,8 @@ public enum BlockRotation {
      * @return
      */
     public static final BlockRotation yawFromLocation(Location location) {
-        int yaw = ((int) location.getYaw()) % 360;
+        // Normalize yaw (which can be negative) to an integer between 0 and 360 (exclusive).
+        int yaw = ((int)location.getYaw() % 360 + 360) % 360;
         if (yaw < 45) {
             // WEST
             return ROTATE_270;

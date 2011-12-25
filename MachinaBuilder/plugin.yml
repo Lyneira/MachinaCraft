@@ -1,5 +1,5 @@
 name: MachinaBuilder
-version: 1.6
+version: 1.7
 description: A Machina that moves forward and lays blocks under the iron heads at its front.
 author: Lyneira
 main: me.lyneira.MachinaBuilder.MachinaBuilder

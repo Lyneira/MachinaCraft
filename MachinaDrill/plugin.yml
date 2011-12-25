@@ -1,5 +1,5 @@
 name: MachinaDrill
-version: 1.6
+version: 1.7
 description: A Machina that moves forward and breaks blocks in its path.
 author: Lyneira
 main: me.lyneira.MachinaDrill.MachinaDrill

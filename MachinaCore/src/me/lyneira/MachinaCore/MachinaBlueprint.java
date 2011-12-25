@@ -21,5 +21,5 @@ public interface MachinaBlueprint {
      *            The face on the anchor to which the lever is attached
      * @return A new Machina if successful, null otherwise.
      */
-    public Machina detect(Player player, final BlockLocation anchor, final BlockFace leverFace, ItemStack itemInHand);
+    public Machina detect(final Player player, final BlockLocation anchor, final BlockFace leverFace, final ItemStack itemInHand);
 }

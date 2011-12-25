@@ -48,7 +48,7 @@ public interface Machina {
      *            The player attempting to deactivate the machina
      * @return True if the machina should continue to move.
      */
-    public boolean onLever(final BlockLocation anchor, Player player, ItemStack itemInHand);
+    public boolean onLever(final BlockLocation anchor, final Player player, final ItemStack itemInHand);
 
     /**
      * Function that is called at the moment of deactivation. <br>

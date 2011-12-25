@@ -96,6 +96,15 @@ public final class BlockLocation {
     }
 
     /**
+     * Returns the {@link Material} at this {@link BlockLocation}
+     * 
+     * @return The {@link Material} at this location
+     */
+    public final Material getType() {
+        return world.getBlockAt(x, y, z).getType();
+    }
+
+    /**
      * Returns the Type Id at this {@link BlockLocation}
      * 
      * @return The Type Id at this location

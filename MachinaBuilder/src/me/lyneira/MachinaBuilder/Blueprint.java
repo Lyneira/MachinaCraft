@@ -23,10 +23,12 @@ import me.lyneira.MachinaCore.MovableBlueprint;
  * @author Lyneira
  */
 public class Blueprint extends MovableBlueprint {
-    private static BlueprintFactory blueprint;
-    final static int mainModule;
-    final static int leftModule;
-    final static int rightModule;
+    private static BlueprintFactory blueprint = new BlueprintFactory(5);
+    final static int mainModule = blueprint.newModule();
+    final static int leftModule = blueprint.newModule();
+    final static int rightModule = blueprint.newModule();
+    final static int backendBasicModule = blueprint.newModule();
+    final static int backendRoadModule = blueprint.newModule();
 
     final static Material headMaterial = Material.IRON_BLOCK;
     private final static Material baseMaterial = Material.WOOD;
@@ -37,31 +39,38 @@ public class Blueprint extends MovableBlueprint {
 
     final static BlueprintBlock centralBase;
     final static BlueprintBlock chest;
-    final static BlueprintBlock furnace;
+    final static BlueprintBlock furnaceBasic;
+    final static BlueprintBlock furnaceRoad;
+    final static BlueprintBlock chestRoad;
     final static BlueprintBlock primaryHead;
     final static BlueprintBlock leftHead;
     final static BlueprintBlock rightHead;
 
     static {
-        blueprint = new BlueprintFactory(3);
 
-        mainModule = blueprint.newModule();
-        leftModule = blueprint.newModule();
-        rightModule = blueprint.newModule();
-
+        // **** Main module ****
         // The lever is always key.
         blueprint.addKey(new BlockVector(0, 1, 0), Material.LEVER, mainModule);
         // Central base, used for ground detection
         centralBase = blueprint.addKey(new BlockVector(0, 0, 0), baseMaterial, mainModule);
-        // Furnace determines direction
-        furnace = blueprint.addKey(new BlockVector(-1, 0, 0), burningFurnaceMaterial, mainModule);
-
         chest = blueprint.add(new BlockVector(1, 1, 0), supplyContainerMaterial, mainModule);
         primaryHead = blueprint.add(new BlockVector(1, 0, 0), headMaterial, mainModule);
+        
+        // **** Basic backend module ****
+        // Furnace has to be key because it isn't burning at detection
+        furnaceBasic = blueprint.addKey(new BlockVector(-1, 0, 0), burningFurnaceMaterial, backendBasicModule);
+        
+        // **** Road builder backend module ****
+        // Furnace has to be key because it isn't burning at detection
+        furnaceRoad = blueprint.addKey(new BlockVector(-2, 0, 0), burningFurnaceMaterial, backendRoadModule);
+        blueprint.add(new BlockVector(-1, 0, 0), baseMaterial, backendRoadModule);
+        chestRoad = blueprint.add(new BlockVector(-1, 1, 0), supplyContainerMaterial, backendRoadModule);
 
+        // **** Left module ****
         leftHead = blueprint.add(new BlockVector(1, 0, -1), headMaterial, leftModule);
         blueprint.add(new BlockVector(0, 0, -1), baseMaterial, leftModule);
 
+        // **** Right module ****
         rightHead = blueprint.add(new BlockVector(1, 0, 1), headMaterial, rightModule);
         blueprint.add(new BlockVector(0, 0, 1), baseMaterial, rightModule);
     }
@@ -90,19 +99,27 @@ public class Blueprint extends MovableBlueprint {
 
         // Search for a furnace around the anchor.
         for (BlockRotation i : BlockRotation.values()) {
-            if (!anchor.getRelative(i.getYawFace()).checkType(furnaceMaterial))
-                continue;
-
+            List<Integer> detectedModules = new ArrayList<Integer>(3);
             BlockRotation yaw = i.getOpposite();
+            BlockFace furnaceFace = i.getYawFace();
+            BlueprintBlock furnace;
+            if (anchor.getRelative(furnaceFace).checkType(furnaceMaterial)) {
+                furnace = furnaceBasic;
+                detectedModules.add(backendBasicModule);
+            } else if (anchor.getRelative(furnaceFace, 2).checkType(furnaceMaterial) && detectOther(anchor, yaw, backendRoadModule)) {
+                furnace = furnaceRoad;
+                detectedModules.add(backendRoadModule);
+            } else {
+                continue;
+            }
+
             if (!detectOther(anchor, yaw, mainModule))
                 continue;
-
             if (!player.hasPermission("machinabuilder.activate")) {
                 player.sendMessage("You do not have permission to activate a builder.");
                 return null;
             }
 
-            List<Integer> detectedModules = new ArrayList<Integer>(3);
             detectedModules.add(mainModule);
 
             // Detect optional modules here.
@@ -113,7 +130,7 @@ public class Blueprint extends MovableBlueprint {
                 detectedModules.add(rightModule);
             }
 
-            Builder builder = new Builder(this, detectedModules, yaw, player, anchor);
+            Builder builder = new Builder(this, detectedModules, yaw, player, anchor, furnace);
             if (itemInHand != null && itemInHand.getType() == rotateMaterial) {
                 builder.doRotate(anchor, BlockRotation.yawFromLocation(player.getLocation()));
                 builder.onDeActivate(anchor);
