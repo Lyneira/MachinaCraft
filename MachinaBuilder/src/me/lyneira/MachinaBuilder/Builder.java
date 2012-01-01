@@ -271,7 +271,7 @@ public class Builder extends Movable {
             int time = 0;
             Block inputBlock = anchor.getRelative(Blueprint.chest.vector(yaw)).getBlock();
             InventoryManager manager = new InventoryManager(((Chest) inputBlock.getState()).getInventory());
-            
+
             if (!manager.find(isBuildingBlock)) {
                 stage = buildStage;
                 return buildStage.enqueue(anchor);
@@ -359,24 +359,21 @@ public class Builder extends Movable {
                 do {
                     BlockLocation target = it.next().getRelative(down, i);
                     if (validBuildLocation(target)) {
-                        if (i == depth) {
-                            targets.add(target);
-                        } else {
-                            depth = i;
-                            targets.clear();
-                            targets.add(target);
+                        BlockLocation ground = target.getRelative(down);
+                        // A potential target must have ground beneath it to place on.
+                        if (validPlaceAgainst(ground)) {
+                            if (i == depth) {
+                                targets.add(target);
+                            } else {
+                                depth = i;
+                                targets.clear();
+                                targets.add(target);
+                            }
                         }
                     } else {
                         it.remove();
                     }
                 } while (it.hasNext());
-            }
-
-            // Filter targets that don't have ground below them to place on.
-            for (Iterator<BlockLocation> it = targets.iterator(); it.hasNext();) {
-                BlockLocation ground = it.next().getRelative(down);
-                if (!validPlaceAgainst(ground))
-                    it.remove();
             }
 
             int numTargets = targets.size();
