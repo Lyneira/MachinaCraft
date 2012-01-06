@@ -25,6 +25,7 @@ public final class MachinaCore extends JavaPlugin {
     private final MachinaCorePlayerListener playerListener = new MachinaCorePlayerListener(this);
     private final MachinaCoreWorldListener worldListener = new MachinaCoreWorldListener();
     private final Map<String, MachinaBlueprint> blueprints = new LinkedHashMap<String, MachinaBlueprint>();
+    private ConfigurationManager config;
 
     public final void onEnable() {
         plugin = this;
@@ -35,6 +36,9 @@ public final class MachinaCore extends JavaPlugin {
         pluginManager = this.getServer().getPluginManager();
         pluginManager.registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Event.Priority.Monitor, this);
         pluginManager.registerEvent(Event.Type.CHUNK_UNLOAD, worldListener, Event.Priority.Monitor, this);
+        
+        config = new ConfigurationManager();
+        config.load(this);
     }
 
     public final void onDisable() {

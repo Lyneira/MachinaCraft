@@ -1,9 +1,13 @@
 package me.lyneira.MachinaCore;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Furnace;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -19,6 +23,36 @@ public class Fuel {
 
     public static final int smeltSlot = 0;
     public static final int fuelSlot = 1;
+    private static final Map<Integer, Integer> burnTimes = new HashMap<Integer, Integer>(24);
+
+    private static final int blazeRodTime = 2400;
+    private static final int coalTime = 1600;
+    private static final int woodTime = 300;
+    private static final int saplingTime = 100;
+
+    static {
+        burnTimes.put(Material.BLAZE_ROD.getId(), blazeRodTime);
+        
+        burnTimes.put(Material.COAL.getId(), coalTime);
+        
+        burnTimes.put(Material.WOOD.getId(), woodTime);
+        burnTimes.put(Material.LOG.getId(), woodTime);
+        burnTimes.put(Material.FENCE.getId(), woodTime);
+        burnTimes.put(Material.WOOD_STAIRS.getId(), woodTime);
+        burnTimes.put(Material.TRAP_DOOR.getId(), woodTime);
+        burnTimes.put(Material.WORKBENCH.getId(), woodTime);
+        burnTimes.put(Material.BOOKSHELF.getId(), woodTime);
+        burnTimes.put(Material.CHEST.getId(), woodTime);
+        burnTimes.put(Material.JUKEBOX.getId(), woodTime);
+        burnTimes.put(Material.NOTE_BLOCK.getId(), woodTime);
+        burnTimes.put(Material.LOCKED_CHEST.getId(), woodTime);
+        burnTimes.put(Material.FENCE_GATE.getId(), woodTime);
+        
+        burnTimes.put(Material.SAPLING.getId(), saplingTime);
+        burnTimes.put(Material.STICK.getId(), saplingTime);
+        burnTimes.put(Material.SUGAR_CANE.getId(), saplingTime);
+        burnTimes.put(Material.PAPER.getId(), saplingTime);
+    }
 
     //
     /**
@@ -29,19 +63,12 @@ public class Fuel {
      *            The material for which to get the burn time.
      * @return The burn time. Returns 0 for any material that is not a fuel.
      */
-    public static int burnTime(final Material material) {
-        if (material == Material.COAL) {
-            return 1600;
-        } else if (material == Material.WOOD || material == Material.LOG || material == Material.FENCE || material == Material.WOOD_STAIRS || material == Material.TRAP_DOOR
-                || material == Material.WORKBENCH || material == Material.BOOKSHELF || material == Material.CHEST || material == Material.JUKEBOX || material == Material.NOTE_BLOCK
-                || material == Material.LOCKED_CHEST) {
-            return 300;
-        } else if (material == Material.SAPLING || material == Material.STICK || material == Material.SUGAR_CANE || material == Material.PAPER) {
-            return 100;
-        } else if (material == Material.BLAZE_ROD) {
-            return 2400;
+    public static int burnTime(int typeId) {
+        int burnTime = 0;
+        if (burnTimes.containsKey(typeId)) {
+            burnTime = burnTimes.get(typeId);
         }
-        return 0;
+        return burnTime;
     }
 
     /**
@@ -55,7 +82,7 @@ public class Fuel {
         try {
             Inventory furnaceInventory = furnace.getInventory();
             ItemStack fuelStack = furnaceInventory.getItem(fuelSlot);
-            int burnTime = burnTime(fuelStack.getType());
+            int burnTime = burnTime(fuelStack.getType().getId());
             int amount = fuelStack.getAmount();
             if (burnTime > 0) {
                 if (amount == 0) {
@@ -110,6 +137,20 @@ public class Fuel {
             return true;
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    static final void loadConfiguration(ConfigurationSection configuration) {
+        Map<String, Object> fuels = configuration.getValues(false);
+        for (String id : fuels.keySet()) {
+            int typeId;
+            try {
+                typeId = Integer.valueOf(id);
+            } catch (Exception e) {
+                MachinaCore.log.warning("MachinaCore: Could not parse fuel data for id: " + id);
+                continue;
+            }
+            burnTimes.put(typeId, configuration.getInt(id, 0));
         }
     }
 }

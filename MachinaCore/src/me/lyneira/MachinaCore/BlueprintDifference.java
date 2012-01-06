@@ -48,10 +48,10 @@ class BlueprintDifference {
         plus = differencePlus.toArray(new BlockVector[0]);
 
         // The negative difference must always include attached blocks.
-        differenceMinus.addAll(originalVectors);
         for (int i = 0; i < blueprintSize; i++) {
-            if (!blueprint[i].attached) {
-                differenceMinus.remove(movedVectors.get(i));
+            BlockVector vector = originalVectors.get(i);
+            if (blueprint[i].attached || !movedVectors.contains(vector)) {
+                differenceMinus.add(vector);
             }
         }
         minus = differenceMinus.toArray(new BlockVector[0]);
