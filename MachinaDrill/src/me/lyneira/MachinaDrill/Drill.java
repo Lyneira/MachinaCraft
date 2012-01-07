@@ -2,6 +2,7 @@ package me.lyneira.MachinaDrill;
 
 import java.util.List;
 
+import java.util.logging.Logger;
 import me.lyneira.MachinaCore.BlockData;
 import me.lyneira.MachinaCore.BlockLocation;
 import me.lyneira.MachinaCore.BlockRotation;
@@ -51,6 +52,12 @@ final class Drill extends Movable {
      * The typeId of the next target location.
      */
     private int nextTypeId;
+    
+    /**
+     * The type of a drill
+     */
+    private enum drillType {HORIZONTAL, VERTICAL};
+    private drillType drillDirection;
 
     /**
      * Creates a new drill.
@@ -68,7 +75,13 @@ final class Drill extends Movable {
         super(blueprint, moduleIndices, yaw, player);
 
         this.player = player;
-        drillPattern = Blueprint.drillPattern.get(yaw);
+        if(hasModule(blueprint.mainModule)) {
+            drillPattern = Blueprint.drillPattern.get(yaw);
+            drillDirection = drillType.HORIZONTAL;
+        } else if(hasModule(blueprint.verticalModule)) {
+            drillPattern = Blueprint.basePattern;
+            drillDirection = drillType.VERTICAL;
+        }
         // Set furnace to burning state.
         setFurnace(anchor, true);
     }
@@ -107,7 +120,11 @@ final class Drill extends Movable {
      */
     private boolean doDrill(final BlockLocation anchor) {
         if (BlockData.isDrillable(nextTypeId)) {
-            Block chest = anchor.getRelative(Blueprint.chest.vector(yaw)).getBlock();
+            Block chest;
+            if(drillDirection == drillType.HORIZONTAL)
+                chest = anchor.getRelative(Blueprint.chest.vector(yaw)).getBlock();
+            else
+                chest = anchor.getRelative(Blueprint.verticalChest.vector(yaw)).getBlock();
             Inventory inventory = ((Chest) chest.getState()).getInventory();
             if (inventory.firstEmpty() < 0)
                 return false;
@@ -137,12 +154,20 @@ final class Drill extends Movable {
      * @return The new anchor location of the Drill, or null on failure.
      */
     private BlockLocation doMove(final BlockLocation anchor) {
+        BlockFace face;
+        BlockLocation newAnchor;
         // Check for ground at the new base
-        BlockFace face = yaw.getYawFace();
-        BlockLocation newAnchor = anchor.getRelative(face);
-        BlockLocation ground = newAnchor.getRelative(Blueprint.centralBase.vector(yaw).add(BlockFace.DOWN));
-        if (!BlockData.isSolid(ground.getTypeId())) {
-            return null;
+        if(drillDirection == drillType.HORIZONTAL){
+            face = yaw.getYawFace();
+            newAnchor = anchor.getRelative(face);
+            BlockLocation ground = newAnchor.getRelative(Blueprint.centralBase.vector(yaw).add(BlockFace.DOWN));
+            if (!BlockData.isSolid(ground.getTypeId())) {
+                return null;
+            }
+        } else {
+            
+            face = BlockFace.DOWN;
+            newAnchor = anchor.getRelative(face);
         }
 
         // Collision detection
@@ -152,7 +177,7 @@ final class Drill extends Movable {
 
         // Simulate a block place event to give protection plugins a chance to
         // stop the drill move
-        if (!canMove(newAnchor, Blueprint.head)) {
+        if ((drillDirection == drillType.HORIZONTAL && !canMove(newAnchor, Blueprint.head)) || (drillDirection == drillType.VERTICAL && !canMove(newAnchor, Blueprint.verticalHead))) {
             return null;
         }
 
@@ -235,7 +260,11 @@ final class Drill extends Movable {
      */
     private boolean useEnergy(final BlockLocation anchor, final int energy) {
         while (currentEnergy < energy) {
-            int newFuel = Fuel.consume((Furnace) anchor.getRelative(Blueprint.furnace.vector(yaw)).getBlock().getState());
+            int newFuel;
+            if(drillDirection == drillType.HORIZONTAL)
+                newFuel = Fuel.consume((Furnace) anchor.getRelative(Blueprint.furnace.vector(yaw)).getBlock().getState());
+            else
+                newFuel = Fuel.consume((Furnace) anchor.getRelative(Blueprint.verticalFurnace.vector(yaw)).getBlock().getState());
             if (newFuel > 0) {
                 currentEnergy += newFuel;
             } else {
@@ -252,7 +281,7 @@ final class Drill extends Movable {
      */
     public boolean onLever(final BlockLocation anchor, Player player, ItemStack itemInHand) {
         if ((this.player == player && player.hasPermission("machinadrill.deactivate-own")) || player.hasPermission("machinadrill.deactivate-all")) {
-            if (itemInHand != null && itemInHand.getType() == Blueprint.rotateMaterial) {
+            if (itemInHand != null && itemInHand.getType() == Blueprint.rotateMaterial && drillDirection == drillType.HORIZONTAL) {
                 doRotate(anchor, BlockRotation.yawFromLocation(player.getLocation()));
                 return true;
             }
@@ -280,7 +309,11 @@ final class Drill extends Movable {
      *            Whether the furnace should be burning.
      */
     void setFurnace(final BlockLocation anchor, final boolean burning) {
-        Block furnace = anchor.getRelative(Blueprint.furnace.vector(yaw)).getBlock();
+        Block furnace;
+        if(drillDirection == drillType.HORIZONTAL)
+            furnace = anchor.getRelative(Blueprint.furnace.vector(yaw)).getBlock();
+        else
+            furnace = anchor.getRelative(Blueprint.verticalFurnace.vector(yaw)).getBlock();
         Fuel.setFurnace(furnace, yaw.getOpposite().getYawFace(), burning);
     }
 }
