@@ -18,7 +18,11 @@ import org.bukkit.block.BlockFace;
 public enum BlockRotation {
     ROTATE_0, ROTATE_90, ROTATE_180, ROTATE_270;
 
+    private final static BlockFace[] yawFace = { BlockFace.SOUTH, BlockFace.EAST, BlockFace.NORTH, BlockFace.WEST };
+    private final static BlockVector[] yawVector = { new BlockVector(yawFace[0]), new BlockVector(yawFace[1]), new BlockVector(yawFace[2]), new BlockVector(yawFace[3]) };
+    private final static byte[] yawData = { 0x5, 0x2, 0x4, 0x3 };
     private final static BlockRotation[] byOrdinal = BlockRotation.values();
+    
 
     /**
      * Returns the opposite rotation.
@@ -70,15 +74,25 @@ public enum BlockRotation {
      * @return The BlockFace corresponding to this rotation.
      */
     public final BlockFace getYawFace() {
-        if (this == ROTATE_0) {
-            return BlockFace.SOUTH;
-        } else if (this == ROTATE_90) {
-            return BlockFace.EAST;
-        } else if (this == ROTATE_180) {
-            return BlockFace.NORTH;
-        } else { // ROTATE_270
-            return BlockFace.WEST;
-        }
+        return yawFace[this.ordinal()];
+    }
+    
+    /**
+     * Converts a BlockRotation into a BlockVector in the XZ plane.
+     * 
+     * @return The BlockVector corresponding to this rotation.
+     */
+    public final BlockVector getYawVector() {
+        return yawVector[this.ordinal()];
+    }
+    
+    /**
+     * Returns the proper data value to set the direction of a Wall Sign, Furnace, Dispenser or Chest.
+     * 
+     * @return
+     */
+    public final byte getYawData() {
+        return yawData[this.ordinal()];
     }
 
     /**

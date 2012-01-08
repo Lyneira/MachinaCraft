@@ -1,5 +1,5 @@
 name: MachinaCore
-version: 1.9
+version: 2.0
 description: A framework for lever-activated machines made out of blocks.
 author: Lyneira
 main: me.lyneira.MachinaCore.MachinaCore

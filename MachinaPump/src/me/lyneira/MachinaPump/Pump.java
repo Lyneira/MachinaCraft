@@ -36,6 +36,7 @@ final class Pump implements Machina {
     private final BlockLocation anchor;
     private final BlockFace leverFace;
     private final BlockFace cauldronFace;
+    private final BlockRotation yaw;
     private final BlockVector forward;
     private final BlockFace backward;
     private final BlockVector left;
@@ -52,6 +53,7 @@ final class Pump implements Machina {
         this.anchor = anchor;
         this.leverFace = leverFace;
         this.cauldronFace = cauldronFace;
+        this.yaw = yaw;
         forward = new BlockVector(yaw.getYawFace());
         left = new BlockVector(yaw.getLeft().getYawFace());
         backward = yaw.getOpposite().getYawFace();
@@ -118,7 +120,7 @@ final class Pump implements Machina {
      */
     void setFurnace(BlockLocation anchor, boolean burning) {
         Block furnace = anchor.getRelative(backward).getBlock();
-        Fuel.setFurnace(furnace, backward, burning);
+        Fuel.setFurnace(furnace, yaw.getOpposite(), burning);
     }
 
     /**

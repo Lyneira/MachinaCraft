@@ -20,6 +20,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.block.Furnace;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -92,9 +93,11 @@ public class Builder extends Movable {
             heads.add(Blueprint.rightHead);
         // Set furnace to burning state.
         setFurnace(anchor, true);
-        if (hasModule(Blueprint.backendRoadModule))
+        setChest(anchor, Blueprint.chest);
+        if (hasModule(Blueprint.backendRoadModule)) {
+            setChest(anchor, Blueprint.chestRoad);
             firstStage = roadStage;
-        else
+        } else
             firstStage = buildStage;
     }
 
@@ -143,6 +146,9 @@ public class Builder extends Movable {
         rotate(anchor, rotateBy);
         // Set furnace to correct direction.
         setFurnace(anchor, true);
+        setChest(anchor, Blueprint.chest);
+        if (hasModule(Blueprint.backendRoadModule))
+            setChest(anchor, Blueprint.chestRoad);
         stage = null;
     }
 
@@ -203,7 +209,17 @@ public class Builder extends Movable {
      */
     void setFurnace(final BlockLocation anchor, final boolean burning) {
         Block furnaceBlock = anchor.getRelative(furnace.vector(yaw)).getBlock();
-        Fuel.setFurnace(furnaceBlock, yaw.getOpposite().getYawFace(), burning);
+        Fuel.setFurnace(furnaceBlock, yaw.getOpposite(), burning);
+    }
+    
+    /**
+     * Sets a chest facing backwards.
+     * @param anchor
+     */
+    void setChest(final BlockLocation anchor, final BlueprintBlock chest) {
+        Block chestBlock = anchor.getRelative(chest.vector(yaw)).getBlock();
+        if (chestBlock.getType() == Material.CHEST)
+            chestBlock.setData(yaw.getOpposite().getYawData());
     }
 
     /**
@@ -399,6 +415,9 @@ public class Builder extends Movable {
          */
         @Override
         public Stage run(BlockLocation anchor) {
+            // Check if a sign pointing left or right is present and rotate.
+            BlockRotation signRotation = readRotationSign(anchor); 
+
             // Check for ground at the new base
             BlockFace face = yaw.getYawFace();
             BlockLocation movedAnchor = anchor.getRelative(face);
@@ -430,6 +449,9 @@ public class Builder extends Movable {
             buildRail(movedAnchor);
 
             newAnchor = movedAnchor;
+            if (signRotation != null) {
+                doRotate(newAnchor, signRotation);
+            }
             return firstStage;
         }
 
@@ -456,6 +478,22 @@ public class Builder extends Movable {
 
             manager.decrement();
             target.setTypeId(typeId);
+        }
+        
+        private BlockRotation readRotationSign(BlockLocation anchor) {
+            BlockLocation signLocation = anchor.getRelative(Blueprint.primaryHead.vector(yaw).add(yaw.getYawVector(), 2));
+            if (!signLocation.checkTypes(Material.SIGN_POST, Material.SIGN))
+                return null;
+            String[] lines = ((Sign) signLocation.getBlock().getState()).getLines();
+            for (String s : lines) {
+                if (s == null)
+                    continue;
+                if (s.equals("->") || s.toLowerCase().equals("right"))
+                    return yaw.getRight();
+                if (s.equals("<-") || s.toLowerCase().equals("left"))
+                    return yaw.getLeft();
+            }
+            return null;
         }
 
         @Override

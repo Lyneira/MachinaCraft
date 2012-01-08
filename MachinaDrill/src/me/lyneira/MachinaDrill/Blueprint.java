@@ -23,15 +23,16 @@ import org.bukkit.inventory.ItemStack;
  * MachinaBlueprint representing a Drill blueprint
  * 
  * @author Lyneira
+ * @author 5phinX
  */
 final class Blueprint extends MovableBlueprint {
     private static BlueprintFactory blueprint;
     final static int mainModule;
     final static int verticalModule;
-    static Map<BlockRotation, BlockVector[]> drillPattern = new EnumMap<BlockRotation, BlockVector[]>(BlockRotation.class);
-    static BlockVector[] basePattern;
+    final static Map<BlockRotation, BlockVector[]> horizontalDrillPattern = new EnumMap<BlockRotation, BlockVector[]>(BlockRotation.class);
+    final static BlockVector[] verticalDrillPattern;
 
-    static int drillPatternSize;
+    final static int drillPatternSize;
     private final static Material anchorMaterial = Material.GOLD_BLOCK;
     private final static Material baseMaterial = Material.WOOD;
     final static Material headMaterial = Material.IRON_BLOCK;
@@ -72,6 +73,26 @@ final class Blueprint extends MovableBlueprint {
         blueprint.add(new BlockVector(0, -1, 1), baseMaterial, mainModule);
         blueprint.add(new BlockVector(0, -1, -1), baseMaterial, mainModule);
         
+        // Add drill pattern data 3x3
+        drillPatternSize = 9;
+        BlockVector[] basePattern = new BlockVector[drillPatternSize];
+        basePattern[0] = new BlockVector(2, 0, 0);
+        basePattern[1] = new BlockVector(2, 1, 0);
+        basePattern[2] = new BlockVector(2, 0, 1);
+        basePattern[3] = new BlockVector(2, -1, 0);
+        basePattern[4] = new BlockVector(2, 0, -1);
+        basePattern[5] = new BlockVector(2, 1, -1);
+        basePattern[6] = new BlockVector(2, 1, 1);
+        basePattern[7] = new BlockVector(2, -1, 1);
+        basePattern[8] = new BlockVector(2, -1, -1);
+        for (BlockRotation i : BlockRotation.values()) {
+            BlockVector[] rotatedPattern = new BlockVector[drillPatternSize];
+            for (int j = 0; j < drillPatternSize; j++) {
+                rotatedPattern[j] = basePattern[j].rotated(i);
+            }
+            horizontalDrillPattern.put(i, rotatedPattern);
+        }
+        
         
         //Vertical module section
         // Add key blocks to the blueprint
@@ -91,7 +112,17 @@ final class Blueprint extends MovableBlueprint {
         verticalHead = blueprint.add(new BlockVector(0, -1, 0), headMaterial, verticalModule);
         blueprint.add(new BlockVector(0, -1, 1), baseMaterial, verticalModule);
         blueprint.add(new BlockVector(0, -1, -1), baseMaterial, verticalModule);
-        
+
+        verticalDrillPattern = new BlockVector[drillPatternSize];
+        verticalDrillPattern[0] = new BlockVector(0, -2, 0);
+        verticalDrillPattern[1] = new BlockVector(1, -2, 0);
+        verticalDrillPattern[2] = new BlockVector(0, -2, 1);
+        verticalDrillPattern[3] = new BlockVector(-1, -2, 0);
+        verticalDrillPattern[4] = new BlockVector(0, -2, -1);
+        verticalDrillPattern[5] = new BlockVector(1, -2, -1);
+        verticalDrillPattern[6] = new BlockVector(1, -2, 1);
+        verticalDrillPattern[7] = new BlockVector(-1, -2, 1);
+        verticalDrillPattern[8] = new BlockVector(-1, -2, -1);
     }
 
     public final static Blueprint instance = new Blueprint();
@@ -113,30 +144,12 @@ final class Blueprint extends MovableBlueprint {
             return null;
 
         BlockLocation centralBase = anchor.getRelative(BlockFace.DOWN);
+        List<Integer> detectedModules = new ArrayList<Integer>(1);
+        Drill drill = null;
         if (centralBase.checkType(baseMaterial)) {
             // Check if the drill is on solid ground.
             if (!BlockData.isSolid(centralBase.getRelative(BlockFace.DOWN).getTypeId()))
                 return null;
-            
-            // Add drill pattern data 3x3
-            drillPatternSize = 9;
-            basePattern = new BlockVector[drillPatternSize];
-            basePattern[0] = new BlockVector(2, 0, 0);
-            basePattern[1] = new BlockVector(2, 1, 0);
-            basePattern[2] = new BlockVector(2, 0, 1);
-            basePattern[3] = new BlockVector(2, -1, 0);
-            basePattern[4] = new BlockVector(2, 0, -1);
-            basePattern[5] = new BlockVector(2, 1, -1);
-            basePattern[6] = new BlockVector(2, 1, 1);
-            basePattern[7] = new BlockVector(2, -1, 1);
-            basePattern[8] = new BlockVector(2, -1, -1);
-            for (BlockRotation i : BlockRotation.values()) {
-                BlockVector[] rotatedPattern = new BlockVector[drillPatternSize];
-                for (int j = 0; j < drillPatternSize; j++) {
-                    rotatedPattern[j] = basePattern[j].rotated(i);
-                }
-                drillPattern.put(i, rotatedPattern);
-            }
 
             // Search for a furnace around the central base.
             for (BlockRotation i : BlockRotation.values()) {
@@ -152,34 +165,18 @@ final class Blueprint extends MovableBlueprint {
                     return null;
                 }
 
-                // Detection was a success, now make the new drill.
-                List<Integer> detectedModules = new ArrayList<Integer>(1);
+                // Detection was a success.
                 detectedModules.add(mainModule);
-
-                Drill drill = new Drill(this, detectedModules, yaw, player, anchor);
-                if (itemInHand != null && itemInHand.getType() == rotateMaterial) {
+                drill = new Drill(this, detectedModules, yaw, player, anchor, chest, head, furnace);
+                if (drill != null && itemInHand != null && itemInHand.getType() == rotateMaterial) {
                     // Support for rotation on a non-activated drill
                     drill.doRotate(anchor, BlockRotation.yawFromLocation(player.getLocation()));
                     drill.onDeActivate(anchor);
                     drill = null;
                 }
-                return drill;
+                break;
             }
-            return null;
-        } else if(centralBase.checkType(headMaterial)) {
-            // Add drill pattern data 3x3
-            drillPatternSize = 9;
-            basePattern = new BlockVector[drillPatternSize];
-            basePattern[0] = new BlockVector(-1, -2, 1);
-            basePattern[1] = new BlockVector(0, -2, 1);
-            basePattern[2] = new BlockVector(1, -2, 1);
-            basePattern[3] = new BlockVector(-1, -2, 0);
-            basePattern[4] = new BlockVector(0, -2, 0);
-            basePattern[5] = new BlockVector(1, -2, 0);
-            basePattern[6] = new BlockVector(-1, -2, -1);
-            basePattern[7] = new BlockVector(0, -2, -1);
-            basePattern[8] = new BlockVector(1, -2, -1);
-            
+        } else if(centralBase.checkType(headMaterial)) {            
             // Search for a furnace around the central base.
             for (BlockRotation i : BlockRotation.values()) {
                 if (!anchor.getRelative(i.getYawFace()).checkType(furnaceMaterial))
@@ -194,19 +191,12 @@ final class Blueprint extends MovableBlueprint {
                     return null;
                 }
 
-                // Detection was a success, now make the new drill.
-                List<Integer> detectedModules = new ArrayList<Integer>(1);
+                // Detection was a success.
                 detectedModules.add(verticalModule);
-
-                Drill drill = new Drill(this, detectedModules, yaw, player, anchor);
-            
-                return drill;
+                drill = new Drill(this, detectedModules, yaw, player, anchor, verticalChest, verticalHead, verticalFurnace);
+                break;
             }
-            return null;
         }
-
-        
-
-        return null;
+        return drill;
     }
 }

@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.block.Furnace;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.Inventory;
@@ -116,22 +115,18 @@ public class Fuel {
      *         could not be cast to a furnace. In that case, this function does
      *         nothing.
      */
-    public static boolean setFurnace(final Block furnaceBlock, final BlockFace direction, final boolean burning) {
+    public static boolean setFurnace(final Block furnaceBlock, final BlockRotation direction, final boolean burning) {
         try {
-            Furnace furnace = (Furnace) furnaceBlock.getState();
-            Inventory inventory = furnace.getInventory();
+            Inventory inventory = ((Furnace) furnaceBlock.getState()).getInventory();
             ItemStack[] contents = inventory.getContents();
             inventory.clear();
 
             if (burning) {
-                furnace.setType(Material.BURNING_FURNACE);
+                furnaceBlock.setTypeIdAndData(Material.BURNING_FURNACE.getId(), direction.getYawData(), false);
             } else {
-                furnace.setType(Material.FURNACE);
+                furnaceBlock.setTypeIdAndData(Material.FURNACE.getId(), direction.getYawData(), false);
             }
-            // Set furnace direction
-            furnace.setData(new org.bukkit.material.Furnace(direction));
 
-            furnace.update(true);
             Inventory newInventory = ((Furnace) furnaceBlock.getState()).getInventory();
             newInventory.setContents(contents);
             return true;
