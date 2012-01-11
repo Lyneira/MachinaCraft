@@ -1,6 +1,7 @@
 package me.lyneira.MachinaCore;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.bukkit.Chunk;
@@ -133,23 +134,39 @@ class MachinaRunner implements Runnable {
         machinae.remove(anchor);
         machina.onDeActivate(anchor);
     }
-    
+
+    /**
+     * Deactivates this MachinaRunner without modifying the machinae hashmap.
+     * Intended for use with an iteration over the hashmap.
+     */
+    private final void deActivateSafely() {
+        if (!active)
+            return;
+
+        active = false;
+        machina.onDeActivate(anchor);
+    }
+
     /**
      * Deactivates all machina in or near an unloaded chunk.
-     * @param chunk The chunk that is being unloaded
+     * 
+     * @param chunk
+     *            The chunk that is being unloaded
      */
     static final void notifyChunkUnload(Chunk chunk) {
         int x = chunk.getX();
         int z = chunk.getZ();
 
-        for (MachinaRunner machinaRunner : machinae.values()) {
+        for (Iterator<MachinaRunner> it = machinae.values().iterator(); it.hasNext();) {
+            MachinaRunner machinaRunner = it.next();
             Chunk machinaChunk = machinaRunner.anchor.getBlock().getChunk();
 
             int xDistance = Math.abs(x - machinaChunk.getX());
             int zDistance = Math.abs(z - machinaChunk.getZ());
 
             if (xDistance <= chunkUnloadDistance && zDistance <= chunkUnloadDistance) {
-                machinaRunner.deActivate();
+                machinaRunner.deActivateSafely();
+                it.remove();
             }
         }
     }
