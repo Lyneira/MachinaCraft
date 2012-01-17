@@ -1,0 +1,10 @@
+name: HoverPad
+version: 2.1.0
+description: A Machina that hovers beneath the player's feet, providing a platform to stand on.
+author: Lyneira
+main: me.lyneira.HoverPad.HoverPadPlugin
+depend: [MachinaCore]
+permissions:
+    hoverpad:
+        description: Allows use of a hoverpad.
+        default: op

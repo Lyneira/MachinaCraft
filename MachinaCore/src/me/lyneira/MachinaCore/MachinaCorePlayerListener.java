@@ -27,14 +27,21 @@ final class MachinaCorePlayerListener extends PlayerListener {
     public final void onPlayerInteract(final PlayerInteractEvent event) {
         if (event.isCancelled())
             return;
-        if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            Block block = event.getClickedBlock();
-            if (block.getType() == Material.LEVER) {
-                Lever lever = (Lever) block.getState().getData();
-                BlockFace attachedFace = lever.getAttachedFace();
-                Block attachedTo = block.getRelative(attachedFace);
-                plugin.onLever(event.getPlayer(), new BlockLocation(attachedTo), attachedFace.getOppositeFace(), event.getItem());
-            }
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK)
+            return;
+
+        Block block = event.getClickedBlock();
+        if (block.getType() != Material.LEVER)
+            return;
+
+        Lever lever = (Lever) block.getState().getData();
+        BlockFace attachedFace = lever.getAttachedFace();
+        if (attachedFace == null) {
+            MachinaCore.log.warning("MachinaCore: Lever activated by " + event.getPlayer().getName() + " seems to be attached to nothing?");
+            return;
         }
+
+        Block attachedTo = block.getRelative(attachedFace);
+        plugin.onLever(event.getPlayer(), new BlockLocation(attachedTo), attachedFace.getOppositeFace(), event.getItem());
     }
 }

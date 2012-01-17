@@ -75,7 +75,6 @@ final class Drill extends Movable {
     Drill(final Blueprint blueprint, final List<Integer> moduleIndices, final BlockRotation yaw, Player player, BlockLocation anchor, BlueprintBlock chest, BlueprintBlock head, BlueprintBlock furnace) {
         super(blueprint, moduleIndices, yaw, player);
 
-        this.player = player;
         this.chest = chest;
         this.head = head;
         this.furnace = furnace;

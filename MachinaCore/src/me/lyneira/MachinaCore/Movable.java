@@ -119,6 +119,22 @@ public abstract class Movable implements Machina {
 
     /**
      * Detects whether a collision would happen if this movable were to teleport
+     * to the given location. This function assumes both locations are in the same world.
+     * 
+     * @param oldAnchor
+     *            {@link BlockLocation} of the old anchor.
+     * 
+     * @param newAnchor
+     *            {@link BlockLocation} to teleport to.
+     * @return True if a collision would happen
+     */
+    protected boolean detectCollisionTeleport(final BlockLocation oldAnchor, final BlockLocation newAnchor) {
+        BlockVector vector = newAnchor.subtract(oldAnchor);
+        return detectCollisionTeleport(oldAnchor, vector);
+    }
+
+    /**
+     * Detects whether a collision would happen if this movable were to teleport
      * by the given vector.
      * 
      * @param oldAnchor

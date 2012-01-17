@@ -2,6 +2,7 @@
 <project name="build-common" default="all" basedir=".">
 
 	<property name="binDir" value="bin" />
+	<property name="jarDir" value="jar" />
 	
 	<target name="all" depends="copyResources, makeJar" description="Create a plugin jar for the project">
 	</target>

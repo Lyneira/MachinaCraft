@@ -26,6 +26,11 @@ import org.bukkit.inventory.ItemStack;
 
 import com.google.common.base.Predicate;
 
+/**
+ * Builder operation class
+ * 
+ * @author Lyneira
+ */
 public class Builder extends Movable {
     /**
      * The number of server ticks to wait for a move action.
@@ -84,7 +89,6 @@ public class Builder extends Movable {
     Builder(final Blueprint blueprint, final List<Integer> modules, final BlockRotation yaw, Player player, BlockLocation anchor, BlueprintBlock furnace) {
         super(blueprint, modules, yaw, player);
 
-        this.player = player;
         this.furnace = furnace;
         heads.add(Blueprint.primaryHead);
         if (hasModule(Blueprint.leftModule))

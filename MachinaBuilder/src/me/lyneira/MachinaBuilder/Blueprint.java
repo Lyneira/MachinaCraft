@@ -75,7 +75,7 @@ public class Blueprint extends MovableBlueprint {
         blueprint.add(new BlockVector(0, 0, 1), baseMaterial, rightModule);
     }
 
-    public final static Blueprint instance = new Blueprint();
+    final static Blueprint instance = new Blueprint();
 
     private Blueprint() {
         super(blueprint);

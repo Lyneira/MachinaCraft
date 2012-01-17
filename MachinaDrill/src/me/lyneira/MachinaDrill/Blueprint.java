@@ -125,7 +125,7 @@ final class Blueprint extends MovableBlueprint {
         verticalDrillPattern[8] = new BlockVector(-1, -2, -1);
     }
 
-    public final static Blueprint instance = new Blueprint();
+    final static Blueprint instance = new Blueprint();
 
     private Blueprint() {
         super(blueprint);
