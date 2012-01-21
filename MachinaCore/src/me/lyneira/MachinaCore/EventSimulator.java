@@ -1,10 +1,13 @@
 package me.lyneira.MachinaCore;
 
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 
 /**
  * Class that simulates events.
@@ -94,5 +97,39 @@ public class EventSimulator {
         BlockBreakEvent breakEvent = new BlockBreakEvent(placedBlock, player);
         MachinaCore.pluginManager.callEvent(breakEvent);
         return true;
+    }
+
+    /**
+     * Simulates a rightclick event on the target block. Returns true if the rightclick interaction is allowed.
+     * @param target The target location to click on.
+     * @param player The player to simulate for
+     * @param clickedFace The blockface to click on
+     * @return True if the player may interact with this block
+     */
+    public static boolean blockRightClick(BlockLocation target, Player player, BlockFace clickedFace) {
+        PlayerInteractEvent event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, null, target.getBlock(), clickedFace);
+        MachinaCore.pluginManager.callEvent(event);
+
+        if (event.isCancelled())
+            return false;
+        return true;
+    }
+
+    /**
+     * Function for testing whether one or more inventories inside a machina are protected from the player.
+     * @param yaw The direction of the machina
+     * @param player The player to simulate for
+     * @param anchor The anchor of the machina
+     * @param blocks One or more BlueprintBlocks belonging to the machina
+     * @return False if and only if the player may interact with and break all the given blocks. True otherwise. 
+     */
+    public static boolean inventoryProtected(BlockRotation yaw, Player player, BlockLocation anchor, BlueprintBlock... blocks) {
+        BlockFace clickedFace = yaw.getOpposite().getYawFace();
+        for (BlueprintBlock b : blocks) {
+            BlockLocation target = anchor.getRelative(b.vector(yaw));
+            if (!(blockRightClick(target, player, clickedFace) && blockBreak(target, player)))
+                return true;
+        }
+        return false;
     }
 }

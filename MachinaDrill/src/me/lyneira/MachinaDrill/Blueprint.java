@@ -11,6 +11,7 @@ import me.lyneira.MachinaCore.BlockRotation;
 import me.lyneira.MachinaCore.BlockVector;
 import me.lyneira.MachinaCore.BlueprintBlock;
 import me.lyneira.MachinaCore.BlueprintFactory;
+import me.lyneira.MachinaCore.EventSimulator;
 import me.lyneira.MachinaCore.Machina;
 import me.lyneira.MachinaCore.MovableBlueprint;
 
@@ -164,6 +165,9 @@ final class Blueprint extends MovableBlueprint {
                     player.sendMessage("You do not have permission to activate a drill.");
                     return null;
                 }
+                
+                if (EventSimulator.inventoryProtected(yaw, player, anchor, chest, furnace))
+                    return null;
 
                 // Detection was a success.
                 detectedModules.add(mainModule);
@@ -177,7 +181,7 @@ final class Blueprint extends MovableBlueprint {
                 break;
             }
         } else if(centralBase.checkType(headMaterial)) {            
-            // Search for a furnace around the central base.
+            // Search for a furnace around the anchor.
             for (BlockRotation i : BlockRotation.values()) {
                 if (!anchor.getRelative(i.getYawFace()).checkType(furnaceMaterial))
                     continue;
@@ -190,6 +194,9 @@ final class Blueprint extends MovableBlueprint {
                     player.sendMessage("You do not have permission to activate a vertical drill.");
                     return null;
                 }
+
+                if (EventSimulator.inventoryProtected(yaw, player, anchor, verticalChest, verticalFurnace))
+                    return null;
 
                 // Detection was a success.
                 detectedModules.add(verticalModule);

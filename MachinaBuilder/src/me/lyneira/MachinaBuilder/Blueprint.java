@@ -14,6 +14,7 @@ import me.lyneira.MachinaCore.BlockRotation;
 import me.lyneira.MachinaCore.BlockVector;
 import me.lyneira.MachinaCore.BlueprintBlock;
 import me.lyneira.MachinaCore.BlueprintFactory;
+import me.lyneira.MachinaCore.EventSimulator;
 import me.lyneira.MachinaCore.Machina;
 import me.lyneira.MachinaCore.MovableBlueprint;
 
@@ -55,11 +56,11 @@ public class Blueprint extends MovableBlueprint {
         centralBase = blueprint.addKey(new BlockVector(0, 0, 0), baseMaterial, mainModule);
         chest = blueprint.add(new BlockVector(1, 1, 0), supplyContainerMaterial, mainModule);
         primaryHead = blueprint.add(new BlockVector(1, 0, 0), headMaterial, mainModule);
-        
+
         // **** Basic backend module ****
         // Furnace has to be key because it isn't burning at detection
         furnaceBasic = blueprint.addKey(new BlockVector(-1, 0, 0), burningFurnaceMaterial, backendBasicModule);
-        
+
         // **** Road builder backend module ****
         // Furnace has to be key because it isn't burning at detection
         furnaceRoad = blueprint.addKey(new BlockVector(-2, 0, 0), burningFurnaceMaterial, backendRoadModule);
@@ -120,6 +121,10 @@ public class Blueprint extends MovableBlueprint {
                 return null;
             }
 
+            if ((furnace == furnaceBasic && EventSimulator.inventoryProtected(yaw, player, anchor, chest, furnaceBasic))
+                    || EventSimulator.inventoryProtected(yaw, player, anchor, chest, chestRoad, furnaceRoad))
+                return null;
+
             detectedModules.add(mainModule);
 
             // Detect optional modules here.
@@ -141,5 +146,4 @@ public class Blueprint extends MovableBlueprint {
 
         return null;
     }
-
 }
