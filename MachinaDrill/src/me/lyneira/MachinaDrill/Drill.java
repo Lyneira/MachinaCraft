@@ -17,6 +17,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Furnace;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -31,7 +32,12 @@ final class Drill extends Movable {
     /**
      * The number of server ticks to wait for a move action.
      */
-    private static final int moveDelay = 20;
+    private static int moveDelay = 20;
+    
+    /**
+     * Whether the drill should use energy.
+     */
+    private static boolean useEnergy = true;
 
     /**
      * Array of vectors that determines where the drill looks for blocks to
@@ -256,6 +262,9 @@ final class Drill extends Movable {
      * @return True if enough energy could be used up
      */
     private boolean useEnergy(final BlockLocation anchor, final int energy) {
+        if (!useEnergy)
+            return true;
+
         while (currentEnergy < energy) {
             int newFuel = Fuel.consume((Furnace) anchor.getRelative(furnace.vector(yaw)).getBlock().getState());
             if (newFuel > 0) {
@@ -314,5 +323,14 @@ final class Drill extends Movable {
         Block chestBlock = anchor.getRelative(chest.vector(yaw)).getBlock();
         if (chestBlock.getType() == Material.CHEST)
             chestBlock.setData(yaw.getOpposite().getYawData());
+    }
+    
+    /**
+     * Loads the given configuration.
+     * @param configuration
+     */
+    static void loadConfiguration(ConfigurationSection configuration) {
+        moveDelay = Math.max(configuration.getInt("move-delay", moveDelay), 1);
+        useEnergy = configuration.getBoolean("use-energy", useEnergy);
     }
 }

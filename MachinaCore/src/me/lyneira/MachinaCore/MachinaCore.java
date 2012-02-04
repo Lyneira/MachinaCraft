@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
@@ -22,10 +21,7 @@ public final class MachinaCore extends JavaPlugin {
     public static MachinaCore plugin;
     final static Logger log = Logger.getLogger("Minecraft");
     static PluginManager pluginManager;
-    private final MachinaCorePlayerListener playerListener = new MachinaCorePlayerListener(this);
-    private final MachinaCoreWorldListener worldListener = new MachinaCoreWorldListener();
     private final Map<String, MachinaBlueprint> blueprints = new LinkedHashMap<String, MachinaBlueprint>();
-    private ConfigurationManager config;
 
     public final void onEnable() {
         plugin = this;
@@ -34,11 +30,11 @@ public final class MachinaCore extends JavaPlugin {
 
         // Set listener
         pluginManager = this.getServer().getPluginManager();
-        pluginManager.registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Event.Priority.Monitor, this);
-        pluginManager.registerEvent(Event.Type.CHUNK_UNLOAD, worldListener, Event.Priority.Monitor, this);
+        pluginManager.registerEvents(new MachinaCoreListener(this), this);
         
-        config = new ConfigurationManager();
-        config.load(this);
+        ConfigurationManager config = new ConfigurationManager(this);
+        Fuel.loadConfiguration(config.getSection("fuels"));
+        BlockData.loadConfiguration(config.getSection("blocks"));
     }
 
     public final void onDisable() {

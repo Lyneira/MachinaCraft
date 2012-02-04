@@ -1,0 +1,12 @@
+# MachinaPump configuration file.
+#
+# max-length: The maximum length of the tube the pump will build.
+#             The size of the affected area increases by the square of the tube length.
+#             Recommended values: up to 16
+# max-depth: The maximum depth the pump will fill or drain at.
+# tick-delay: The number of server ticks it takes to fill or drain one block.
+#             20 ticks = 1 second.
+
+max-length: 9
+max-depth: 8
+tick-delay: 10

@@ -21,6 +21,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.block.Furnace;
 import org.bukkit.block.Sign;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -35,17 +36,22 @@ public class Builder extends Movable {
     /**
      * The number of server ticks to wait for a move action.
      */
-    private static final int moveDelay = 20;
+    private static int moveDelay = 20;
 
     /**
      * The number of server ticks to wait for a build action.
      */
-    private static final int buildDelay = 10;
+    private static int buildDelay = 10;
 
     /**
      * The maximum depth to which the Builder will drop blocks.
      */
-    private static final int maxDepth = 6;
+    private static int maxDepth = 6;
+    
+    /**
+     * Whether the builder should use energy.
+     */
+    private static boolean useEnergy = true;
 
     /**
      * The amount of energy stored. This is just the number of server ticks left
@@ -166,6 +172,9 @@ public class Builder extends Movable {
      * @return True if enough energy could be used up
      */
     private boolean useEnergy(final BlockLocation anchor, final int energy) {
+        if (!useEnergy)
+            return true;
+
         while (currentEnergy < energy) {
             int newFuel = Fuel.consume((Furnace) anchor.getRelative(furnace.vector(yaw)).getBlock().getState());
             if (newFuel > 0) {
@@ -547,5 +556,16 @@ public class Builder extends Movable {
      */
     private static boolean validPlaceAgainst(BlockLocation target) {
         return (!target.checkTypes(Material.AIR, Material.WATER, Material.STATIONARY_WATER, Material.LONG_GRASS, Material.SNOW));
+    }
+
+    /**
+     * Loads the given configuration.
+     * @param configuration
+     */
+    static void loadConfiguration(ConfigurationSection configuration) {
+        moveDelay = Math.max(configuration.getInt("move-delay", moveDelay), 1);
+        buildDelay = Math.max(configuration.getInt("build-delay", buildDelay), 1);
+        maxDepth = Math.min(Math.max(configuration.getInt("max-depth", maxDepth), 1), 128);
+        useEnergy = configuration.getBoolean("use-energy", useEnergy);
     }
 }

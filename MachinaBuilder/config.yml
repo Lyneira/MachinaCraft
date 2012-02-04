@@ -1,0 +1,12 @@
+# MachinaBuilder configuration file.
+#
+# move-delay: The number of server ticks it takes for the builder to move.
+#             20 ticks = 1 second.
+# build-delay: The number of ticks it takes to place a block. 
+# max-depth: The maximum depth at which the builder can build.
+# use-energy: Whether the builder needs fuel to run.
+
+move-delay: 20
+build-delay: 10
+max-depth: 6
+use-energy: true

@@ -2,6 +2,7 @@ package me.lyneira.MachinaBuilder;
 
 import java.util.logging.Logger;
 
+import me.lyneira.MachinaCore.ConfigurationManager;
 import me.lyneira.MachinaCore.MachinaCore;
 
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -21,6 +22,9 @@ public class MachinaBuilder extends JavaPlugin {
         pluginManager = this.getServer().getPluginManager();
         PluginDescriptionFile pdf = getDescription();
         log.info(pdf.getName() + " version " + pdf.getVersion() + " is now enabled.");
+        
+        ConfigurationManager config = new ConfigurationManager(this);
+        Builder.loadConfiguration(config.getAll());
 
         MachinaCore.plugin.registerBlueprint(Blueprint.instance);
     }

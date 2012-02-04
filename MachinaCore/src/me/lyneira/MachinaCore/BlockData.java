@@ -442,6 +442,9 @@ public final class BlockData {
     }
 
     static final void loadConfiguration(ConfigurationSection configuration) {
+        if (configuration == null)
+            return;
+
         Map<String, Object> blockSections = configuration.getValues(false);
         for (String blockId : blockSections.keySet()) {
             if (!configuration.isConfigurationSection(blockId))

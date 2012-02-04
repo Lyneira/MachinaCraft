@@ -9,7 +9,7 @@
 
 	<target name="copyResources" description="Copies needed files to the build location">
 		<copy todir="${binDir}">
-			<fileset file="plugin.yml" />
+			<fileset dir="." includes="*.yml"/>
 		</copy>
 	</target>
 

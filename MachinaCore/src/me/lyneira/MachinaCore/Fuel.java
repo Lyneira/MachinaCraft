@@ -136,6 +136,9 @@ public class Fuel {
     }
 
     static final void loadConfiguration(ConfigurationSection configuration) {
+        if (configuration == null)
+            return;
+
         Map<String, Object> fuels = configuration.getValues(false);
         for (String id : fuels.keySet()) {
             int typeId;

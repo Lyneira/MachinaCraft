@@ -9,6 +9,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Furnace;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -27,9 +28,9 @@ import me.lyneira.MachinaCore.Machina;
  * @author Lyneira
  */
 final class Pump implements Machina {
-    private static final int maxLength = 9;
-    private static final int maxDepth = 8;
-    private static final int delay = 10;
+    private static int maxLength = 9;
+    private static int maxDepth = 8;
+    private static int delay = 10;
     private static final BlockVector down = new BlockVector(0, -1, 0);
 
     private final Player player;
@@ -434,5 +435,15 @@ final class Pump implements Machina {
             target.setEmpty();
             return this;
         }
+    }
+    
+    /**
+     * Loads the given configuration.
+     * @param configuration
+     */
+    static void loadConfiguration(ConfigurationSection configuration) {
+        maxLength = Math.min(Math.max(configuration.getInt("max-length", maxLength), 1), 64);
+        maxDepth = Math.min(Math.max(configuration.getInt("max-depth", maxDepth), 1), 128);
+        delay = Math.max(configuration.getInt("tick-delay", delay), 1);
     }
 }
