@@ -446,25 +446,39 @@ public final class BlockData {
             return;
 
         Map<String, Object> blockSections = configuration.getValues(false);
-        for (String blockId : blockSections.keySet()) {
-            if (!configuration.isConfigurationSection(blockId))
+        for (String configItem : blockSections.keySet()) {
+            BlockData data;
+
+            if (configuration.isList(configItem)) {
+                if (configItem.equals("drill-block")) {
+                    for (int i : configuration.getIntegerList(configItem)) {
+                        data = set(i);
+                        if (data == null)
+                            continue;
+                        data.drillable(false);
+                    }
+                }
+                continue;
+            }
+
+            if (!configuration.isConfigurationSection(configItem))
                 continue;
 
             int typeId;
             try {
-                typeId = Integer.valueOf(blockId);
+                typeId = Integer.valueOf(configItem);
             } catch (Exception e) {
-                MachinaCore.log.warning("MachinaCore: Could not parse block data for id: " + blockId);
+                MachinaCore.log.warning("MachinaCore: Could not parse block data for id: " + configItem);
                 continue;
             }
 
-            BlockData data = set(typeId);
+            data = set(typeId);
             if (data == null) {
-                MachinaCore.log.warning("MachinaCore: Given block data id invalid: " + blockId);
+                MachinaCore.log.warning("MachinaCore: Given block data id invalid: " + configItem);
                 continue;
             }
 
-            ConfigurationSection blockSection = configuration.getConfigurationSection(blockId);
+            ConfigurationSection blockSection = configuration.getConfigurationSection(configItem);
 
             data.solid(blockSection.getBoolean("solid", false));
             data.drillable(blockSection.getBoolean("drillable", false));

@@ -19,10 +19,13 @@
 #     hasInventory: <boolean> - default: false - (ADVANCED) Whether the block has an inventory that should be preserved when moving as part of a machina.
 #     attached: <boolean> - default: false - (ADVANCED) Whether the block can only exist attached to another block. (levers, ladders, rails, doors, etc)
 #
-# Example configuration that changes some properties for wooden planks:
+# To provide a shorthand way to make many blocks non-breakable by drills, a list of ids can be given to the drill-block list.
+#
+# Example configuration that changes some properties for wooden planks, and blocks some man-made objects from being drilled:
 #fuels:
 #    5: 800
 #blocks:
+#    drill-block: [4, 5, 43, 44, 53]
 #    5:
 #        solid: false
 #        drillable: false
