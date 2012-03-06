@@ -70,7 +70,8 @@ class MachinaRunner implements Runnable {
     }
 
     /**
-     * Returns whether a machina anchor exists for the given BlockLocation
+     * Returns whether a machina anchor exists for the given
+     * {@link BlockLocation}
      * 
      * @param location
      *            The location to check for
@@ -78,6 +79,17 @@ class MachinaRunner implements Runnable {
      */
     static final boolean exists(final BlockLocation location) {
         return machinae.containsKey(location);
+    }
+
+    /**
+     * Returns the machina that exists at the given {@link BlockLocation}
+     * 
+     * @param location
+     *            The location to check for
+     * @return A machina, or null if none exists.
+     */
+    static final Machina getMachina(final BlockLocation location) {
+        return machinae.get(location).machina;
     }
 
     /**

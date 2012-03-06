@@ -51,8 +51,9 @@ public interface Machina {
     public boolean onLever(final BlockLocation anchor, final Player player, final ItemStack itemInHand);
 
     /**
-     * Function that is called at the moment of deactivation. <br>
-     * ** Important: The machina may not be intact at this point!
+     * Function that is called at the moment of deactivation.<br>
+     * <br>
+     * <b>Important:</b> The machina may not be intact at this point!
      * 
      * @param anchor
      *            The anchor location to which the machina's lever is attached

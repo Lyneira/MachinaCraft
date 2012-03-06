@@ -6,7 +6,11 @@ import java.util.Map;
 import org.bukkit.Material;
 
 /**
- * Represents a single block in a blueprint.
+ * Represents a single block in a blueprint. The 'south' {@link BlockVector} is
+ * the location of this block in relation to the anchor (0,0,0) if the blueprint
+ * were facing southward.
+ * <p>
+ * In the south direction, x+ is forward, y+ is up, z+ is right
  * 
  * @author Lyneira
  */
@@ -43,7 +47,7 @@ public class BlueprintBlock {
      * @param key
      *            Whether this block needs special handling during detection
      */
-    BlueprintBlock(BlockVector south, Material type, boolean key) {
+    public BlueprintBlock(BlockVector south, Material type, boolean key) {
         this.south = south;
         vectors.put(BlockRotation.ROTATE_0, south);
         vectors.put(BlockRotation.ROTATE_90, south.rotated(BlockRotation.ROTATE_90));

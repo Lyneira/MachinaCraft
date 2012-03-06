@@ -1,5 +1,5 @@
 name: MachinaPump
-version: 2.1.0
+version: @VERSION@
 description: A Machina that drains or fills an area of water or lava.
 author: Lyneira
 main: me.lyneira.MachinaPump.MachinaPump
