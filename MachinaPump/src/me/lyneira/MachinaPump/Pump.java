@@ -160,12 +160,10 @@ final class Pump implements Machina {
     boolean putDrainItem() {
         Inventory inventory = ((Furnace) anchor.getRelative(backward).getBlock().getState()).getInventory();
         ItemStack item = inventory.getItem(Fuel.smeltSlot);
-        Material type = item.getType();
-        if (type == Material.AIR) {
-            item.setType(tubeMaterial);
-            inventory.setItem(Fuel.smeltSlot, item);
+        if (item == null) {
+            inventory.setItem(Fuel.smeltSlot, new ItemStack(tubeMaterial, 1));
             return true;
-        } else if (type == tubeMaterial) {
+        } else if (item.getType() == tubeMaterial) {
             int amount = item.getAmount();
             if (amount < tubeMaterial.getMaxStackSize()) {
                 item.setAmount(amount + 1);
@@ -202,7 +200,7 @@ final class Pump implements Machina {
             // Try to take a drain block from the furnace.
             Inventory inventory = ((Furnace) anchor.getRelative(backward).getBlock().getState()).getInventory();
             ItemStack item = inventory.getItem(Fuel.smeltSlot);
-            if (item.getType() == tubeMaterial) {
+            if (item != null && item.getType() == tubeMaterial) {
                 // Before taking, we have to simulate whether we can actually
                 // place the block.
                 if (!EventSimulator.blockPlace(target, tubeMaterial.getId(), target.getRelative(backward, size), player))
@@ -228,7 +226,7 @@ final class Pump implements Machina {
             // Check which mode the pump should operate in.
             Inventory inventory = ((Furnace) anchor.getRelative(backward).getBlock().getState()).getInventory();
             ItemStack item = inventory.getItem(Fuel.fuelSlot);
-            if (item.getType() == filledBucketMaterial) {
+            if (item != null && item.getType() == filledBucketMaterial) {
                 if (filledBucketMaterial == Material.WATER_BUCKET && anchor.getWorld().getEnvironment() == World.Environment.NETHER && !player.hasPermission("machinapump.nether-water")) {
                     player.sendMessage("You do not have permission to pour water with a pump in the nether.");
                     return new Retract();

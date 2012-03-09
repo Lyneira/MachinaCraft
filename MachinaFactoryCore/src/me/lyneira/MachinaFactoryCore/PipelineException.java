@@ -2,6 +2,11 @@ package me.lyneira.MachinaFactoryCore;
 
 import me.lyneira.MachinaCore.BlockLocation;
 
+/**
+ * Thrown when a pipeline fails to find an endpoint, or fails to verify.
+ * 
+ * @author Lyneira
+ */
 public class PipelineException extends Exception {
 
     private static final long serialVersionUID = -719552834534112022L;

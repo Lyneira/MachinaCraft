@@ -3,12 +3,17 @@ package me.lyneira.MachinaFactoryCore;
 import me.lyneira.MachinaCore.BlockLocation;
 import me.lyneira.MachinaCore.BlockRotation;
 import me.lyneira.MachinaCore.HeartBeatEvent;
+import me.lyneira.MachinaCore.InventoryManager;
 
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.RedstoneTorch;
+
+import com.google.common.base.Predicate;
 
 /**
  * Itemsender component which will send item packets over redstone wire.
@@ -40,7 +45,7 @@ class ItemSender extends Component {
         }
         return null;
     }
-    
+
     @Override
     public void onDeActivate(BlockLocation anchor) {
         super.onDeActivate(anchor);
@@ -49,11 +54,19 @@ class ItemSender extends Component {
 
     boolean doSend() {
         try {
-            pipeline.sendMessage("Hello!");
+            InventoryManager manager = new InventoryManager(((InventoryHolder) chest().getBlock().getState()).getInventory());
+            if (manager.find(anyItem)) {
+                ItemStack item = manager.get();
+                item.setAmount(1);
+                if (pipeline.sendPacket(item)) {
+                    manager.decrement();
+                    return true;
+                }
+            }
         } catch (PipelineException e) {
-            return false;
+
         }
-        return true;
+        return false;
     }
 
     BlockLocation chest() {
@@ -75,4 +88,13 @@ class ItemSender extends Component {
         }
         state.update();
     }
+
+    private static final Predicate<ItemStack> anyItem = new Predicate<ItemStack>() {
+
+        @Override
+        public boolean apply(ItemStack item) {
+            return (item != null);
+        }
+
+    };
 }

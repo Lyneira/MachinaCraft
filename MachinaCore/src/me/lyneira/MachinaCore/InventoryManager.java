@@ -44,7 +44,7 @@ public class InventoryManager {
     public void increment() {
         ItemStack item = inventory.getItem(index);
 
-        if (item.getTypeId() == 0)
+        if (item == null)
             return;
 
         int newAmount = item.getAmount() + 1;
@@ -62,7 +62,7 @@ public class InventoryManager {
      */
     public void decrement() {
         ItemStack item = inventory.getItem(index);
-        if (item.getTypeId() == 0)
+        if (item == null)
             return;
 
         item.setAmount(item.getAmount() - 1);
@@ -101,7 +101,7 @@ public class InventoryManager {
      * @return
      */
     public ItemStack get() {
-        return inventory.getItem(index);
+        return inventory.getItem(index).clone();
     }
 
     /**
@@ -110,5 +110,12 @@ public class InventoryManager {
      */
     public void set(ItemStack item) {
         inventory.setItem(index, item);
+    }
+    
+    /**
+     * Clears the slot at the current position.
+     */
+    public void clear() {
+        inventory.clear(index);
     }
 }

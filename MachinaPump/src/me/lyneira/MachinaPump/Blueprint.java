@@ -39,7 +39,7 @@ final class Blueprint implements MachinaBlueprint {
             if (location.checkType(Material.FURNACE)) {
                 yaw = i.getOpposite();
                 ItemStack item = ((Furnace) location.getBlock().getState()).getInventory().getItem(Fuel.smeltSlot);
-                if (item.getType() == Material.IRON_BLOCK) {
+                if (item != null && item.getType() == Material.IRON_BLOCK) {
                     lavaMode = true;
                 } else {
                     lavaMode = false;

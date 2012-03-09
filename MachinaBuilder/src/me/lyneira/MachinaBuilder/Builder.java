@@ -350,7 +350,7 @@ public class Builder extends Movable {
                     return null;
 
                 ItemStack item = manager.get();
-                int typeId = manager.get().getTypeId();
+                int typeId = item.getTypeId();
                 if (!canPlace(target, typeId, target.getRelative(BlockFace.DOWN)))
                     continue;
 

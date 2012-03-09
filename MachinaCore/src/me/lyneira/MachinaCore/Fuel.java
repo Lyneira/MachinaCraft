@@ -81,6 +81,8 @@ public class Fuel {
         try {
             Inventory furnaceInventory = furnace.getInventory();
             ItemStack fuelStack = furnaceInventory.getItem(fuelSlot);
+            if (fuelStack == null)
+                return 0;
             int burnTime = burnTime(fuelStack.getType().getId());
             int amount = fuelStack.getAmount();
             if (burnTime > 0) {

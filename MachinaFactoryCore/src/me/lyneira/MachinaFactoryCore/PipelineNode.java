@@ -1,42 +1,70 @@
 package me.lyneira.MachinaFactoryCore;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.material.Diode;
 
 import me.lyneira.MachinaCore.BlockLocation;
+import me.lyneira.MachinaCore.BlockRotation;
 
 class PipelineNode {
-    final BlockLocation location;
     final PipelineNode previous;
-    final int distance;
+    final BlockLocation location;
     final Material type;
+    final int distance;
 
     /**
-     * Constructs a new root PipelineNode from the given location. 
+     * Constructs a new root PipelineNode from the given location.
+     * 
      * @param location
      */
     PipelineNode(BlockLocation location) {
-        this.location = location;
         this.previous = null;
-        distance = 0;
+        this.location = location;
         type = location.getType();
+        distance = 0;
     }
 
-    private PipelineNode(BlockLocation location, PipelineNode previous) {
-        this.location = location;
+    PipelineNode(PipelineNode previous, BlockLocation location, Material type) {
         this.previous = previous;
+        this.location = location;
+        this.type = type;
         distance = previous.distance + 1;
-        type = location.getType();
     }
-    
-    List<PipelineNode> neighbors() {
-        // TODO find only valid neighbors
+
+    List<PipelineNode> neighbors(Material material) {
+        List<PipelineNode> neighbors = new ArrayList<PipelineNode>(4);
+        for (BlockRotation i : BlockRotation.values()) {
+            addNeighbor(neighbors, location.getRelative(i.getYawFace()), material);
+        }
+        addNeighbor(neighbors, location.getRelative(BlockFace.UP), material);
+        addNeighbor(neighbors, location.getRelative(BlockFace.DOWN), material);
+        return neighbors;
+    }
+
+    private void addNeighbor(List<PipelineNode> neighbors, BlockLocation location, Material material) {
+        Material type = location.getType();
+        if (type == Material.AIR)
+            return;
+
+        if (type == material) {
+            neighbors.add(new PipelineNode(this, location, type));
+        } else {
+            neighbors.add(new TargetNode(this, location, type));
+        }
+    }
+
+    PipelineEndpoint target() {
         return null;
     }
     
-    boolean validTarget() {
-        // TODO
+    boolean verify() {
+        if (type == location.getType())
+            return true;
         return false;
     }
 

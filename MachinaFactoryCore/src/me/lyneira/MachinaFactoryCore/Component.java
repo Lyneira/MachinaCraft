@@ -17,7 +17,7 @@ import me.lyneira.MachinaCore.Machina;
  * 
  * @author Lyneira
  */
-public abstract class Component implements Machina {
+public abstract class Component implements Machina, EndpointVerify {
     protected final BlockLocation anchor;
     protected final BlockRotation yaw;
     private final ComponentBlueprint blueprint;
@@ -57,6 +57,11 @@ public abstract class Component implements Machina {
 
     @Override
     public boolean verify(BlockLocation anchor) {
+        return verify(blueprint.blueprintBase) && verify(blueprint.blueprintActive);
+    }
+    
+    @Override
+    public boolean verify() {
         return verify(blueprint.blueprintBase) && verify(blueprint.blueprintActive);
     }
 
