@@ -26,7 +26,7 @@ public final class MachinaCore extends JavaPlugin {
      * This is a hashmap of the blueprint's class name to its blueprint. This
      * prevents accidental double insertions by buggy code.
      */
-    private final Map<String, MachinaBlueprint> blueprints = new LinkedHashMap<String, MachinaBlueprint>();
+    private final Map<Class<?>, MachinaBlueprint> blueprints = new LinkedHashMap<Class<?>, MachinaBlueprint>();
 
     public final void onEnable() {
         // plugin = this;
@@ -122,7 +122,7 @@ public final class MachinaCore extends JavaPlugin {
      *            The blueprint to register
      */
     public final void registerBlueprint(MachinaBlueprint blueprint) {
-        blueprints.put(blueprint.getClass().getName(), blueprint);
+        blueprints.put(blueprint.getClass(), blueprint);
     }
 
     /**
@@ -132,6 +132,6 @@ public final class MachinaCore extends JavaPlugin {
      *            The blueprint to unregister
      */
     public final void unRegisterBlueprint(MachinaBlueprint blueprint) {
-        blueprints.remove((blueprint.getClass().getName()));
+        blueprints.remove((blueprint.getClass()));
     }
 }

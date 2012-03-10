@@ -1,18 +1,39 @@
 package me.lyneira.MachinaFactoryCore;
 
+/**
+ * Represents a packet handler for {@link PipelineEndpoint} implementations.
+ * Suggested usage in your implementation:<br>
+ * private static final PacketHandler handler = new PacketHandler(PacketListener<?>...);
+ * 
+ * @author Lyneira
+ * 
+ */
 public class PacketHandler {
     private final PacketListener<?>[] listeners;
     private final Class<?>[] types;
 
+    /**
+     * Constructs a new PacketHandler for the given PacketListeners.
+     * @param listeners A list of PacketListeners for class types this handler should handle.
+     */
     public PacketHandler(PacketListener<?>... listeners) {
         this.listeners = listeners;
         types = new Class<?>[listeners.length];
         for (int i = 0; i < listeners.length; i++) {
-            types[i] = listeners[i].payloadType();
+            Class<?> payloadType = listeners[i].payloadType();
+            if (payloadType == null)
+                throw new NullPointerException("PacketHandler constructor got a PacketListener with a null payloadType()!");
+            types[i] = payloadType;
         }
     }
 
-    public <P> boolean handle(PipelineEndpoint endpoint, P payload) {
+    /**
+     * Dispatches the payload to the first listener able to handle it.
+     * @param endpoint
+     * @param payload
+     * @return True if the payload was handled successfully.
+     */
+    <P> boolean handle(PipelineEndpoint endpoint, P payload) {
         for (int i = 0; i < listeners.length; i++) {
             if (types[i].isInstance(payload)) {
                 @SuppressWarnings("unchecked")

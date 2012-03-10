@@ -1,28 +1,24 @@
-package me.lyneira.HoverPad;
+package me.lyneira.ItemRelay;
 
 import java.util.logging.Logger;
 
-import me.lyneira.MachinaCore.MachinaCore;
+import me.lyneira.MachinaFactoryCore.MachinaFactoryCore;
 
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
-/**
- * Main Plugin.
- * 
- * @author Lyneira
- */
-public class HoverPadPlugin extends JavaPlugin {
+public class ItemRelayPlugin extends JavaPlugin {
     final static Logger log = Logger.getLogger("Minecraft");
-    private MachinaCore machinaCore;
+    private MachinaFactoryCore machinaFactoryCore;
+    private Blueprint blueprint = new Blueprint();
 
     @Override
     public final void onEnable() {
         PluginDescriptionFile pdf = getDescription();
         log.info(pdf.getName() + " version " + pdf.getVersion() + " is now enabled.");
 
-        machinaCore = (MachinaCore) getServer().getPluginManager().getPlugin("MachinaCore");
-        machinaCore.registerBlueprint(Blueprint.instance);
+        machinaFactoryCore = (MachinaFactoryCore) getServer().getPluginManager().getPlugin("MachinaFactoryCore");
+        machinaFactoryCore.registerFactoryBlueprint(blueprint, ItemRelay.class, true);
     }
 
     @Override
@@ -30,6 +26,6 @@ public class HoverPadPlugin extends JavaPlugin {
         PluginDescriptionFile pdf = getDescription();
         log.info(pdf.getName() + " is now disabled.");
 
-        machinaCore.unRegisterBlueprint(Blueprint.instance);
+        machinaFactoryCore.unregisterFactoryBlueprint(blueprint);
     }
 }

@@ -17,10 +17,11 @@ public class MachinaDrill extends JavaPlugin {
     final static Logger log = Logger.getLogger("Minecraft");
     private MachinaCore machinaCore;
 
+    @Override
     public final void onEnable() {
         PluginDescriptionFile pdf = getDescription();
         log.info(pdf.getName() + " version " + pdf.getVersion() + " is now enabled.");
-        
+
         ConfigurationManager config = new ConfigurationManager(this);
         Drill.loadConfiguration(config.getAll());
 
@@ -28,6 +29,7 @@ public class MachinaDrill extends JavaPlugin {
         machinaCore.registerBlueprint(Blueprint.instance);
     }
 
+    @Override
     public final void onDisable() {
         PluginDescriptionFile pdf = getDescription();
         log.info(pdf.getName() + " is now disabled.");

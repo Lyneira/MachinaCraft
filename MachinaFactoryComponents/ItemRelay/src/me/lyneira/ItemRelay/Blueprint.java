@@ -1,40 +1,45 @@
-package me.lyneira.MachinaFactoryCore;
-
-import me.lyneira.MachinaCore.BlockLocation;
-import me.lyneira.MachinaCore.BlockRotation;
-import me.lyneira.MachinaCore.BlockVector;
-import me.lyneira.MachinaCore.BlueprintBlock;
-import me.lyneira.MachinaCore.Machina;
+package me.lyneira.ItemRelay;
 
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import me.lyneira.MachinaCore.BlockLocation;
+import me.lyneira.MachinaCore.BlockRotation;
+import me.lyneira.MachinaCore.BlockVector;
+import me.lyneira.MachinaCore.BlueprintBlock;
+import me.lyneira.MachinaCore.Machina;
+import me.lyneira.MachinaCore.MachinaBlueprint;
+import me.lyneira.MachinaFactoryCore.ComponentActivateException;
+import me.lyneira.MachinaFactoryCore.ComponentBlueprint;
+import me.lyneira.MachinaFactoryCore.ComponentDetectException;
+
 /**
- * Blueprint for the {@link ItemSender}
+ * Blueprint for the {@link ItemRelay}.
  * 
  * @author Lyneira
  */
-class ItemSenderBlueprint implements MachinaFactoryBlueprint {
+class Blueprint implements MachinaBlueprint {
     static final Material anchorMaterial = Material.SMOOTH_BRICK;
     final BlueprintBlock chest;
-    final BlueprintBlock senderActive;
-    final BlueprintBlock senderInactive;
+    final BlueprintBlock sender;
     final ComponentBlueprint blueprint;
 
-    ItemSenderBlueprint() {
+    /**
+     * The blueprints for the base, inactive and active states are specified
+     * here.
+     */
+    Blueprint() {
         BlueprintBlock[] blueprintBase = { new BlueprintBlock(new BlockVector(0, 0, 0), anchorMaterial, true), //
                 chest = new BlueprintBlock(new BlockVector(-1, 0, 0), Material.CHEST, true), //
         };
         BlueprintBlock[] blueprintInactive = { new BlueprintBlock(new BlockVector(1, 0, 0), Material.WOOD, false), //
                 new BlueprintBlock(new BlockVector(1, 1, 0), Material.IRON_FENCE, false), //
-                senderInactive = new BlueprintBlock(new BlockVector(2, 0, 0), Material.REDSTONE_TORCH_ON, false), //
         };
 
         BlueprintBlock[] blueprintActive = { new BlueprintBlock(new BlockVector(1, 0, 0), Material.IRON_FENCE, false), //
-                new BlueprintBlock(new BlockVector(2, 0, 0), Material.WOOD, false), //
-                senderActive = new BlueprintBlock(new BlockVector(3, 0, 0), Material.REDSTONE_TORCH_ON, false), //
+                sender = new BlueprintBlock(new BlockVector(2, 0, 0), Material.WOOD, false), //
         };
         blueprint = new ComponentBlueprint(blueprintBase, blueprintInactive, blueprintActive);
     }
@@ -56,19 +61,11 @@ class ItemSenderBlueprint implements MachinaFactoryBlueprint {
         if (yaw == null)
             return null;
 
-        boolean active;
         try {
-            active = blueprint.detectOther(anchor, yaw);
-            return new ItemSender(this, yaw, player, anchor, leverFace, active);
+            return new ItemRelay(this, yaw, player, anchor, leverFace);
         } catch (ComponentDetectException e) {
-            return null;
         } catch (ComponentActivateException e) {
-            return null;
         }
-    }
-
-    @Override
-    public boolean leverActivatable() {
-        return true;
+        return null;
     }
 }

@@ -17,6 +17,7 @@ public class MachinaBuilder extends JavaPlugin {
     final static Logger log = Logger.getLogger("Minecraft");
     private MachinaCore machinaCore;
 
+    @Override
     public final void onEnable() {
         PluginDescriptionFile pdf = getDescription();
         log.info(pdf.getName() + " version " + pdf.getVersion() + " is now enabled.");
@@ -28,6 +29,7 @@ public class MachinaBuilder extends JavaPlugin {
         machinaCore.registerBlueprint(Blueprint.instance);
     }
 
+    @Override
     public final void onDisable() {
         PluginDescriptionFile pdf = getDescription();
         log.info(pdf.getName() + " is now disabled.");

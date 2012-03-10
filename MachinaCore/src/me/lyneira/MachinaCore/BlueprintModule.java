@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.bukkit.block.Block;
-import org.bukkit.block.ContainerBlock;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -112,7 +112,7 @@ class BlueprintModule {
         ItemStack[][] result = new ItemStack[inventoryIndices.length][];
         for (int i = 0; i < inventoryIndices.length; i++) {
             Block block = anchor.getRelative(vectors[inventoryIndices[i]]).getBlock();
-            Inventory inventory = ((ContainerBlock) block.getState()).getInventory();
+            Inventory inventory = ((InventoryHolder) block.getState()).getInventory();
             result[i] = inventory.getContents();
             inventory.clear();
         }
@@ -132,7 +132,7 @@ class BlueprintModule {
         BlockVector[] vectors = blueprintVectors.get(yaw);
         for (int i = 0; i < inventoryIndices.length; i++) {
             Block block = anchor.getRelative(vectors[inventoryIndices[i]]).getBlock();
-            Inventory inventory = ((ContainerBlock) block.getState()).getInventory();
+            Inventory inventory = ((InventoryHolder) block.getState()).getInventory();
             inventory.setContents(inventories[i]);
         }
     }

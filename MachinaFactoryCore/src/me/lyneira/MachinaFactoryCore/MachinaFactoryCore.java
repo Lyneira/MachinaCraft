@@ -5,8 +5,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import me.lyneira.MachinaCore.BlockLocation;
+import me.lyneira.MachinaCore.Machina;
+import me.lyneira.MachinaCore.MachinaBlueprint;
 import me.lyneira.MachinaCore.MachinaCore;
 
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -17,24 +21,30 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class MachinaFactoryCore extends JavaPlugin {
     final static Logger log = Logger.getLogger("Minecraft");
+    static MachinaFactoryCore plugin;
     private MachinaCore machinaCore;
 
     /**
-     * This is a hashmap of the blueprint's class name to its blueprint. This
-     * prevents accidental double insertions by buggy code.
+     * Hashmap of the blueprint's class to its blueprint. This prevents
+     * accidental double insertions.
      */
-    private final Map<String, MachinaFactoryBlueprint> blueprints = new LinkedHashMap<String, MachinaFactoryBlueprint>();
+    private final Map<Class<? extends MachinaBlueprint>, MachinaFactoryBlueprint> blueprints = new LinkedHashMap<Class<? extends MachinaBlueprint>, MachinaFactoryBlueprint>();
+    /**
+     * Hashmap of the blueprint's class to its blueprint. This map contains only
+     * those blueprints whose machina are a valid {@link PipelineEndpoint}.
+     */
+    private final Map<Class<? extends MachinaBlueprint>, MachinaBlueprint> endpointBlueprints = new LinkedHashMap<Class<? extends MachinaBlueprint>, MachinaBlueprint>();
 
+    @Override
     public void onEnable() {
+        plugin = this;
         PluginDescriptionFile pdf = getDescription();
         log.info(pdf.getName() + " version " + pdf.getVersion() + " is now enabled.");
 
         machinaCore = (MachinaCore) getServer().getPluginManager().getPlugin("MachinaCore");
-
-        // TODO Split itemsender and factory core
-        registerFactoryBlueprint(new ItemSenderBlueprint());
     }
 
+    @Override
     public void onDisable() {
         PluginDescriptionFile pdf = getDescription();
         log.info(pdf.getName() + " is now disabled.");
@@ -42,21 +52,57 @@ public class MachinaFactoryCore extends JavaPlugin {
         Iterator<MachinaFactoryBlueprint> it = blueprints.values().iterator();
         while (it.hasNext()) {
             MachinaFactoryBlueprint blueprint = it.next();
-            if (blueprint.leverActivatable())
-                machinaCore.unRegisterBlueprint(blueprint);
+            if (blueprint.leverActivatable)
+                machinaCore.unRegisterBlueprint(blueprint.blueprint);
             it.remove();
         }
     }
 
-    public void registerFactoryBlueprint(MachinaFactoryBlueprint blueprint) {
-        blueprints.put(blueprint.getClass().getName(), blueprint);
-        if (blueprint.leverActivatable())
+    /**
+     * Registers a {@link MachinaBlueprint} with MachinaFactoryCore. If
+     * it is lever-activatable, it will also be registered with MachinaCore.
+     * 
+     * @param blueprint
+     */
+    public void registerFactoryBlueprint(MachinaBlueprint blueprint, Class<? extends Machina> machinaType, boolean leverActivatable) {
+        MachinaFactoryBlueprint b = new MachinaFactoryBlueprint(blueprint, machinaType, leverActivatable);
+        blueprints.put(blueprint.getClass(), b);
+        if (leverActivatable)
             machinaCore.registerBlueprint(blueprint);
+        if (b.validEndpoint)
+            endpointBlueprints.put(blueprint.getClass(), blueprint);
     }
 
-    public void unregisterFactoryBlueprint(MachinaFactoryBlueprint blueprint) {
-        blueprints.remove(blueprint.getClass().getName());
-        if (blueprint.leverActivatable())
-            machinaCore.unRegisterBlueprint(blueprint);
+    /**
+     * Unregisters the {@link MachinaFactoryBlueprint} with MachinaFactoryCore.
+     * If it was lever-activatable, it will also be unregistered with
+     * MachinaCore.
+     * 
+     * @param blueprint
+     */
+    public void unregisterFactoryBlueprint(MachinaBlueprint blueprint) {
+        MachinaFactoryBlueprint b = blueprints.get(blueprint.getClass());
+        if (b != null) {
+            blueprints.remove(blueprint.getClass());
+            if (b.leverActivatable)
+                machinaCore.unRegisterBlueprint(blueprint);
+            if (b.validEndpoint)
+                endpointBlueprints.remove(blueprint.getClass());
+        }
+    }
+    
+    /**
+     * Attempts to detect an endpoint at the given location and returns it.
+     * @param player The player activating this machina
+     * @param location The location to detect at
+     * @return A PipelineEndpoint if successful, null otherwise.
+     */
+    PipelineEndpoint detectEndpoint(Player player, BlockLocation location) {
+        Machina detectedMachina = machinaCore.detectMachina(endpointBlueprints.values().iterator(), player, location);
+        if (detectedMachina == null)
+             return null;
+        if (detectedMachina instanceof PipelineEndpoint)
+            return (PipelineEndpoint) detectedMachina;
+        return null;
     }
 }

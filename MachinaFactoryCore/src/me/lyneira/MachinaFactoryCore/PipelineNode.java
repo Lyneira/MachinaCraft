@@ -4,14 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.material.Diode;
+import org.bukkit.entity.Player;
 
 import me.lyneira.MachinaCore.BlockLocation;
 import me.lyneira.MachinaCore.BlockRotation;
 
+/**
+ * A node in a {@link Pipeline}.
+ * 
+ * @author Lyneira
+ */
 class PipelineNode {
+    /**
+     * Points back towards the start of the pipeline.
+     */
     final PipelineNode previous;
     final BlockLocation location;
     final Material type;
@@ -29,6 +36,12 @@ class PipelineNode {
         distance = 0;
     }
 
+    /**
+     * Constructs a new PipelineNode for the given location, with the given previous node.
+     * @param previous
+     * @param location
+     * @param type
+     */
     PipelineNode(PipelineNode previous, BlockLocation location, Material type) {
         this.previous = previous;
         this.location = location;
@@ -36,6 +49,11 @@ class PipelineNode {
         distance = previous.distance + 1;
     }
 
+    /**
+     * Returns a list of neighbors for this node.
+     * @param material
+     * @return
+     */
     List<PipelineNode> neighbors(Material material) {
         List<PipelineNode> neighbors = new ArrayList<PipelineNode>(4);
         for (BlockRotation i : BlockRotation.values()) {
@@ -46,6 +64,12 @@ class PipelineNode {
         return neighbors;
     }
 
+    /**
+     * Adds a PipelineNode for the given location and material to the given neighbor list, with this node as the previous.
+     * @param neighbors
+     * @param location
+     * @param material
+     */
     private void addNeighbor(List<PipelineNode> neighbors, BlockLocation location, Material material) {
         Material type = location.getType();
         if (type == Material.AIR)
@@ -58,10 +82,18 @@ class PipelineNode {
         }
     }
 
-    PipelineEndpoint target() {
+    /**
+     * Returns a {@link PipelineEndpoint} for this node.
+     * @return A PipelineEndpoint, or null if this is not a valid endpoint.
+     */
+    PipelineEndpoint target(Player player) {
         return null;
     }
     
+    /**
+     * Verifies this node.
+     * @return True if successful, otherwise false.
+     */
     boolean verify() {
         if (type == location.getType())
             return true;

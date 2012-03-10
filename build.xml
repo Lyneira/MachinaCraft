@@ -9,6 +9,7 @@
 		<ant dir="MachinaDrill" />
 		<ant dir="MachinaPump" />
 		<ant dir="MachinaFactoryCore" />
+		<ant dir="MachinaFactoryComponents" />
 	</target>
 
 	<target name="clean">

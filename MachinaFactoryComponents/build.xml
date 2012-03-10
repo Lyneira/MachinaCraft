@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="MachinaFactoryComponents" default="all" basedir=".">
+	<target name="all" description="Build all jars for the project">
+		<ant dir="ItemRelay" />
+	</target>
+</project>

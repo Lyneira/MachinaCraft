@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="build-common-machinafactorycomponents" default="all"	basedir=".">
+	<import file="../build-common.xml" />
+	
+	<target name="makeJar" description="Create the jar">
+        <jar jarfile="../../${jarDir}/${ant.project.name}.jar" basedir="${binDir}" />
+    </target>
+</project>

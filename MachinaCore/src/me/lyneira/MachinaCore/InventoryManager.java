@@ -6,9 +6,9 @@ import org.bukkit.inventory.ItemStack;
 import com.google.common.base.Predicate;
 
 /**
- * Class for processing of an Inventory. Maintains a cursor to the
- * current {@link ItemStack}, starting at the first slot. The cursor can be
- * manipulated by the find function.
+ * Class for processing of an Inventory. Maintains a cursor to the current
+ * {@link ItemStack}, starting at the first slot. The cursor can be manipulated
+ * by the find function.
  * 
  * @author Lyneira
  */
@@ -30,6 +30,20 @@ public class InventoryManager {
         ItemStack[] contents = inventory.getContents();
         for (index = 0; index < contents.length; index++) {
             if (predicate.apply(contents[index])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Finds the first non-empty slot in the inventory.
+     * @return True if an item was found.
+     */
+    public boolean findFirst() {
+        ItemStack[] contents = inventory.getContents();
+        for (index = 0; index < contents.length; index++) {
+            if (contents[index] != null) {
                 return true;
             }
         }
@@ -71,6 +85,7 @@ public class InventoryManager {
 
     /**
      * Tests whether the inventory has room for the given itemstack.
+     * 
      * @param item
      * @return True if the inventory has room.
      */
@@ -98,6 +113,7 @@ public class InventoryManager {
 
     /**
      * Gets a copy of the ItemStack at the current position.
+     * 
      * @return
      */
     public ItemStack get() {
@@ -106,12 +122,13 @@ public class InventoryManager {
 
     /**
      * Sets the current position to a copy of the given ItemStack.
+     * 
      * @param item
      */
     public void set(ItemStack item) {
         inventory.setItem(index, item);
     }
-    
+
     /**
      * Clears the slot at the current position.
      */

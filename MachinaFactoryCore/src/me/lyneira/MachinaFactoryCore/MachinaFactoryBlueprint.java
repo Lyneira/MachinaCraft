@@ -1,18 +1,20 @@
 package me.lyneira.MachinaFactoryCore;
 
+import me.lyneira.MachinaCore.Machina;
 import me.lyneira.MachinaCore.MachinaBlueprint;
 
-/**
- * Interface required for registering with MachinaFactoryCore.
- * 
- * @author Lyneira
- */
-public interface MachinaFactoryBlueprint extends MachinaBlueprint {
-    /**
-     * Returns true if this blueprint may be activated by a lever.<br>
-     * MachinaFactoryCore will register it with MachinaCore if true.
-     * 
-     * @return True if this blueprint may be activated by a lever.
-     */
-    public boolean leverActivatable();
+class MachinaFactoryBlueprint {
+    final MachinaBlueprint blueprint;
+    final boolean validEndpoint;
+    final boolean leverActivatable;
+    
+    MachinaFactoryBlueprint(MachinaBlueprint blueprint, Class<? extends Machina> type, boolean leverActivatable) {
+        this.blueprint = blueprint;
+        this.leverActivatable = leverActivatable;
+        if (PipelineEndpoint.class.isAssignableFrom(type)) {
+            validEndpoint = true;
+        } else {
+            validEndpoint = false;
+        }
+    }
 }

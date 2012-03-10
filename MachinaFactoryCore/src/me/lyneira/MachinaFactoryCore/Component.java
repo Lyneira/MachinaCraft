@@ -23,23 +23,24 @@ public abstract class Component implements Machina, EndpointVerify {
     private final ComponentBlueprint blueprint;
 
     /**
-     * Constructs a new Component from the ComponentBlueprint and activates it
-     * 
+     * Constructs a new Component from the ComponentBlueprint and activates it.
+     * The constructor takes care of detecting the non-key blocks of the
+     * blueprint and throws an exception if it failed to detect them.
      * @param blueprint
      * @param anchor
      * @param yaw
-     * @param active
+     * @throws ComponentActivateException The component could not activate due to a collision.
+     * @throws ComponentDetectException The component could not be detected.
      */
-    protected Component(ComponentBlueprint blueprint, BlockLocation anchor, BlockRotation yaw, boolean active) throws ComponentActivateException {
+    protected Component(ComponentBlueprint blueprint, BlockLocation anchor, BlockRotation yaw) throws ComponentActivateException, ComponentDetectException {
         this.anchor = anchor;
         this.yaw = yaw;
         this.blueprint = blueprint;
 
+        boolean active = blueprint.detectOther(anchor, yaw);
+
         if (active)
             return;
-
-        if (!verify(blueprint.blueprintInactive))
-            throw new ComponentActivateException();
 
         if (detectCollision(blueprint.activateDiffPlus))
             throw new ComponentActivateException();
@@ -56,15 +57,21 @@ public abstract class Component implements Machina, EndpointVerify {
     }
 
     @Override
-    public boolean verify(BlockLocation anchor) {
-        return verify(blueprint.blueprintBase) && verify(blueprint.blueprintActive);
+    public final boolean verify(BlockLocation anchor) {
+        return verify();
     }
-    
+
     @Override
     public boolean verify() {
         return verify(blueprint.blueprintBase) && verify(blueprint.blueprintActive);
     }
 
+    /**
+     * Verifies the given blueprintblock list.
+     * 
+     * @param blueprint
+     * @return True if successful.
+     */
     private boolean verify(List<BlueprintBlock> blueprint) {
         for (BlueprintBlock i : blueprint) {
             if (anchor.getRelative(i.vector(yaw)).getTypeId() != i.typeId) {
@@ -99,7 +106,7 @@ public abstract class Component implements Machina, EndpointVerify {
             this.anchor.getRelative(i.vector(yaw)).setTypeId(i.typeId);
         }
     }
-    
+
     /**
      * Returns true if a collision would happen with the given diffPlus set.
      * 

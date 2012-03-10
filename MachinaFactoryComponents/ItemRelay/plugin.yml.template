@@ -1,0 +1,6 @@
+name: ItemRelay
+version: @VERSION@
+description: A MachinaFactory component that sends items.
+author: Lyneira
+main: me.lyneira.ItemRelay.ItemRelayPlugin
+depend: [MachinaFactoryCore]

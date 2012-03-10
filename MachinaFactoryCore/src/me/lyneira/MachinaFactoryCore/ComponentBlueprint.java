@@ -40,8 +40,7 @@ public class ComponentBlueprint {
      * inactive the component will consist of the base and inactive blueprints.
      * While active, the active blueprint replaces the inactive blueprint.<br>
      * <br>
-     * Note: Attachables such as a redstone torch should be put last in their
-     * array.
+     * Note: Attachables such as a torch should be put last in their array.
      * 
      * @param blueprintBase
      *            An array of {@link BlueprintBlock}s that is present in either
@@ -73,7 +72,7 @@ public class ComponentBlueprint {
      * @throws Exception
      *             if detection failed.
      */
-    public boolean detectOther(BlockLocation anchor, BlockRotation yaw) throws ComponentDetectException {
+    boolean detectOther(BlockLocation anchor, BlockRotation yaw) throws ComponentDetectException {
         if (!detectOther(anchor, yaw, blueprintBase))
             throw new ComponentDetectException();
 
@@ -85,6 +84,15 @@ public class ComponentBlueprint {
         throw new ComponentDetectException();
     }
 
+    /**
+     * Detects the non-key blocks in the given {@link BlueprintBlock} list and
+     * return true if successful.
+     * 
+     * @param anchor
+     * @param yaw
+     * @param blueprint
+     * @return True if the {@link BlueprintBlock} list was detected.
+     */
     private boolean detectOther(BlockLocation anchor, BlockRotation yaw, List<BlueprintBlock> blueprint) {
         for (BlueprintBlock i : blueprint) {
             if (i.key)
