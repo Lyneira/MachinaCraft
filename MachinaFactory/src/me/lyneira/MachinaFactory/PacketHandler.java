@@ -1,4 +1,4 @@
-package me.lyneira.MachinaFactoryCore;
+package me.lyneira.MachinaFactory;
 
 /**
  * Represents a packet handler for {@link PipelineEndpoint} implementations.

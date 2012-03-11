@@ -18,8 +18,6 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author Lyneira
  */
 public final class MachinaCore extends JavaPlugin {
-
-    // public static MachinaCore plugin;
     final static Logger log = Logger.getLogger("Minecraft");
     static PluginManager pluginManager;
     /**
@@ -29,7 +27,6 @@ public final class MachinaCore extends JavaPlugin {
     private final Map<Class<?>, MachinaBlueprint> blueprints = new LinkedHashMap<Class<?>, MachinaBlueprint>();
 
     public final void onEnable() {
-        // plugin = this;
         PluginDescriptionFile pdf = getDescription();
         log.info(pdf.getName() + " version " + pdf.getVersion() + " is now enabled.");
 
@@ -107,11 +104,22 @@ public final class MachinaCore extends JavaPlugin {
 
     /**
      * Returns the machina present at this location, or null if none exists.
+     * 
      * @param location
      * @return A machina, or null if none could be found
      */
     public Machina getMachina(BlockLocation location) {
         return MachinaRunner.getMachina(location);
+    }
+
+    /**
+     * Returns true if a machina exists at this location
+     * 
+     * @param location
+     * @return True if a machina exists here.
+     */
+    public boolean exists(BlockLocation location) {
+        return MachinaRunner.exists(location);
     }
 
     /**

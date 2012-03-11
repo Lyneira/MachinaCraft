@@ -1,4 +1,4 @@
-package me.lyneira.MachinaFactoryCore;
+package me.lyneira.MachinaFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ class TargetNode extends PipelineNode {
     }
 
     @Override
-    PipelineEndpoint target(Player player) {
+    PipelineEndpoint target(BlockLocation anchor, Player player) {
         switch (type) {
         case AIR:
             return null;
@@ -33,7 +33,9 @@ class TargetNode extends PipelineNode {
         case DISPENSER:
             return new ContainerEndpoint(location);
         }
-        return MachinaFactoryCore.plugin.detectEndpoint(player, location);
+        if (location.equals(anchor))
+            return null;
+        return MachinaFactory.plugin.detectEndpoint(player, location);
     }
 
     /**

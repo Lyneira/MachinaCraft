@@ -1,4 +1,4 @@
-package me.lyneira.MachinaFactoryCore;
+package me.lyneira.MachinaFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;

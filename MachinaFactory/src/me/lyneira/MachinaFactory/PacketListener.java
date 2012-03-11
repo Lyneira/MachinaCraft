@@ -1,4 +1,4 @@
-package me.lyneira.MachinaFactoryCore;
+package me.lyneira.MachinaFactory;
 
 /**
  * Represents a listener for a certain type of packet payload.<br>

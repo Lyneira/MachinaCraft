@@ -1,4 +1,4 @@
-package me.lyneira.MachinaFactoryCore;
+package me.lyneira.MachinaFactory;
 
 /**
  * Thrown when a component being created is unable to activate.

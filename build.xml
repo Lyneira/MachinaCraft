@@ -8,7 +8,7 @@
 		<ant dir="MachinaBuilder" />
 		<ant dir="MachinaDrill" />
 		<ant dir="MachinaPump" />
-		<ant dir="MachinaFactoryCore" />
+		<ant dir="MachinaFactory" />
 		<ant dir="MachinaFactoryComponents" />
 	</target>
 

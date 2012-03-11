@@ -237,13 +237,13 @@ public final class BlockLocation {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) {
+        if (obj == null)
             return false;
-        }
-        if (getClass() != obj.getClass()) {
+
+        if (!(obj instanceof BlockLocation))
             return false;
-        }
-        final BlockLocation other = (BlockLocation) obj;
+
+        BlockLocation other = (BlockLocation) obj;
         if (this.world != other.world && (this.world == null || !this.world.equals(other.world))) {
             return false;
         }

@@ -1,6 +1,6 @@
-name: MachinaFactoryCore
+name: MachinaFactory
 version: @VERSION@
 description: A MachinaCraft framework for factory components.
 author: Lyneira
-main: me.lyneira.MachinaFactoryCore.MachinaFactoryCore
+main: me.lyneira.MachinaFactory.MachinaFactory
 depend: [MachinaCore]

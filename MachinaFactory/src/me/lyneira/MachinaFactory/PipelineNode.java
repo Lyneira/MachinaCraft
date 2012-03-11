@@ -1,4 +1,4 @@
-package me.lyneira.MachinaFactoryCore;
+package me.lyneira.MachinaFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,7 +86,7 @@ class PipelineNode {
      * Returns a {@link PipelineEndpoint} for this node.
      * @return A PipelineEndpoint, or null if this is not a valid endpoint.
      */
-    PipelineEndpoint target(Player player) {
+    PipelineEndpoint target(BlockLocation anchor, Player player) {
         return null;
     }
     

@@ -11,9 +11,9 @@ import me.lyneira.MachinaCore.BlockVector;
 import me.lyneira.MachinaCore.BlueprintBlock;
 import me.lyneira.MachinaCore.Machina;
 import me.lyneira.MachinaCore.MachinaBlueprint;
-import me.lyneira.MachinaFactoryCore.ComponentActivateException;
-import me.lyneira.MachinaFactoryCore.ComponentBlueprint;
-import me.lyneira.MachinaFactoryCore.ComponentDetectException;
+import me.lyneira.MachinaFactory.ComponentActivateException;
+import me.lyneira.MachinaFactory.ComponentBlueprint;
+import me.lyneira.MachinaFactory.ComponentDetectException;
 
 /**
  * Blueprint for the {@link ItemRelay}.
@@ -21,7 +21,7 @@ import me.lyneira.MachinaFactoryCore.ComponentDetectException;
  * @author Lyneira
  */
 class Blueprint implements MachinaBlueprint {
-    static final Material anchorMaterial = Material.SMOOTH_BRICK;
+    static final Material anchorMaterial = Material.BRICK;
     final BlueprintBlock chest;
     final BlueprintBlock sender;
     final ComponentBlueprint blueprint;

@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="MachinaFactoryCore" default="all" basedir=".">
+<project name="MachinaFactory" default="all" basedir=".">
 	<import file="../build-common.xml" />
 </project>

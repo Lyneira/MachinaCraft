@@ -1,4 +1,4 @@
-package me.lyneira.MachinaFactoryCore;
+package me.lyneira.MachinaFactory;
 
 /**
  * Represents any verifiable endpoint. This interface serves to allow

@@ -1,4 +1,4 @@
-package me.lyneira.MachinaFactoryCore;
+package me.lyneira.MachinaFactory;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -19,10 +19,10 @@ import org.bukkit.plugin.java.JavaPlugin;
  * 
  * @author Lyneira
  */
-public class MachinaFactoryCore extends JavaPlugin {
+public class MachinaFactory extends JavaPlugin {
     final static Logger log = Logger.getLogger("Minecraft");
-    static MachinaFactoryCore plugin;
-    private MachinaCore machinaCore;
+    static MachinaFactory plugin;
+    static MachinaCore machinaCore;
 
     /**
      * Hashmap of the blueprint's class to its blueprint. This prevents

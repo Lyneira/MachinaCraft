@@ -1,9 +1,9 @@
-package me.lyneira.MachinaFactoryCore;
+package me.lyneira.MachinaFactory;
 
 import me.lyneira.MachinaCore.BlockLocation;
 
 /**
- * Thrown when a pipeline fails to find an endpoint, or fails to verify.
+ * Thrown when a pipeline failed to find an endpoint, or fails to verify.
  * 
  * @author Lyneira
  */

@@ -1,4 +1,4 @@
-package me.lyneira.MachinaFactoryCore;
+package me.lyneira.MachinaFactory;
 
 import me.lyneira.MachinaCore.Machina;
 import me.lyneira.MachinaCore.MachinaBlueprint;
