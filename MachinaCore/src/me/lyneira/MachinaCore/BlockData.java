@@ -1,5 +1,7 @@
 package me.lyneira.MachinaCore;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Random;
 
@@ -37,7 +39,7 @@ public final class BlockData {
      * @return The item stack resulting from the block break, or null if there
      *         is no drop
      */
-    public static final ItemStack breakBlock(final BlockLocation location) {
+    public static final Collection<ItemStack> breakBlock(final BlockLocation location) {
         Block block = location.getBlock();
         BlockData data;
         int blockType = block.getTypeId();
@@ -47,12 +49,16 @@ public final class BlockData {
             return null;
         }
         // Got a BlockMetaData, now determine what to drop
+
+        // Simplest case, ask bukkit
+        if (data.drop < 0) {
+            return block.getDrops();
+        }
+
         int item;
         byte dataValue;
         if (data.drop == 0) {
             return null;
-        } else if (data.drop < 0) {
-            item = blockType;
         } else {
             item = data.drop;
         }
@@ -71,7 +77,7 @@ public final class BlockData {
             amount = data.dropMin;
         }
         if (amount > 0) {
-            return new ItemStack(item, amount, (short) 0, new Byte(dataValue));
+            return Arrays.asList(new ItemStack[] { new ItemStack(item, amount, (short) 0, new Byte(dataValue)) });
         } else {
             return null;
         }
@@ -95,14 +101,14 @@ public final class BlockData {
 
     /**
      * What item Id will be dropped when this block is drilled. A value of 0
-     * means nothing will be dropped. A negative value means the broken block's
-     * typeId will be used.
+     * means nothing will be dropped. A negative value means the block will be
+     * broken as if a player had dug it.
      */
     private int drop = -1;
 
     /**
      * Metadata of the item to be dropped. A negative value means the broken
-     * block's data will be used.
+     * block's data will be used. Only used if drop is non-negative.
      */
     private int data = -1;
 
@@ -136,9 +142,9 @@ public final class BlockData {
     static {
         // The Big Scary Static Init of Everything Block Related...
 
-        set(Material.STONE.getId()).solid(true).drillable(true).drillTime(breakTimeMedium).drop(Material.COBBLESTONE.getId());
+        set(Material.STONE.getId()).solid(true).drillable(true).drillTime(breakTimeMedium);
 
-        set(Material.GRASS.getId()).solid(true).drillable(true).drillTime(breakTimeFast).drop(Material.DIRT.getId());
+        set(Material.GRASS.getId()).solid(true).drillable(true).drillTime(breakTimeFast);
 
         set(Material.DIRT.getId()).solid(true).drillable(true).drillTime(breakTimeFast);
 
@@ -166,19 +172,17 @@ public final class BlockData {
 
         set(Material.IRON_ORE.getId()).solid(true).drillable(true).drillTime(breakTimeSlow);
 
-        set(Material.COAL_ORE.getId()).solid(true).drillable(true).drillTime(breakTimeSlow).drop(Material.COAL.getId());
+        set(Material.COAL_ORE.getId()).solid(true).drillable(true).drillTime(breakTimeSlow);
 
         set(Material.LOG.getId()).solid(true).drillable(true).copyData(true).drillTime(breakTimeMedium);
 
-        // 1 in 20 chance to drop 1 sapling
-        set(Material.LEAVES.getId()).solid(true).drillable(true).copyData(true).drillTime(breakTimeFast).drop(Material.SAPLING.getId()).dropMin(-18).dropRandom(20);
+        set(Material.LEAVES.getId()).solid(true).drillable(true).copyData(true).drillTime(breakTimeFast);
 
         set(Material.SPONGE.getId()).solid(true).drillable(true).drillTime(breakTimeFast);
 
-        // Easter: Glass blocks can be recovered with a drill
         set(Material.GLASS.getId()).solid(true).drillable(true).drillTime(breakTimeFast);
 
-        set(Material.LAPIS_ORE.getId()).solid(true).drillable(true).drillTime(breakTimeSlow).drop(Material.INK_SACK.getId()).data(4).dropMin(4).dropRandom(4);
+        set(Material.LAPIS_ORE.getId()).solid(true).drillable(true).drillTime(breakTimeSlow);
 
         set(Material.LAPIS_BLOCK.getId()).solid(true).drillable(true).drillTime(breakTimeSlow);
 
@@ -190,18 +194,16 @@ public final class BlockData {
 
         set(Material.BED_BLOCK.getId()).copyData(true);
 
-        set(Material.POWERED_RAIL.getId()).drillable(true).data(0).copyData(true).attached(true);
+        set(Material.POWERED_RAIL.getId()).drillable(true).copyData(true).attached(true);
 
-        set(Material.DETECTOR_RAIL.getId()).drillable(true).data(0).copyData(true).attached(true);
+        set(Material.DETECTOR_RAIL.getId()).drillable(true).copyData(true).attached(true);
 
         set(Material.PISTON_STICKY_BASE.getId()).solid(true).copyData(true);
 
         set(Material.WEB.getId()).drillable(true).drillTime(breakTimeMedium);
 
-        // Drop seeds 1 in 8 chance
-        set(Material.LONG_GRASS.getId()).drillable(true).copyData(true).attached(true).drop(Material.SEEDS.getId()).dropMin(-6).drop(8).data(0);
+        set(Material.LONG_GRASS.getId()).drillable(true).copyData(true).attached(true);
 
-        // Easter: Drop dead bush
         set(Material.DEAD_BUSH.getId()).drillable(true).attached(true);
 
         set(Material.PISTON_BASE.getId()).solid(true).copyData(true);
@@ -222,7 +224,7 @@ public final class BlockData {
 
         set(Material.IRON_BLOCK.getId()).solid(true).drillable(true).drillTime(breakTimeIronDiamondBlock);
 
-        set(Material.DOUBLE_STEP.getId()).solid(true).drillable(true).copyData(true).drillTime(breakTimeMedium).drop(Material.STEP.getId()).dropMin(2);
+        set(Material.DOUBLE_STEP.getId()).solid(true).drillable(true).copyData(true).drillTime(breakTimeMedium);
 
         set(Material.STEP.getId()).solid(true).drillable(true).copyData(true).drillTime(breakTimeMedium);
 
@@ -230,15 +232,15 @@ public final class BlockData {
 
         set(Material.TNT.getId()).solid(true).drillable(true).drillTime(breakTimeFast);
 
-        set(Material.BOOKSHELF.getId()).solid(true).drillable(true).drillTime(breakTimeMedium).drop(Material.BOOK.getId()).dropMin(3);
+        set(Material.BOOKSHELF.getId()).solid(true).drillable(true).drillTime(breakTimeMedium);
 
         set(Material.MOSSY_COBBLESTONE.getId()).solid(true).drillable(true).drillTime(breakTimeMedium);
 
         set(Material.OBSIDIAN.getId()).solid(true).drillable(true).drillTime(breakTimeObsidian);
 
-        set(Material.TORCH.getId()).drillable(true).data(0).copyData(true).attached(true);
+        set(Material.TORCH.getId()).drillable(true).copyData(true).attached(true);
 
-        set(Material.FIRE.getId()).drillable(true).drop(0).copyData(true);
+        set(Material.FIRE.getId()).drillable(true).copyData(true);
 
         set(Material.MOB_SPAWNER.getId()).solid(true);
 
@@ -246,98 +248,96 @@ public final class BlockData {
 
         set(Material.CHEST.getId()).solid(true).copyData(true).inventory(true);
 
-        set(Material.REDSTONE_WIRE.getId()).drillable(true).attached(true).drop(Material.REDSTONE.getId()).data(0);
+        set(Material.REDSTONE_WIRE.getId()).drillable(true).attached(true);
 
-        set(Material.DIAMOND_ORE.getId()).drillable(true).solid(true).drillTime(breakTimeSlow).drop(Material.DIAMOND.getId());
+        set(Material.DIAMOND_ORE.getId()).drillable(true).solid(true).drillTime(breakTimeSlow);
 
         set(Material.DIAMOND_BLOCK.getId()).drillable(true).solid(true).drillTime(breakTimeIronDiamondBlock);
 
         set(Material.WORKBENCH.getId()).drillable(true).solid(true).drillTime(breakTimeMedium);
 
-        set(Material.CROPS.getId()).drillable(true).copyData(true).attached(true).drop(Material.SEEDS.getId()).data(0);
+        set(Material.CROPS.getId()).drillable(true).copyData(true).attached(true);
 
-        set(Material.SOIL.getId()).drillable(true).solid(true).copyData(true).drillTime(breakTimeFast).drop(Material.DIRT.getId()).data(0);
+        set(Material.SOIL.getId()).drillable(true).solid(true).copyData(true).drillTime(breakTimeFast);
 
         set(Material.FURNACE.getId()).solid(true).copyData(true).inventory(true);
 
         set(Material.BURNING_FURNACE.getId()).solid(true).copyData(true).inventory(true);
 
-        set(Material.SIGN_POST.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeMedium).drop(Material.SIGN.getId()).data(0);
+        set(Material.SIGN_POST.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeMedium);
 
         set(Material.WOODEN_DOOR.getId()).copyData(true).attached(true);
 
-        set(Material.LADDER.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeMedium).data(0);
+        set(Material.LADDER.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeMedium);
 
-        set(Material.RAILS.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeMedium).data(0);
+        set(Material.RAILS.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeMedium);
 
         set(Material.COBBLESTONE_STAIRS.getId()).drillable(true).solid(true).copyData(true).drillTime(breakTimeMedium);
 
-        set(Material.WALL_SIGN.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeMedium).drop(Material.SIGN.getId()).data(0);
+        set(Material.WALL_SIGN.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeMedium);
 
-        set(Material.LEVER.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeMedium).data(0);
+        set(Material.LEVER.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeMedium);
 
-        set(Material.STONE_PLATE.getId()).drillable(true).attached(true).drillTime(breakTimeMedium).data(0);
+        set(Material.STONE_PLATE.getId()).drillable(true).attached(true).drillTime(breakTimeMedium);
 
         set(Material.IRON_DOOR_BLOCK.getId()).copyData(true).attached(true);
 
-        set(Material.WOOD_PLATE.getId()).drillable(true).attached(true).drillTime(breakTimeMedium).data(0);
+        set(Material.WOOD_PLATE.getId()).drillable(true).attached(true).drillTime(breakTimeMedium);
 
-        set(Material.REDSTONE_ORE.getId()).drillable(true).solid(true).drillTime(breakTimeSlow).drop(Material.REDSTONE.getId()).data(0).dropMin(4).dropRandom(2);
+        set(Material.REDSTONE_ORE.getId()).drillable(true).solid(true).drillTime(breakTimeSlow);
 
-        set(Material.GLOWING_REDSTONE_ORE.getId()).drillable(true).solid(true).drillTime(breakTimeSlow).drop(Material.REDSTONE.getId()).data(0).dropMin(4).dropRandom(2);
+        set(Material.GLOWING_REDSTONE_ORE.getId()).drillable(true).solid(true).drillTime(breakTimeSlow);
 
-        set(Material.REDSTONE_TORCH_OFF.getId()).drillable(true).copyData(true).attached(true).drop(Material.REDSTONE_TORCH_ON.getId()).data(0);
+        set(Material.REDSTONE_TORCH_OFF.getId()).drillable(true).copyData(true).attached(true);
 
-        set(Material.REDSTONE_TORCH_ON.getId()).drillable(true).copyData(true).attached(true).data(0);
+        set(Material.REDSTONE_TORCH_ON.getId()).drillable(true).copyData(true).attached(true);
 
-        set(Material.STONE_BUTTON.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeMedium).data(0);
+        set(Material.STONE_BUTTON.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeMedium);
 
-        set(Material.SNOW.getId()).drillable(true).copyData(true).attached(true).drop(Material.SNOW_BALL.getId()).data(0);
+        set(Material.SNOW.getId()).drillable(true).copyData(true).attached(true);
 
-        set(Material.ICE.getId()).drillable(true).solid(true).drillTime(breakTimeMedium).drop(0);
+        set(Material.ICE.getId()).drillable(true).solid(true).drillTime(breakTimeMedium);
 
         set(Material.SNOW_BLOCK.getId()).drillable(true).solid(true).drillTime(breakTimeFast);
 
         // Cactus non-solid for the benefit of builder machina
-        set(Material.CACTUS.getId()).drillable(true).attached(true).drillTime(breakTimeFast).data(0);
+        set(Material.CACTUS.getId()).drillable(true).attached(true).drillTime(breakTimeFast);
 
-        set(Material.CLAY.getId()).drillable(true).solid(true).drillTime(breakTimeFast).drop(Material.CLAY_BALL.getId()).dropMin(4);
+        set(Material.CLAY.getId()).drillable(true).solid(true).drillTime(breakTimeFast);
 
-        set(Material.SUGAR_CANE_BLOCK.getId()).drillable(true).attached(true).drillTime(breakTimeFast).drop(Material.SUGAR_CANE.getId()).data(0);
+        set(Material.SUGAR_CANE_BLOCK.getId()).drillable(true).attached(true).drillTime(breakTimeFast);
 
         set(Material.JUKEBOX.getId()).solid(true).copyData(true);
 
         set(Material.FENCE.getId()).drillable(true).solid(true).drillTime(breakTimeMedium);
 
-        set(Material.PUMPKIN.getId()).drillable(true).solid(true).drillTime(breakTimeFast).data(0);
+        set(Material.PUMPKIN.getId()).drillable(true).solid(true).drillTime(breakTimeFast);
 
         set(Material.NETHERRACK.getId()).drillable(true).solid(true).drillTime(breakTimeNetherrack);
 
         set(Material.SOUL_SAND.getId()).drillable(true).solid(true).drillTime(breakTimeFast);
 
-        // Easter: Drop full Glowstone amount
-        set(Material.GLOWSTONE.getId()).drillable(true).solid(true).drillTime(breakTimeFast).drop(Material.GLOWSTONE_DUST.getId()).dropMin(4);
+        set(Material.GLOWSTONE.getId()).drillable(true).solid(true).drillTime(breakTimeFast);
 
-        set(Material.JACK_O_LANTERN.getId()).drillable(true).solid(true).copyData(true).drillTime(breakTimeFast).data(0);
+        set(Material.JACK_O_LANTERN.getId()).drillable(true).solid(true).copyData(true).drillTime(breakTimeFast);
 
-        // The cake is a lie!
-        set(Material.CAKE_BLOCK.getId()).drillable(true).drop(0).copyData(true).attached(true).drillTime(breakTimeFast);
+        set(Material.CAKE_BLOCK.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeFast);
 
-        set(Material.DIODE_BLOCK_OFF.getId()).drillable(true).copyData(true).attached(true).drop(Material.DIODE.getId()).data(0);
+        set(Material.DIODE_BLOCK_OFF.getId()).drillable(true).copyData(true).attached(true);
 
-        set(Material.DIODE_BLOCK_ON.getId()).drillable(true).copyData(true).attached(true).drop(Material.DIODE.getId()).data(0);
+        set(Material.DIODE_BLOCK_ON.getId()).drillable(true).copyData(true).attached(true);
 
         set(Material.LOCKED_CHEST.getId()).solid(true);
 
-        set(Material.TRAP_DOOR.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeFast).data(0);
+        set(Material.TRAP_DOOR.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeFast);
 
-        set(Material.MONSTER_EGGS.getId()).drillable(true).solid(true).copyData(true).drillTime(breakTimeMedium).drop(Material.COBBLESTONE.getId()).data(0);
+        set(Material.MONSTER_EGGS.getId()).drillable(true).solid(true).copyData(true).drillTime(breakTimeMedium);
 
         set(Material.SMOOTH_BRICK.getId()).drillable(true).solid(true).copyData(true).drillTime(breakTimeSlow);
 
-        set(Material.HUGE_MUSHROOM_1.getId()).drillable(true).solid(true).copyData(true).drillTime(breakTimeFast).drop(Material.BROWN_MUSHROOM.getId()).dropMin(-7).dropRandom(10);
+        set(Material.HUGE_MUSHROOM_1.getId()).drillable(true).solid(true).copyData(true).drillTime(breakTimeFast);
 
-        set(Material.HUGE_MUSHROOM_2.getId()).drillable(true).solid(true).copyData(true).drillTime(breakTimeFast).drop(Material.RED_MUSHROOM.getId()).dropMin(-7).dropRandom(10);
+        set(Material.HUGE_MUSHROOM_2.getId()).drillable(true).solid(true).copyData(true).drillTime(breakTimeFast);
 
         set(Material.IRON_FENCE.getId()).drillable(true).solid(true).drillTime(breakTimeFast);
 
@@ -345,19 +345,19 @@ public final class BlockData {
 
         set(Material.MELON_BLOCK.getId()).drillable(true).solid(true).drillTime(breakTimeFast);
 
-        set(Material.PUMPKIN_STEM.getId()).drillable(true).drop(0).copyData(true).attached(true);
+        set(Material.PUMPKIN_STEM.getId()).drillable(true).copyData(true).attached(true);
 
-        set(Material.MELON_STEM.getId()).drillable(true).drop(0).copyData(true).attached(true);
+        set(Material.MELON_STEM.getId()).drillable(true).copyData(true).attached(true);
 
-        set(Material.VINE.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeFast).data(0);
+        set(Material.VINE.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeFast);
 
-        set(Material.FENCE_GATE.getId()).drillable(true).solid(true).copyData(true).drillTime(breakTimeMedium).data(0);
+        set(Material.FENCE_GATE.getId()).drillable(true).solid(true).copyData(true).drillTime(breakTimeMedium);
 
         set(Material.BRICK_STAIRS.getId()).drillable(true).solid(true).copyData(true).drillTime(breakTimeSlow);
 
         set(Material.SMOOTH_STAIRS.getId()).drillable(true).solid(true).copyData(true).drillTime(breakTimeSlow);
 
-        set(Material.MYCEL.getId()).solid(true).drillable(true).drillTime(breakTimeFast).drop(Material.DIRT.getId());
+        set(Material.MYCEL.getId()).solid(true).drillable(true).drillTime(breakTimeFast);
 
         set(Material.WATER_LILY.getId()).drillable(true).drillTime(breakTimeFast);
 
@@ -367,7 +367,7 @@ public final class BlockData {
 
         set(Material.NETHER_BRICK_STAIRS.getId()).solid(true).drillable(true).copyData(true).drillTime(breakTimeSlow);
 
-        set(Material.NETHER_WARTS.getId()).drillable(true).copyData(true).drillTime(breakTimeFast).data(0);
+        set(Material.NETHER_WARTS.getId()).drillable(true).copyData(true).drillTime(breakTimeFast);
 
         set(Material.ENCHANTMENT_TABLE.getId()).solid(true).drillable(true).drillTime(breakTimeObsidian);
 
@@ -378,6 +378,7 @@ public final class BlockData {
         set(Material.ENDER_PORTAL.getId()).copyData(true);
 
         set(Material.ENDER_STONE.getId()).solid(true).drillable(true).drillTime(breakTimeSlow);
+        // TODO 1.2.3: Add redstone lamps
     }
 
     // Private setters to make the initialization look better.

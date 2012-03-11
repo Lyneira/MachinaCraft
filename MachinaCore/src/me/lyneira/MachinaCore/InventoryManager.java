@@ -1,5 +1,7 @@
 package me.lyneira.MachinaCore;
 
+import java.util.Collection;
+
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -38,6 +40,7 @@ public class InventoryManager {
 
     /**
      * Finds the first non-empty slot in the inventory.
+     * 
      * @return True if an item was found.
      */
     public boolean findFirst() {
@@ -99,7 +102,7 @@ public class InventoryManager {
         int durability = item.getDurability();
         for (int i = 0; i < contents.length; i++) {
             ItemStack currentItem = contents[i];
-            if (currentItem == null || currentItem.getTypeId() == 0) {
+            if (currentItem == null) {
                 return true;
             } else if (typeId == currentItem.getTypeId() && durability == currentItem.getDurability()) {
                 leftover = leftover - (currentItem.getMaxStackSize() - currentItem.getAmount());
@@ -109,6 +112,22 @@ public class InventoryManager {
             }
         }
         return false;
+    }
+
+    /**
+     * Tests whether the inventory has room for all of the given itemstacks.
+     * 
+     * @param items
+     * @return True if the inventory has room.
+     */
+    public boolean hasRoom(Collection<ItemStack> items) {
+        if (items == null)
+            return true;
+        for (ItemStack item : items) {
+            if (!hasRoom(item))
+                return false;
+        }
+        return true;
     }
 
     /**

@@ -1,5 +1,6 @@
 package me.lyneira.MachinaDrill;
 
+import java.util.Collection;
 import java.util.List;
 
 import me.lyneira.MachinaCore.BlockData;
@@ -10,6 +11,7 @@ import me.lyneira.MachinaCore.BlueprintBlock;
 import me.lyneira.MachinaCore.EventSimulator;
 import me.lyneira.MachinaCore.Fuel;
 import me.lyneira.MachinaCore.HeartBeatEvent;
+import me.lyneira.MachinaCore.InventoryManager;
 import me.lyneira.MachinaCore.Movable;
 
 import org.bukkit.Material;
@@ -19,7 +21,6 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Furnace;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -131,21 +132,23 @@ final class Drill extends Movable {
     private boolean doDrill(final BlockLocation anchor) {
         if (BlockData.isDrillable(nextTypeId)) {
             Block chestBlock = anchor.getRelative(chest.vector(yaw)).getBlock();
-            Inventory inventory = ((Chest) chestBlock.getState()).getInventory();
-            if (inventory.firstEmpty() < 0)
-                return false;
-
-            if (!EventSimulator.blockBreak(queuedTarget, player))
+            
+            InventoryManager manager = new InventoryManager(((Chest) chestBlock.getState()).getInventory());
+            Collection<ItemStack> results = BlockData.breakBlock(queuedTarget);
+            
+            if (!manager.hasRoom(results))
                 return false;
 
             if (!useEnergy(anchor, BlockData.getDrillTime(nextTypeId)))
                 return false;
 
-            ItemStack item = BlockData.breakBlock(queuedTarget);
+            if (!EventSimulator.blockBreak(queuedTarget, player))
+                return false;
+
             queuedTarget.setEmpty();
             // Put item in the container
-            if (item != null) {
-                inventory.addItem(item);
+            if (results != null) {
+                manager.inventory.addItem(results.toArray(new ItemStack[results.size()]));
             }
         }
         return true;

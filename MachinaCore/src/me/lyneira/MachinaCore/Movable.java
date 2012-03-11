@@ -4,6 +4,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -14,6 +15,7 @@ import org.bukkit.inventory.ItemStack;
  * @author Lyneira
  */
 public abstract class Movable implements Machina {
+    private static final Material[] emptyTypes = new Material[] { Material.AIR, Material.SNOW, Material.LONG_GRASS };
     protected final MovableBlueprint blueprint;
     private final List<Integer> modules;
     private final int moduleCount;
@@ -110,7 +112,7 @@ public abstract class Movable implements Machina {
      */
     protected boolean detectCollision(final BlockLocation oldAnchor, final BlockFace face) {
         for (BlockVector i : getDifference(face).plus) {
-            if (!oldAnchor.getRelative(i).isEmpty()) {
+            if (!oldAnchor.getRelative(i).checkTypes(emptyTypes)) {
                 return true;
             }
         }
@@ -119,7 +121,8 @@ public abstract class Movable implements Machina {
 
     /**
      * Detects whether a collision would happen if this movable were to teleport
-     * to the given location. This function assumes both locations are in the same world.
+     * to the given location. This function assumes both locations are in the
+     * same world.
      * 
      * @param oldAnchor
      *            {@link BlockLocation} of the old anchor.
@@ -147,7 +150,7 @@ public abstract class Movable implements Machina {
     protected boolean detectCollisionTeleport(final BlockLocation oldAnchor, final BlockVector teleportBy) {
         BlockVector[] teleportDifference = BlueprintDifference.teleportDifference(unifiedVectors, size, teleportBy);
         for (BlockVector i : teleportDifference) {
-            if (!oldAnchor.getRelative(i).isEmpty()) {
+            if (!oldAnchor.getRelative(i).checkTypes(emptyTypes)) {
                 return true;
             }
         }
@@ -168,7 +171,7 @@ public abstract class Movable implements Machina {
     protected boolean detectCollisionRotate(final BlockLocation anchor, final BlockRotation rotateBy) {
         BlockVector[] rotateDifference = BlueprintDifference.rotateDifference(unifiedVectors, size, rotateBy);
         for (BlockVector i : rotateDifference) {
-            if (!anchor.getRelative(i).isEmpty()) {
+            if (!anchor.getRelative(i).checkTypes(emptyTypes)) {
                 return true;
             }
         }
@@ -341,9 +344,10 @@ public abstract class Movable implements Machina {
     protected boolean canPlace(BlockLocation target, int typeId, BlockLocation placedAgainst) {
         return EventSimulator.blockPlace(target, typeId, placedAgainst, player);
     }
-    
+
     /**
      * Checks if the given module id is active for this machina.
+     * 
      * @param id
      * @return True if the module is active.
      */

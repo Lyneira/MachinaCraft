@@ -1,6 +1,7 @@
 package me.lyneira.MachinaBuilder;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -47,7 +48,7 @@ public class Builder extends Movable {
      * The maximum depth to which the Builder will drop blocks.
      */
     private static int maxDepth = 6;
-    
+
     /**
      * Whether the builder should use energy.
      */
@@ -224,9 +225,10 @@ public class Builder extends Movable {
         Block furnaceBlock = anchor.getRelative(furnace.vector(yaw)).getBlock();
         Fuel.setFurnace(furnaceBlock, yaw.getOpposite(), burning);
     }
-    
+
     /**
      * Sets a chest facing backwards.
+     * 
      * @param anchor
      */
     void setChest(final BlockLocation anchor, final BlueprintBlock chest) {
@@ -266,8 +268,8 @@ public class Builder extends Movable {
                 if (!BlockData.isDrillable(typeId))
                     continue;
 
-                ItemStack brokenItem = BlockData.breakBlock(target);
-                if (!outputManager.hasRoom(brokenItem))
+                Collection<ItemStack> results = BlockData.breakBlock(target);
+                if (!outputManager.hasRoom(results))
                     continue;
 
                 if (!inputManager.find(isBuildingBlock))
@@ -278,9 +280,10 @@ public class Builder extends Movable {
 
                 if (!EventSimulator.blockBreak(target, player))
                     return null;
+
                 target.setEmpty();
-                if (brokenItem != null)
-                    outputManager.inventory.addItem(brokenItem);
+                if (results != null)
+                    outputManager.inventory.addItem(results.toArray(new ItemStack[results.size()]));
 
                 ItemStack replacementItem = inputManager.get();
                 typeId = replacementItem.getTypeId();
@@ -389,7 +392,8 @@ public class Builder extends Movable {
                     BlockLocation target = it.next().getRelative(down, i);
                     if (validBuildLocation(target)) {
                         BlockLocation ground = target.getRelative(down);
-                        // A potential target must have ground beneath it to place on.
+                        // A potential target must have ground beneath it to
+                        // place on.
                         if (validPlaceAgainst(ground)) {
                             if (i == depth) {
                                 targets.add(target);
@@ -429,7 +433,7 @@ public class Builder extends Movable {
         @Override
         public Stage run(BlockLocation anchor) {
             // Check if a sign pointing left or right is present and rotate.
-            BlockRotation signRotation = readRotationSign(anchor); 
+            BlockRotation signRotation = readRotationSign(anchor);
 
             // Check for ground at the new base
             BlockFace face = yaw.getYawFace();
@@ -492,7 +496,7 @@ public class Builder extends Movable {
             manager.decrement();
             target.setTypeId(typeId);
         }
-        
+
         private BlockRotation readRotationSign(BlockLocation anchor) {
             BlockLocation signLocation = anchor.getRelative(Blueprint.primaryHead.vector(yaw).add(yaw.getYawVector(), 2));
             if (!signLocation.checkTypes(Material.SIGN_POST, Material.SIGN))
@@ -560,6 +564,7 @@ public class Builder extends Movable {
 
     /**
      * Loads the given configuration.
+     * 
      * @param configuration
      */
     static void loadConfiguration(ConfigurationSection configuration) {

@@ -11,8 +11,8 @@
 #     solid: <boolean> - default: false - Whether the block is solid, meaning a machina could rest on it.
 #     drillable: <boolean> - default: false - Whether the block can be drilled.
 #     drillTime: <integer> - default: 1 - The number of ticks it takes to drill this block.
-#     drop: <integer> - default: -1 - The item id to drop when this block is broken. Default is to use the block's own id, a value of 0 means drop nothing.
-#     data: <integer> - default: -1 - The data value to set for the item dropped. Default is to use the block's data value.
+#     drop: <integer> - default: -1 - The item id to drop when this block is broken. Default is to break the block as if a player had dug it.
+#     data: <integer> - default: -1 - The data value to set for the item dropped. Only used if drop is non-negative. Default is to use the block's data value.
 #     dropMin: <integer> - default: 1 - The minimum amount to drop. If less than 1, nothing will be dropped unless dropRandom causes the result to be above 0.
 #     dropRandom: <integer> - default: 0 - A random amount (0 to dropRandom-1) to add to dropMin.
 #     copyData: <boolean> - default: false - (ADVANCED) Whether to preserve the block's data value when moving as part of a machina.
