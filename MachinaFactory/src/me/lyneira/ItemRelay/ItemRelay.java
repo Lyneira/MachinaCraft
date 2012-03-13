@@ -24,7 +24,7 @@ import org.bukkit.inventory.ItemStack;
  * 
  * @author Lyneira
  */
-class ItemRelay extends Component implements PipelineEndpoint {
+public class ItemRelay extends Component implements PipelineEndpoint {
 
     private static final int delay = 20;
 

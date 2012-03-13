@@ -20,7 +20,7 @@ import me.lyneira.MachinaFactory.ComponentDetectException;
  * 
  * @author Lyneira
  */
-class Blueprint implements MachinaBlueprint {
+public class Blueprint implements MachinaBlueprint {
     static final Material anchorMaterial = Material.BRICK;
     final BlueprintBlock chest;
     final BlueprintBlock sender;
@@ -30,7 +30,7 @@ class Blueprint implements MachinaBlueprint {
      * The blueprints for the base, inactive and active states are specified
      * here.
      */
-    Blueprint() {
+    public Blueprint() {
         BlueprintBlock[] blueprintBase = { new BlueprintBlock(new BlockVector(0, 0, 0), anchorMaterial, true), //
                 chest = new BlueprintBlock(new BlockVector(-1, 0, 0), Material.CHEST, true), //
         };

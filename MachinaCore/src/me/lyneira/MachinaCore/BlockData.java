@@ -378,7 +378,10 @@ public final class BlockData {
         set(Material.ENDER_PORTAL.getId()).copyData(true);
 
         set(Material.ENDER_STONE.getId()).solid(true).drillable(true).drillTime(breakTimeSlow);
-        // TODO 1.2.3: Add redstone lamps
+        
+        set(Material.REDSTONE_LAMP_OFF.getId()).solid(true).drillable(true).drillTime(breakTimeFast);
+        
+        set(Material.REDSTONE_LAMP_ON.getId()).solid(true).drillable(true).drillTime(breakTimeFast);
     }
 
     // Private setters to make the initialization look better.

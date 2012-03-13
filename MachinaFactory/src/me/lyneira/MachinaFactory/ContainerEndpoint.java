@@ -46,7 +46,9 @@ public class ContainerEndpoint implements PipelineEndpoint {
     }
 
     /**
-     * Handles an inventory, transferring the first item from it to this container.
+     * Handles an inventory, transferring the first item from it to this
+     * container.
+     * 
      * @param inventory
      * @return True if an item was transferred.
      */
@@ -68,7 +70,7 @@ public class ContainerEndpoint implements PipelineEndpoint {
         }
         return false;
     }
-    
+
     /**
      * Listener for item stacks.
      */
@@ -83,7 +85,7 @@ public class ContainerEndpoint implements PipelineEndpoint {
             return ItemStack.class;
         }
     };
-    
+
     /**
      * Listener for inventories.
      */
@@ -100,7 +102,7 @@ public class ContainerEndpoint implements PipelineEndpoint {
     };
 
     private static final PacketHandler handler = new PacketHandler(itemStackListener, inventoryListener);
-    
+
     @Override
     public PacketHandler getHandler() {
         return handler;

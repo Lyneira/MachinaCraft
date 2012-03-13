@@ -42,6 +42,9 @@ public class MachinaFactory extends JavaPlugin {
         log.info(pdf.getName() + " version " + pdf.getVersion() + " is now enabled.");
 
         machinaCore = (MachinaCore) getServer().getPluginManager().getPlugin("MachinaCore");
+
+        // Enable built-in components.
+        registerFactoryBlueprint(new me.lyneira.ItemRelay.Blueprint(), me.lyneira.ItemRelay.ItemRelay.class, true);
     }
 
     @Override
@@ -56,11 +59,12 @@ public class MachinaFactory extends JavaPlugin {
                 machinaCore.unRegisterBlueprint(blueprint.blueprint);
             it.remove();
         }
+        endpointBlueprints.clear();
     }
 
     /**
-     * Registers a {@link MachinaBlueprint} with MachinaFactoryCore. If
-     * it is lever-activatable, it will also be registered with MachinaCore.
+     * Registers a {@link MachinaBlueprint} with MachinaFactoryCore. If it is
+     * lever-activatable, it will also be registered with MachinaCore.
      * 
      * @param blueprint
      */
@@ -90,17 +94,20 @@ public class MachinaFactory extends JavaPlugin {
                 endpointBlueprints.remove(blueprint.getClass());
         }
     }
-    
+
     /**
      * Attempts to detect an endpoint at the given location and returns it.
-     * @param player The player activating this machina
-     * @param location The location to detect at
+     * 
+     * @param player
+     *            The player activating this machina
+     * @param location
+     *            The location to detect at
      * @return A PipelineEndpoint if successful, null otherwise.
      */
     PipelineEndpoint detectEndpoint(Player player, BlockLocation location) {
         Machina detectedMachina = machinaCore.detectMachina(endpointBlueprints.values().iterator(), player, location);
         if (detectedMachina == null)
-             return null;
+            return null;
         if (detectedMachina instanceof PipelineEndpoint)
             return (PipelineEndpoint) detectedMachina;
         return null;
