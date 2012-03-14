@@ -19,6 +19,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Furnace;
+import org.bukkit.block.Sign;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -34,7 +35,7 @@ final class Drill extends Movable {
      * The number of server ticks to wait for a move action.
      */
     private static int moveDelay = 20;
-    
+
     /**
      * Whether the drill should use energy.
      */
@@ -61,7 +62,7 @@ final class Drill extends Movable {
      * The typeId of the next target location.
      */
     private int nextTypeId;
-    
+
     private BlockFace direction;
     private final BlueprintBlock chest;
     private final BlueprintBlock head;
@@ -85,10 +86,10 @@ final class Drill extends Movable {
         this.chest = chest;
         this.head = head;
         this.furnace = furnace;
-        if(hasModule(Blueprint.mainModule)) {
+        if (hasModule(Blueprint.mainModule)) {
             drillPattern = Blueprint.horizontalDrillPattern.get(yaw);
             direction = yaw.getYawFace();
-        } else if(hasModule(Blueprint.verticalModule)) {
+        } else if (hasModule(Blueprint.verticalModule)) {
             drillPattern = Blueprint.verticalDrillPattern;
             direction = BlockFace.DOWN;
         }
@@ -132,10 +133,10 @@ final class Drill extends Movable {
     private boolean doDrill(final BlockLocation anchor) {
         if (BlockData.isDrillable(nextTypeId)) {
             Block chestBlock = anchor.getRelative(chest.vector(yaw)).getBlock();
-            
+
             InventoryManager manager = new InventoryManager(((Chest) chestBlock.getState()).getInventory());
             Collection<ItemStack> results = BlockData.breakBlock(queuedTarget);
-            
+
             if (!manager.hasRoom(results))
                 return false;
 
@@ -163,9 +164,12 @@ final class Drill extends Movable {
      * @return The new anchor location of the Drill, or null on failure.
      */
     private BlockLocation doMove(final BlockLocation anchor) {
+        // Check if a sign pointing left or right is present and rotate.
+        BlockRotation signRotation = readRotationSign(anchor);
+
         BlockLocation newAnchor = anchor.getRelative(direction);
         // For horizontal drills, check for ground at the new base
-        if(direction != BlockFace.DOWN){
+        if (direction != BlockFace.DOWN) {
             BlockLocation ground = newAnchor.getRelative(Blueprint.centralBase.vector(yaw).add(BlockFace.DOWN));
             if (!BlockData.isSolid(ground.getTypeId())) {
                 return null;
@@ -190,6 +194,10 @@ final class Drill extends Movable {
 
         // Okay to move.
         moveByFace(anchor, direction);
+
+        if (signRotation != null) {
+            doRotate(newAnchor, signRotation);
+        }
 
         return newAnchor;
     }
@@ -317,9 +325,10 @@ final class Drill extends Movable {
         Block furnaceBlock = anchor.getRelative(furnace.vector(yaw)).getBlock();
         Fuel.setFurnace(furnaceBlock, yaw.getOpposite(), burning);
     }
-    
+
     /**
      * Sets the drill's chest facing backwards.
+     * 
      * @param anchor
      */
     void setChest(final BlockLocation anchor) {
@@ -327,9 +336,26 @@ final class Drill extends Movable {
         if (chestBlock.getType() == Material.CHEST)
             chestBlock.setData(yaw.getOpposite().getYawData());
     }
-    
+
+    private BlockRotation readRotationSign(BlockLocation anchor) {
+        BlockLocation signLocation = anchor.getRelative(Blueprint.centralBase.vector(yaw).add(yaw.getYawVector(), 3));
+        if (!signLocation.checkTypes(Material.SIGN_POST, Material.SIGN))
+            return null;
+        String[] lines = ((Sign) signLocation.getBlock().getState()).getLines();
+        for (String s : lines) {
+            if (s == null)
+                continue;
+            if (s.equals("->") || s.toLowerCase().equals("right"))
+                return yaw.getRight();
+            if (s.equals("<-") || s.toLowerCase().equals("left"))
+                return yaw.getLeft();
+        }
+        return null;
+    }
+
     /**
      * Loads the given configuration.
+     * 
      * @param configuration
      */
     static void loadConfiguration(ConfigurationSection configuration) {
