@@ -132,4 +132,16 @@ public class EventSimulator {
         }
         return false;
     }
+    
+    /**
+     * Tests whether the inventory in this block is protected from the player.
+     * @param player The player to simulate for
+     * @param target The target block
+     * @return False if and only if the player may interact with and break the given block. True otherwise.
+     */
+    public static boolean inventoryProtected(Player player, BlockLocation target) {
+        if (!(blockRightClick(target, player, BlockFace.NORTH) && blockBreak(target, player)))
+            return true;
+        return false;
+    }
 }

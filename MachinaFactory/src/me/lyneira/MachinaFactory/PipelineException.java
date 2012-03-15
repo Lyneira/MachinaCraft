@@ -10,24 +10,24 @@ import me.lyneira.MachinaCore.BlockLocation;
 public class PipelineException extends Exception {
 
     private static final long serialVersionUID = -719552834534112022L;
-    public final BlockLocation source;
+    public final BlockLocation location;
 
-    PipelineException(BlockLocation source) {
-        this.source = source;
+    PipelineException(BlockLocation location) {
+        this.location = location;
     }
     
-    PipelineException(BlockLocation source, String message) {
+    PipelineException(BlockLocation location, String message) {
         super(message);
-        this.source = source;
+        this.location = location;
     }
     
-    PipelineException(BlockLocation source, Throwable cause) {
+    PipelineException(BlockLocation location, Throwable cause) {
         super(cause);
-        this.source = source;
+        this.location = location;
     }
     
-    PipelineException(BlockLocation source, String message, Throwable cause) {
+    PipelineException(BlockLocation location, String message, Throwable cause) {
         super(message, cause);
-        this.source = source;
+        this.location = location;
     }
 }

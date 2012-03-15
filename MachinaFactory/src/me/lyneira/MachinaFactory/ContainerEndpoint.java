@@ -1,10 +1,12 @@
 package me.lyneira.MachinaFactory;
 
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
 import me.lyneira.MachinaCore.BlockLocation;
+import me.lyneira.MachinaCore.EventSimulator;
 import me.lyneira.MachinaCore.InventoryManager;
 
 /**
@@ -16,8 +18,11 @@ public class ContainerEndpoint implements PipelineEndpoint {
 
     private final BlockLocation location;
 
-    ContainerEndpoint(BlockLocation location) {
+    ContainerEndpoint(Player player, BlockLocation location) throws PipelineException {
         this.location = location;
+
+        if (EventSimulator.inventoryProtected(player, location))
+            throw new PipelineException(location);
     }
 
     @Override
@@ -37,6 +42,9 @@ public class ContainerEndpoint implements PipelineEndpoint {
      * @return True if there was room for the item stack.
      */
     boolean handle(ItemStack item) {
+        if (item == null)
+            return false;
+
         InventoryManager manager = new InventoryManager(((InventoryHolder) location.getBlock().getState()).getInventory());
         if (manager.hasRoom(item)) {
             manager.inventory.addItem(item);
@@ -53,6 +61,9 @@ public class ContainerEndpoint implements PipelineEndpoint {
      * @return True if an item was transferred.
      */
     boolean handle(Inventory inventory) {
+        if (inventory == null)
+            return false;
+
         Inventory myInventory = (((InventoryHolder) location.getBlock().getState()).getInventory());
         if (inventory.equals(myInventory))
             return false;

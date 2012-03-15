@@ -31,7 +31,11 @@ class TargetNode extends PipelineNode {
             return null;
         case CHEST:
         case DISPENSER:
-            return new ContainerEndpoint(location);
+            try {
+                return new ContainerEndpoint(player, location);
+            } catch (PipelineException e) {
+                return null;
+            }
         }
         if (location.equals(anchor))
             return null;

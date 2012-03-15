@@ -19,7 +19,6 @@ import me.lyneira.MachinaCore.Movable;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.Chest;
 import org.bukkit.block.Furnace;
 import org.bukkit.block.Sign;
 import org.bukkit.configuration.ConfigurationSection;
@@ -258,8 +257,8 @@ public class Builder extends Movable {
         public Stage run(BlockLocation anchor) {
             Block inputBlock = anchor.getRelative(Blueprint.chest.vector(yaw)).getBlock();
             Block outputBlock = anchor.getRelative(Blueprint.chestRoad.vector(yaw)).getBlock();
-            InventoryManager inputManager = new InventoryManager(((Chest) inputBlock.getState()).getInventory());
-            InventoryManager outputManager = new InventoryManager(((Chest) outputBlock.getState()).getInventory());
+            InventoryManager inputManager = new InventoryManager(InventoryManager.getSafeInventory(inputBlock));
+            InventoryManager outputManager = new InventoryManager(InventoryManager.getSafeInventory(outputBlock));
 
             Iterator<BlockLocation> targetIterator = targets.iterator();
             while (targetIterator.hasNext()) {
@@ -302,7 +301,7 @@ public class Builder extends Movable {
             BlockVector down = new BlockVector(BlockFace.DOWN);
             int time = 0;
             Block inputBlock = anchor.getRelative(Blueprint.chest.vector(yaw)).getBlock();
-            InventoryManager manager = new InventoryManager(((Chest) inputBlock.getState()).getInventory());
+            InventoryManager manager = new InventoryManager(InventoryManager.getSafeInventory(inputBlock));
 
             if (!manager.find(isBuildingBlock)) {
                 stage = buildStage;
@@ -338,7 +337,7 @@ public class Builder extends Movable {
         @Override
         public Stage run(BlockLocation anchor) {
             Block chestBlock = anchor.getRelative(Blueprint.chest.vector(yaw)).getBlock();
-            InventoryManager manager = new InventoryManager(((Chest) chestBlock.getState()).getInventory());
+            InventoryManager manager = new InventoryManager(InventoryManager.getSafeInventory(chestBlock));
 
             Iterator<BlockLocation> targetIterator = targets.iterator();
             while (targetIterator.hasNext()) {
@@ -483,7 +482,7 @@ public class Builder extends Movable {
                 return;
 
             Block chestBlock = anchor.getRelative(Blueprint.chest.vector(yaw)).getBlock();
-            InventoryManager manager = new InventoryManager(((Chest) chestBlock.getState()).getInventory());
+            InventoryManager manager = new InventoryManager(InventoryManager.getSafeInventory(chestBlock));
 
             if (!manager.find(isRail))
                 return;

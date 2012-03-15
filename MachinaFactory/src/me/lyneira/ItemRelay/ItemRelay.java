@@ -30,16 +30,21 @@ public class ItemRelay extends Component implements PipelineEndpoint {
 
     private final Blueprint blueprint;
     private final Pipeline pipeline;
+    private final Player player;
 
     ItemRelay(Blueprint blueprint, BlockRotation yaw, Player player, BlockLocation anchor, BlockFace leverFace) throws ComponentActivateException, ComponentDetectException {
         super(blueprint.blueprint, anchor, yaw);
         this.blueprint = blueprint;
+        this.player = player;
         BlockLocation sender = sender();
         pipeline = new Pipeline(anchor, player, sender);
     }
 
     @Override
     public HeartBeatEvent heartBeat(BlockLocation anchor) {
+        if (!player.isOnline())
+            return null;
+
         state = state.run();
         if (state == null)
             return null;
@@ -56,6 +61,9 @@ public class ItemRelay extends Component implements PipelineEndpoint {
     }
 
     boolean handle(ItemStack item) {
+        if (item == null)
+            return false;
+
         grace = 0;
         InventoryManager manager = new InventoryManager(((InventoryHolder) chest().getBlock().getState()).getInventory());
         if (manager.hasRoom(item)) {
@@ -66,6 +74,9 @@ public class ItemRelay extends Component implements PipelineEndpoint {
     }
 
     boolean handle(Inventory inventory) {
+        if (inventory == null)
+            return false;
+
         grace = 0;
         Inventory myInventory = (((InventoryHolder) chest().getBlock().getState()).getInventory());
         if (inventory.equals(myInventory))

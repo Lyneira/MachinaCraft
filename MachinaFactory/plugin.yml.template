@@ -1,6 +1,17 @@
 name: MachinaFactory
 version: @VERSION@
-description: A MachinaCraft framework for factory components.
+description: A MachinaCraft framework that allows machina to send each other objects through a pipeline.
 author: Lyneira
 main: me.lyneira.MachinaFactory.MachinaFactory
 depend: [MachinaCore]
+permissions:
+    machinafactory.*:
+        children:
+            machinafactory.all: true
+    machinafactory.all:
+        description: Gives full access to MachinaFactory's item machina
+        children:
+            machinafactory.itemrelay: true
+    machinafactory.itemrelay:
+        description: Allows use of an Item Relay
+        default: op

@@ -16,7 +16,6 @@ import me.lyneira.MachinaCore.Movable;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Furnace;
 import org.bukkit.block.Sign;
@@ -133,8 +132,8 @@ final class Drill extends Movable {
     private boolean doDrill(final BlockLocation anchor) {
         if (BlockData.isDrillable(nextTypeId)) {
             Block chestBlock = anchor.getRelative(chest.vector(yaw)).getBlock();
-
-            InventoryManager manager = new InventoryManager(((Chest) chestBlock.getState()).getInventory());
+            
+            InventoryManager manager = new InventoryManager(InventoryManager.getSafeInventory(chestBlock));
             Collection<ItemStack> results = BlockData.breakBlock(queuedTarget);
 
             if (!manager.hasRoom(results))

@@ -5,10 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
-import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -114,7 +111,7 @@ class BlueprintModule {
         ItemStack[][] result = new ItemStack[inventoryIndices.length][];
         for (int i = 0; i < inventoryIndices.length; i++) {
             Block block = anchor.getRelative(vectors[inventoryIndices[i]]).getBlock();
-            Inventory inventory = getSafeInventory(block);
+            Inventory inventory = InventoryManager.getSafeInventory(block);
             result[i] = inventory.getContents();
             inventory.clear();
         }
@@ -134,7 +131,7 @@ class BlueprintModule {
         BlockVector[] vectors = blueprintVectors.get(yaw);
         for (int i = 0; i < inventoryIndices.length; i++) {
             Block block = anchor.getRelative(vectors[inventoryIndices[i]]).getBlock();
-            Inventory inventory = getSafeInventory(block);
+            Inventory inventory = InventoryManager.getSafeInventory(block);
             inventory.setContents(inventories[i]);
         }
     }
@@ -193,24 +190,5 @@ class BlueprintModule {
             }
         }
         return result;
-    }
-    
-    /**
-     * Returns the inventory belonging only to the given block, filtering out double inventories.
-     * @return The inventory for the given block.
-     */
-    private Inventory getSafeInventory(Block block) {
-        Inventory inventory = ((InventoryHolder) block.getState()).getInventory();
-        if (inventory instanceof DoubleChestInventory) {
-            DoubleChestInventory doubleChest = (DoubleChestInventory) inventory;
-            Inventory left = doubleChest.getLeftSide();
-            if (((BlockState) doubleChest.getLeftSide().getHolder()).getBlock().equals(block)) {
-                return left;
-            } else {
-                return doubleChest.getRightSide();
-            }
-        } else {
-            return inventory;
-        }
     }
 }

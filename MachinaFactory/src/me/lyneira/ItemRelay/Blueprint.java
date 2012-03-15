@@ -9,6 +9,7 @@ import me.lyneira.MachinaCore.BlockLocation;
 import me.lyneira.MachinaCore.BlockRotation;
 import me.lyneira.MachinaCore.BlockVector;
 import me.lyneira.MachinaCore.BlueprintBlock;
+import me.lyneira.MachinaCore.EventSimulator;
 import me.lyneira.MachinaCore.Machina;
 import me.lyneira.MachinaCore.MachinaBlueprint;
 import me.lyneira.MachinaFactory.ComponentActivateException;
@@ -59,6 +60,14 @@ public class Blueprint implements MachinaBlueprint {
         }
 
         if (yaw == null)
+            return null;
+
+        if (!player.hasPermission("machinafactory.itemrelay")) {
+            player.sendMessage("You do not have permission to activate an item relay.");
+            return null;
+        }
+
+        if (EventSimulator.inventoryProtected(player, anchor.getRelative(yaw.getOpposite().getYawFace())))
             return null;
 
         try {

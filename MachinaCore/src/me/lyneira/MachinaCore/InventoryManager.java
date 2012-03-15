@@ -2,7 +2,11 @@ package me.lyneira.MachinaCore;
 
 import java.util.Collection;
 
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
 import com.google.common.base.Predicate;
@@ -153,5 +157,27 @@ public class InventoryManager {
      */
     public void clear() {
         inventory.clear(index);
+    }
+
+    /**
+     * Returns the inventory belonging only to the given block, filtering out
+     * double inventories. Does not check whether the given block has an
+     * inventory.
+     * 
+     * @return The inventory for the given block.
+     */
+    public static Inventory getSafeInventory(Block block) {
+        Inventory inventory = ((InventoryHolder) block.getState()).getInventory();
+        if (inventory instanceof DoubleChestInventory) {
+            DoubleChestInventory doubleChest = (DoubleChestInventory) inventory;
+            Inventory left = doubleChest.getLeftSide();
+            if (((BlockState) doubleChest.getLeftSide().getHolder()).getBlock().equals(block)) {
+                return left;
+            } else {
+                return doubleChest.getRightSide();
+            }
+        } else {
+            return inventory;
+        }
     }
 }
