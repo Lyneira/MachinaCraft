@@ -13,7 +13,6 @@ import me.lyneira.MachinaFactory.Pipeline;
 import me.lyneira.MachinaFactory.PipelineEndpoint;
 import me.lyneira.MachinaFactory.PipelineException;
 
-import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -32,12 +31,11 @@ public class ItemRelay extends Component implements PipelineEndpoint {
     private final Pipeline pipeline;
     private final Player player;
 
-    ItemRelay(Blueprint blueprint, BlockRotation yaw, Player player, BlockLocation anchor, BlockFace leverFace) throws ComponentActivateException, ComponentDetectException {
+    ItemRelay(Blueprint blueprint, BlockRotation yaw, Player player, BlockLocation anchor) throws ComponentActivateException, ComponentDetectException {
         super(blueprint.blueprint, anchor, yaw);
         this.blueprint = blueprint;
         this.player = player;
-        BlockLocation sender = sender();
-        pipeline = new Pipeline(anchor, player, sender);
+        pipeline = new Pipeline(anchor, player, sender());
     }
 
     @Override
@@ -52,11 +50,11 @@ public class ItemRelay extends Component implements PipelineEndpoint {
         return new HeartBeatEvent(delay);
     }
 
-    BlockLocation chest() {
+    private final BlockLocation chest() {
         return anchor.getRelative(blueprint.chest.vector(yaw));
     }
 
-    BlockLocation sender() {
+    private final BlockLocation sender() {
         return anchor.getRelative(blueprint.sender.vector(yaw));
     }
 

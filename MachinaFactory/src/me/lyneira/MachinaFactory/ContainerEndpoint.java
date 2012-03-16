@@ -14,7 +14,7 @@ import me.lyneira.MachinaCore.InventoryManager;
  * 
  * @author Lyneira
  */
-public class ContainerEndpoint implements PipelineEndpoint {
+class ContainerEndpoint implements PipelineEndpoint {
 
     private final BlockLocation location;
 

@@ -20,7 +20,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author Lyneira
  */
 public class MachinaFactory extends JavaPlugin {
-    final static Logger log = Logger.getLogger("Minecraft");
+    private final static Logger log = Logger.getLogger("Minecraft");
     static MachinaFactory plugin;
     static MachinaCore machinaCore;
 
@@ -45,6 +45,7 @@ public class MachinaFactory extends JavaPlugin {
 
         // Enable built-in components.
         registerFactoryBlueprint(new me.lyneira.ItemRelay.Blueprint(), me.lyneira.ItemRelay.ItemRelay.class, true);
+        registerFactoryBlueprint(new me.lyneira.Fabricator.Blueprint(this), me.lyneira.Fabricator.Fabricator.class, false);
     }
 
     @Override
@@ -111,5 +112,13 @@ public class MachinaFactory extends JavaPlugin {
         if (detectedMachina instanceof PipelineEndpoint)
             return (PipelineEndpoint) detectedMachina;
         return null;
+    }
+    
+    /**
+     * Sends an informational message to the server log.
+     * @param message
+     */
+    public static void log(String message) {
+        log.info("MachinaFactory: " + message);
     }
 }
