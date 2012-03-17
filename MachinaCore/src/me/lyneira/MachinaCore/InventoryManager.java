@@ -1,7 +1,5 @@
 package me.lyneira.MachinaCore;
 
-import java.util.Collection;
-
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.inventory.DoubleChestInventory;
@@ -12,7 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import com.google.common.base.Predicate;
 
 /**
- * Class for processing of an Inventory. Maintains a cursor to the current
+ * Class for processing of an Inventory one item at a time. Maintains a cursor to the current
  * {@link ItemStack}, starting at the first slot. The cursor can be manipulated
  * by the find function.
  * 
@@ -88,50 +86,6 @@ public class InventoryManager {
 
         item.setAmount(item.getAmount() - 1);
         inventory.setItem(index, item);
-    }
-
-    /**
-     * Tests whether the inventory has room for the given itemstack.
-     * 
-     * @param item
-     * @return True if the inventory has room.
-     */
-    public boolean hasRoom(ItemStack item) {
-        if (item == null || item.getTypeId() == 0)
-            return true;
-        ItemStack[] contents = inventory.getContents();
-
-        int leftover = item.getAmount();
-        int typeId = item.getTypeId();
-        int durability = item.getDurability();
-        for (int i = 0; i < contents.length; i++) {
-            ItemStack currentItem = contents[i];
-            if (currentItem == null) {
-                return true;
-            } else if (typeId == currentItem.getTypeId() && durability == currentItem.getDurability()) {
-                leftover = leftover - (currentItem.getMaxStackSize() - currentItem.getAmount());
-                if (leftover <= 0) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Tests whether the inventory has room for all of the given itemstacks.
-     * 
-     * @param items
-     * @return True if the inventory has room.
-     */
-    public boolean hasRoom(Collection<ItemStack> items) {
-        if (items == null)
-            return true;
-        for (ItemStack item : items) {
-            if (!hasRoom(item))
-                return false;
-        }
-        return true;
     }
 
     /**

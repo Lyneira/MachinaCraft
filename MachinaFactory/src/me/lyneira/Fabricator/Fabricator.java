@@ -1,48 +1,56 @@
 package me.lyneira.Fabricator;
 
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.Recipe;
 
 import me.lyneira.MachinaCore.BlockLocation;
 import me.lyneira.MachinaCore.BlockRotation;
 import me.lyneira.MachinaCore.HeartBeatEvent;
 import me.lyneira.MachinaCore.InventoryManager;
+import me.lyneira.MachinaCore.InventoryTransaction;
 import me.lyneira.MachinaFactory.Component;
 import me.lyneira.MachinaFactory.ComponentActivateException;
 import me.lyneira.MachinaFactory.ComponentDetectException;
-import me.lyneira.MachinaFactory.MachinaFactory;
 import me.lyneira.MachinaFactory.PacketHandler;
 import me.lyneira.MachinaFactory.PacketListener;
 import me.lyneira.MachinaFactory.Pipeline;
 import me.lyneira.MachinaFactory.PipelineEndpoint;
+import me.lyneira.MachinaFactory.PipelineException;
 
 public class Fabricator extends Component implements PipelineEndpoint {
 
     private static final int delay = 20;
-    private static final int maxTicks = 2;
+    private static final int maxAge = 10;
 
     private final Blueprint blueprint;
     private final Pipeline pipeline;
-    private final List<ItemStack> recipe;
-    private int tick = 0;
+    private final Transaction recipeTransaction;
+    private final Set<InventoryHolder> transactions;
+    private final Map<InventoryHolder, Boolean> responses;
+    private int age = 0;
 
     Fabricator(Blueprint blueprint, BlockLocation anchor, BlockRotation yaw, Player player) throws ComponentActivateException, ComponentDetectException {
         super(blueprint.blueprint, anchor, yaw);
         this.blueprint = blueprint;
-        recipe = determineRecipe();
-        if (recipe == null) {
+        recipeTransaction = determineRecipe();
+        if (recipeTransaction == null) {
             onDeActivate(anchor);
             throw new ComponentActivateException();
         }
         pipeline = new Pipeline(anchor, player, sender());
+        transactions = new LinkedHashSet<InventoryHolder>(8);
+        responses = new HashMap<InventoryHolder, Boolean>(8);
     }
 
-    private List<ItemStack> determineRecipe() {
+    private Transaction determineRecipe() {
         Inventory chestInventory = InventoryManager.getSafeInventory(chest().getBlock());
         RecipeVerifier verifier;
         try {
@@ -56,11 +64,48 @@ public class Fabricator extends Component implements PipelineEndpoint {
 
     @Override
     public HeartBeatEvent heartBeat(BlockLocation anchor) {
-        if (tick < maxTicks) {
-            tick++;
-            return new HeartBeatEvent(delay);
+        if (age >= maxAge)
+            return null;
+
+        age++;
+        // Handle all transactions here.
+        for (Iterator<InventoryHolder> it = transactions.iterator(); it.hasNext();) {
+            InventoryHolder holder = it.next();
+            it.remove();
+            Inventory inventory = holder.getInventory();
+
+            if (inventory == null) {
+                // Null inventory = return false
+                responses.put(holder, false);
+                continue;
+            }
+            InventoryTransaction transaction = new InventoryTransaction(inventory);
+            transaction.remove(recipeTransaction.ingredients);
+            if (!transaction.verify()) {
+                // Transaction can't be completed, so the sending inventory
+                // has not enough items.
+                responses.put(holder, false);
+                continue;
+            }
+            boolean sendResult = false;
+            try {
+                sendResult = pipeline.sendPacket(recipeTransaction.result.clone());
+            } catch (PipelineException e) {
+                // Pipeline is broken, no point continuing.
+                return null;
+            }
+            if (sendResult) {
+                transaction.execute();
+            } else {
+                // Other end of the pipeline can't handle this item.
+                responses.put(holder, false);
+                continue;
+            }
+            age = 0;
+            responses.put(holder, true);
         }
-        return null;
+
+        return new HeartBeatEvent(delay);
     }
 
     private final BlockLocation chest() {
@@ -75,10 +120,14 @@ public class Fabricator extends Component implements PipelineEndpoint {
         if (inventory == null)
             return false;
 
-        tick = 0;
-        MachinaFactory.log("Fabricator received inventory.");
-        // TODO
-        return false;
+        InventoryHolder holder = inventory.getHolder();
+        transactions.add(holder);
+
+        if (responses.containsKey(holder)) {
+            return responses.get(holder);
+        } else {
+            return true;
+        }
     }
 
     /**

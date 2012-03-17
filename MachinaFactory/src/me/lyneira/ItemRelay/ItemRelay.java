@@ -4,6 +4,7 @@ import me.lyneira.MachinaCore.BlockLocation;
 import me.lyneira.MachinaCore.BlockRotation;
 import me.lyneira.MachinaCore.HeartBeatEvent;
 import me.lyneira.MachinaCore.InventoryManager;
+import me.lyneira.MachinaCore.InventoryTransaction;
 import me.lyneira.MachinaFactory.Component;
 import me.lyneira.MachinaFactory.ComponentActivateException;
 import me.lyneira.MachinaFactory.ComponentDetectException;
@@ -62,31 +63,30 @@ public class ItemRelay extends Component implements PipelineEndpoint {
         if (item == null)
             return false;
 
-        grace = 0;
-        InventoryManager manager = new InventoryManager(((InventoryHolder) chest().getBlock().getState()).getInventory());
-        if (manager.hasRoom(item)) {
-            manager.inventory.addItem(item);
-            return true;
-        }
-        return false;
+        age = 0;
+        InventoryTransaction transaction = new InventoryTransaction(((InventoryHolder) chest().getBlock().getState()).getInventory());
+        transaction.add(item);
+        return transaction.execute();
     }
 
     boolean handle(Inventory inventory) {
         if (inventory == null)
             return false;
 
-        grace = 0;
         Inventory myInventory = (((InventoryHolder) chest().getBlock().getState()).getInventory());
         if (inventory.equals(myInventory))
             return false;
 
+        age = 0;
+
         InventoryManager input = new InventoryManager(inventory);
-        InventoryManager output = new InventoryManager(myInventory);
+        InventoryTransaction transaction = new InventoryTransaction(myInventory);
+
         if (input.findFirst()) {
             ItemStack item = input.get();
             item.setAmount(1);
-            if (output.hasRoom(item)) {
-                output.inventory.addItem(item);
+            transaction.add(item);
+            if (transaction.execute()) {
                 input.decrement();
                 return true;
             }
@@ -112,6 +112,9 @@ public class ItemRelay extends Component implements PipelineEndpoint {
     private final State sendItem = new State() {
         @Override
         public State run() {
+            if (age >= maxAge)
+                return null;
+            age++;
             InventoryManager manager = new InventoryManager(((InventoryHolder) chest().getBlock().getState()).getInventory());
             if (manager.findFirst()) {
                 ItemStack item = manager.get();
@@ -119,62 +122,55 @@ public class ItemRelay extends Component implements PipelineEndpoint {
                 try {
                     if (pipeline.sendPacket(item)) {
                         manager.decrement();
+                        age = 0;
                         return this;
                     } else {
-                        recoveryState = sendInventory;
                         return sendInventory.run();
                     }
                 } catch (PipelineException e) {
-                    // Can't recover to a sending state if the pipeline is
-                    // broken
-                    recoveryState = gracePeriod;
+                    // Can't recover if the pipeline is broken
+                    return null;
                 }
 
             }
-            return gracePeriod.run();
+            return this;
         }
     };
 
     private final State sendInventory = new State() {
         @Override
         public State run() {
+            if (age++ >= maxAge)
+                return null;
+
+            age++;
             Inventory inventory = ((InventoryHolder) chest().getBlock().getState()).getInventory();
 
+            boolean sendResult = false;
             try {
-                if (pipeline.sendPacket(inventory))
-                    return this;
+                sendResult = pipeline.sendPacket(inventory);
             } catch (PipelineException e) {
-                // Can't recover to a sending state if the pipeline is broken
-                recoveryState = gracePeriod;
+                // Can't recover if the pipeline is broken
+                return null;
+            }
+            if (sendResult) {
+                age = 0;
             }
 
-            return gracePeriod.run();
+            return this;
         }
     };
 
-    private int grace = 0;
-    private final State gracePeriod = new State() {
-        /**
-         * Number of grace ticks to keep when encountering no items to send or
-         * when no pipeline could be created.
-         */
-        private static final int graceTicks = 2;
-
-        @Override
-        public State run() {
-            if (grace < graceTicks) {
-                grace++;
-                return recoveryState;
-            } else
-                return null;
-        }
-    };
+    private int age = 0;
+    /**
+     * Number of ticks to keep when encountering no items to send.
+     */
+    private static final int maxAge = 10;
 
     /**
      * Starting state.
      */
     private State state = sendItem;
-    private State recoveryState = sendItem;
 
     /**
      * Listener for item stacks.

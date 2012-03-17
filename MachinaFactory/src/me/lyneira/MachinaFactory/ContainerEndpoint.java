@@ -8,6 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import me.lyneira.MachinaCore.BlockLocation;
 import me.lyneira.MachinaCore.EventSimulator;
 import me.lyneira.MachinaCore.InventoryManager;
+import me.lyneira.MachinaCore.InventoryTransaction;
 
 /**
  * Built-in endpoint for chests and dispensers.
@@ -45,12 +46,9 @@ class ContainerEndpoint implements PipelineEndpoint {
         if (item == null)
             return false;
 
-        InventoryManager manager = new InventoryManager(((InventoryHolder) location.getBlock().getState()).getInventory());
-        if (manager.hasRoom(item)) {
-            manager.inventory.addItem(item);
-            return true;
-        }
-        return false;
+        InventoryTransaction transaction = new InventoryTransaction(((InventoryHolder) location.getBlock().getState()).getInventory());
+        transaction.add(item);
+        return transaction.execute();
     }
 
     /**
@@ -69,12 +67,12 @@ class ContainerEndpoint implements PipelineEndpoint {
             return false;
 
         InventoryManager input = new InventoryManager(inventory);
-        InventoryManager output = new InventoryManager(myInventory);
+        InventoryTransaction transaction = new InventoryTransaction(myInventory);
         if (input.findFirst()) {
             ItemStack item = input.get();
             item.setAmount(1);
-            if (output.hasRoom(item)) {
-                output.inventory.addItem(item);
+            transaction.add(item);
+            if (transaction.execute()) {
                 input.decrement();
                 return true;
             }

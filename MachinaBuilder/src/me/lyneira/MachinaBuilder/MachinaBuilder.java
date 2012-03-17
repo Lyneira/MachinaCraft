@@ -14,7 +14,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author Lyneira
  */
 public class MachinaBuilder extends JavaPlugin {
-    final static Logger log = Logger.getLogger("Minecraft");
+    private final static Logger log = Logger.getLogger("Minecraft");
     private MachinaCore machinaCore;
 
     @Override
@@ -35,5 +35,9 @@ public class MachinaBuilder extends JavaPlugin {
         log.info(pdf.getName() + " is now disabled.");
 
         machinaCore.unRegisterBlueprint(Blueprint.instance);
+    }
+    
+    static void log(String message) {
+        log.info("MachinaBuilder: " + message);
     }
 }

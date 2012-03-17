@@ -116,7 +116,6 @@ public class Pipeline {
      *            The player activating this machina.
      */
     private void findRoute(BlockLocation anchor, Player player) {
-
         Set<PipelineNode> graph = new HashSet<PipelineNode>(25);
         Queue<PipelineNode> q = new ArrayDeque<PipelineNode>();
         PipelineNode start = new PipelineNode(source);

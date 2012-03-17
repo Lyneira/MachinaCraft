@@ -14,6 +14,7 @@ import me.lyneira.MachinaCore.EventSimulator;
 import me.lyneira.MachinaCore.Fuel;
 import me.lyneira.MachinaCore.HeartBeatEvent;
 import me.lyneira.MachinaCore.InventoryManager;
+import me.lyneira.MachinaCore.InventoryTransaction;
 import me.lyneira.MachinaCore.Movable;
 
 import org.bukkit.Material;
@@ -23,6 +24,7 @@ import org.bukkit.block.Furnace;
 import org.bukkit.block.Sign;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import com.google.common.base.Predicate;
@@ -258,7 +260,7 @@ public class Builder extends Movable {
             Block inputBlock = anchor.getRelative(Blueprint.chest.vector(yaw)).getBlock();
             Block outputBlock = anchor.getRelative(Blueprint.chestRoad.vector(yaw)).getBlock();
             InventoryManager inputManager = new InventoryManager(InventoryManager.getSafeInventory(inputBlock));
-            InventoryManager outputManager = new InventoryManager(InventoryManager.getSafeInventory(outputBlock));
+            Inventory output = InventoryManager.getSafeInventory(outputBlock);
 
             Iterator<BlockLocation> targetIterator = targets.iterator();
             while (targetIterator.hasNext()) {
@@ -267,8 +269,10 @@ public class Builder extends Movable {
                 if (!BlockData.isDrillable(typeId))
                     continue;
 
+                InventoryTransaction transaction = new InventoryTransaction(output);
                 Collection<ItemStack> results = BlockData.breakBlock(target);
-                if (!outputManager.hasRoom(results))
+                transaction.add(results);
+                if (!transaction.verify())
                     continue;
 
                 if (!inputManager.find(isBuildingBlock))
@@ -282,7 +286,7 @@ public class Builder extends Movable {
 
                 target.setEmpty();
                 if (results != null)
-                    outputManager.inventory.addItem(results.toArray(new ItemStack[results.size()]));
+                    transaction.execute();
 
                 ItemStack replacementItem = inputManager.get();
                 typeId = replacementItem.getTypeId();

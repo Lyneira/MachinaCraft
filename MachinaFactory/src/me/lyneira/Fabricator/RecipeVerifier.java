@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import me.lyneira.MachinaFactory.ComponentActivateException;
-import me.lyneira.MachinaFactory.MachinaFactory;
 
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -24,6 +23,7 @@ class RecipeVerifier {
     private final int rows;
     private final int columns;
     private final ItemStack[][] matrix;
+    private ItemStack result;
 
     /**
      * Constructs a new RecipeVerifier from the given inventory. A chest
@@ -77,18 +77,25 @@ class RecipeVerifier {
         }
     }
 
-    List<ItemStack> find(Iterator<Recipe> it) {
+    /**
+     * Iterates through the given Recipe iterator and finds the recipe laid out on this verifier's inventory. 
+     * @param it
+     * @return A list of ingredients needed for each combine.
+     */
+    Transaction find(Iterator<Recipe> it) {
         while (it.hasNext()) {
             Recipe r = it.next();
 
             if (r instanceof ShapelessRecipe) {
                 ShapelessRecipe recipe = (ShapelessRecipe) r;
                 if (verify(recipe)) {
+                    result = recipe.getResult();
                     return collect(recipe);
                 }
             } else if (r instanceof ShapedRecipe) {
                 ShapedRecipe recipe = (ShapedRecipe) r;
                 if (verify(recipe)) {
+                    result = recipe.getResult();
                     return collect(recipe);
                 }
             }
@@ -96,27 +103,23 @@ class RecipeVerifier {
         return null;
     }
 
-    List<ItemStack> collect(ShapelessRecipe recipe) {
+    Transaction collect(ShapelessRecipe recipe) {
         List<ItemStack> ingredients = recipe.getIngredientList();
-        List<ItemStack> result = new ArrayList<ItemStack>(ingredients.size());
+        List<ItemStack> collected = new ArrayList<ItemStack>(ingredients.size());
         INGREDIENTS: for (ItemStack ingredient : ingredients) {
-            for (ItemStack item : result) {
+            for (ItemStack item : collected) {
                 if (itemCompareCollect(item, ingredient)) {
                     item.setAmount(item.getAmount() + ingredient.getAmount());
                     continue INGREDIENTS;
                 }
             }
-            result.add(ingredient);
+            collected.add(ingredient);
         }
-        MachinaFactory.log("Found shapeless recipe for " + recipe.getResult().toString() + ", collected ingredients:");
-        for (ItemStack item : result) {
-            MachinaFactory.log(item.toString());
-        }
-        return result;
+        return new Transaction(collected, recipe.getResult());
     }
 
-    List<ItemStack> collect(ShapedRecipe recipe) {
-        List<ItemStack> result = new ArrayList<ItemStack>(rows * columns);
+    Transaction collect(ShapedRecipe recipe) {
+        List<ItemStack> collected = new ArrayList<ItemStack>(rows * columns);
         String[] shape = recipe.getShape();
         Map<Character, ItemStack> map = recipe.getIngredientMap();
         for (String s : shape)
@@ -124,19 +127,15 @@ class RecipeVerifier {
                 ItemStack ingredient = map.get(s.charAt(i));
                 if (ingredient == null)
                     continue;
-                for (ItemStack item : result) {
+                for (ItemStack item : collected) {
                     if (itemCompareCollect(item, ingredient)) {
                         item.setAmount(item.getAmount() + ingredient.getAmount());
                         continue INGREDIENTS;
                     }
                 }
-                result.add(ingredient);
+                collected.add(ingredient);
             }
-        MachinaFactory.log("Found shaped recipe for " + recipe.getResult().toString() + ", collected ingredients:");
-        for (ItemStack item : result) {
-            MachinaFactory.log(item.toString());
-        }
-        return result;
+        return new Transaction(collected, recipe.getResult());
     }
 
     /**
@@ -217,6 +216,10 @@ class RecipeVerifier {
         }
         return true;
     }
+    
+    ItemStack getResult() {
+        return result;
+    }
 
     /**
      * Compares an itemstack to a recipe ingredient and returns true if they
@@ -240,8 +243,8 @@ class RecipeVerifier {
         if (item.getTypeId() != ingredient.getTypeId())
             return false;
 
-        byte ingredientData = ingredient.getData().getData();
-        if (ingredientData == -1 || ingredientData == item.getData().getData()) {
+        short ingredientData = ingredient.getDurability();
+        if (ingredientData == -1 || ingredientData == item.getDurability()) {
             return true;
         }
         return false;
@@ -260,8 +263,8 @@ class RecipeVerifier {
         if (item.getTypeId() != ingredient.getTypeId())
             return false;
 
-        byte ingredientData = ingredient.getData().getData();
-        if (ingredientData == -1 || ingredientData == item.getData().getData()) {
+        short ingredientData = ingredient.getDurability();
+        if (ingredientData == -1 || ingredientData == item.getDurability()) {
             return true;
         }
         return false;
@@ -279,7 +282,7 @@ class RecipeVerifier {
         if (item.getTypeId() != ingredient.getTypeId())
             return false;
 
-        if (ingredient.getData().getData() == item.getData().getData()) {
+        if (ingredient.getDurability() == item.getDurability()) {
             return true;
         }
         return false;

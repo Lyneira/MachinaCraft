@@ -12,6 +12,7 @@ import me.lyneira.MachinaCore.EventSimulator;
 import me.lyneira.MachinaCore.Fuel;
 import me.lyneira.MachinaCore.HeartBeatEvent;
 import me.lyneira.MachinaCore.InventoryManager;
+import me.lyneira.MachinaCore.InventoryTransaction;
 import me.lyneira.MachinaCore.Movable;
 
 import org.bukkit.Material;
@@ -133,10 +134,11 @@ final class Drill extends Movable {
         if (BlockData.isDrillable(nextTypeId)) {
             Block chestBlock = anchor.getRelative(chest.vector(yaw)).getBlock();
             
-            InventoryManager manager = new InventoryManager(InventoryManager.getSafeInventory(chestBlock));
             Collection<ItemStack> results = BlockData.breakBlock(queuedTarget);
+            InventoryTransaction transaction = new InventoryTransaction(InventoryManager.getSafeInventory(chestBlock));
+            transaction.add(results);
 
-            if (!manager.hasRoom(results))
+            if (!transaction.verify())
                 return false;
 
             if (!useEnergy(anchor, BlockData.getDrillTime(nextTypeId)))
@@ -146,9 +148,9 @@ final class Drill extends Movable {
                 return false;
 
             queuedTarget.setEmpty();
-            // Put item in the container
+            // Put results in the container
             if (results != null) {
-                manager.inventory.addItem(results.toArray(new ItemStack[results.size()]));
+                transaction.execute();
             }
         }
         return true;

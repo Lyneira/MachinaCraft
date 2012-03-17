@@ -3,6 +3,7 @@ package me.lyneira.MachinaFactory;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -21,6 +22,7 @@ public abstract class Component implements Machina, EndpointVerify {
     protected final BlockLocation anchor;
     protected final BlockRotation yaw;
     private final ComponentBlueprint blueprint;
+    private static final Material[] emptyTypes = new Material[] { Material.AIR, Material.SNOW, Material.LONG_GRASS };
 
     /**
      * Constructs a new Component from the ComponentBlueprint and activates it.
@@ -116,7 +118,7 @@ public abstract class Component implements Machina, EndpointVerify {
      */
     private boolean detectCollision(List<BlueprintBlock> diffPlus) {
         for (BlueprintBlock i : diffPlus) {
-            if (!anchor.getRelative(i.vector(yaw)).isEmpty())
+            if (!anchor.getRelative(i.vector(yaw)).checkTypes(emptyTypes))
                 return true;
         }
         return false;

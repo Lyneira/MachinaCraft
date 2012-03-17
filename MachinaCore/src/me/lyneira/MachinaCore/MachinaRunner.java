@@ -130,8 +130,9 @@ class MachinaRunner implements Runnable {
      * Deactivates all MachinaRunners
      */
     static final void deActivateAll() {
-        for (MachinaRunner machinaRunner : machinae.values()) {
-            machinaRunner.deActivate();
+        for (Iterator<MachinaRunner>it = machinae.values().iterator(); it.hasNext();) {
+            it.next().deActivateSafely();
+            it.remove();
         }
     }
 
