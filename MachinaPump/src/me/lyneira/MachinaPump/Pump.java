@@ -203,7 +203,7 @@ final class Pump implements Machina {
             if (item != null && item.getType() == tubeMaterial) {
                 // Before taking, we have to simulate whether we can actually
                 // place the block.
-                if (!EventSimulator.blockPlace(target, tubeMaterial.getId(), target.getRelative(backward, size), player))
+                if (!EventSimulator.blockPlace(target, tubeMaterial.getId(), (byte) 0, target.getRelative(backward, size), player))
                     return stop();
 
                 int amount = item.getAmount();
@@ -372,7 +372,7 @@ final class Pump implements Machina {
         }
 
         void apply(BlockLocation target) {
-            if ((target.checkTypes(Material.AIR, liquidMaterial, stationaryLiquidMaterial)) && EventSimulator.blockPlace(target, stationaryLiquidMaterial.getId(), target.getRelative(down), player)) {
+            if ((target.checkTypes(Material.AIR, liquidMaterial, stationaryLiquidMaterial)) && EventSimulator.blockPlace(target, stationaryLiquidMaterial.getId(), (byte) 0, target.getRelative(down), player)) {
                 target.getBlock().setTypeIdAndData(stationaryLiquidMaterial.getId(), (byte) 0, true);
             }
         }

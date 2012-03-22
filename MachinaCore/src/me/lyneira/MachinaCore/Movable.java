@@ -309,11 +309,9 @@ public abstract class Movable implements Machina {
     /**
      * Function for a moving machina to test whether it's allowed to move to a
      * new location by protection plugins. Returns true if the player could
-     * build (and break) the new block.
+     * build the new block. The event used to test this will always be cancelled
+     * for any monitoring plugins.
      * 
-     * This function is zero-sum for the benefit of block logging plugins. In
-     * other words, it simulates both block place and remove events so that a
-     * rollback doesn't leave a block trail for a moved machina.
      * 
      * @param newAnchor
      *            The new anchor location of the machina.
@@ -326,7 +324,7 @@ public abstract class Movable implements Machina {
     protected boolean canMove(BlockLocation newAnchor, BlueprintBlock block) {
         BlockLocation target = newAnchor.getRelative(block.vector(yaw));
         BlockLocation placedAgainst = target.getRelative(yaw.getOpposite().getYawFace());
-        return EventSimulator.blockPlaceNoTrace(target, block.typeId, placedAgainst, player);
+        return EventSimulator.blockPlacePretend(target, block.typeId, placedAgainst, player);
     }
 
     /**
@@ -341,8 +339,8 @@ public abstract class Movable implements Machina {
      *            The block that it will be placed against
      * @return True if the player may place a block at the location
      */
-    protected boolean canPlace(BlockLocation target, int typeId, BlockLocation placedAgainst) {
-        return EventSimulator.blockPlace(target, typeId, placedAgainst, player);
+    protected boolean canPlace(BlockLocation target, int typeId, byte data, BlockLocation placedAgainst) {
+        return EventSimulator.blockPlace(target, typeId, data, placedAgainst, player);
     }
 
     /**

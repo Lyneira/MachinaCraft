@@ -73,12 +73,12 @@ public class Fabricator extends Component implements PipelineEndpoint {
             InventoryHolder holder = it.next();
             it.remove();
             Inventory inventory = holder.getInventory();
-
             if (inventory == null) {
                 // Null inventory = return false
                 responses.put(holder, false);
                 continue;
             }
+
             InventoryTransaction transaction = new InventoryTransaction(inventory);
             transaction.remove(recipeTransaction.ingredients);
             if (!transaction.verify()) {
@@ -87,6 +87,7 @@ public class Fabricator extends Component implements PipelineEndpoint {
                 responses.put(holder, false);
                 continue;
             }
+
             boolean sendResult = false;
             try {
                 sendResult = pipeline.sendPacket(recipeTransaction.result.clone());
@@ -94,7 +95,11 @@ public class Fabricator extends Component implements PipelineEndpoint {
                 // Pipeline is broken, no point continuing.
                 return null;
             }
+
             if (sendResult) {
+                // Make a new transaction here in case the fabricator fed the result back to the source inventory.
+                transaction = new InventoryTransaction(inventory);
+                transaction.remove(recipeTransaction.ingredients);
                 transaction.execute();
             } else {
                 // Other end of the pipeline can't handle this item.

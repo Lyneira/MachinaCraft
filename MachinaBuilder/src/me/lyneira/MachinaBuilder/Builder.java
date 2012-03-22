@@ -290,10 +290,10 @@ public class Builder extends Movable {
 
                 ItemStack replacementItem = inputManager.get();
                 typeId = replacementItem.getTypeId();
-                if (!canPlace(target, typeId, target.getRelative(BlockFace.UP)))
+                byte data = replacementItem.getData().getData();
+                if (!canPlace(target, typeId, data, target.getRelative(BlockFace.UP)))
                     return null;
 
-                byte data = replacementItem.getData().getData();
                 inputManager.decrement();
                 target.getBlock().setTypeIdAndData(typeId, data, false);
             }
@@ -357,7 +357,7 @@ public class Builder extends Movable {
 
                 ItemStack item = manager.get();
                 int typeId = item.getTypeId();
-                if (!canPlace(target, typeId, target.getRelative(BlockFace.DOWN)))
+                if (!canPlace(target, typeId, (byte) item.getDurability(), target.getRelative(BlockFace.DOWN)))
                     continue;
 
                 byte data = item.getData().getData();
@@ -493,7 +493,7 @@ public class Builder extends Movable {
 
             ItemStack railItem = manager.get();
             int typeId = railItem.getTypeId();
-            if (!canPlace(target, typeId, ground))
+            if (!canPlace(target, typeId, (byte) 0, ground))
                 return;
 
             manager.decrement();

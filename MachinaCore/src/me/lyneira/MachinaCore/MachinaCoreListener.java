@@ -7,6 +7,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.material.Lever;
@@ -27,10 +29,8 @@ final class MachinaCoreListener implements Listener {
      * Detects whether the player right-clicked on a lever and starts machina
      * detection.
      */
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void playerInteract(PlayerInteractEvent event) {
-        if (event.isCancelled())
-            return;
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK)
             return;
 
@@ -48,14 +48,42 @@ final class MachinaCoreListener implements Listener {
         Block attachedTo = block.getRelative(attachedFace);
         plugin.onLever(event.getPlayer(), new BlockLocation(attachedTo), attachedFace.getOppositeFace(), event.getItem());
     }
-    
+
     /**
      * Notifies MachinaRunners of a chunk unload.
      */
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void chunkUnload(ChunkUnloadEvent event) {
-        if (!event.isCancelled()) {
-            MachinaRunner.notifyChunkUnload(event.getChunk());
+        MachinaRunner.notifyChunkUnload(event.getChunk());
+    }
+
+    /**
+     * Collects the cancelled result from a pretend blockplace event by
+     * EventSimulator and cancels the event afterward.
+     * 
+     * @param event
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void blockPlace(BlockPlaceEvent event) {
+        if (event == EventSimulator.pretendEvent) {
+            EventSimulator.pretendEventCancelled = event.isCancelled();
+            EventSimulator.pretendEvent = null;
+            event.setCancelled(true);
+        }
+    }
+
+    /**
+     * Collects the cancelled result from a pretend blockplace event by
+     * EventSimulator and cancels the event afterward.
+     * 
+     * @param event
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void blockBreak(BlockBreakEvent event) {
+        if (event == EventSimulator.pretendEvent) {
+            EventSimulator.pretendEventCancelled = event.isCancelled();
+            EventSimulator.pretendEvent = null;
+            event.setCancelled(true);
         }
     }
 }

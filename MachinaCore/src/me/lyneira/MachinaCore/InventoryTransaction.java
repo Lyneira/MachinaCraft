@@ -22,9 +22,23 @@ public class InventoryTransaction {
     private List<ItemStack> addItems = new ArrayList<ItemStack>(4);
     private List<ItemStack> removeItems = new ArrayList<ItemStack>(4);
 
+    /**
+     * Constructs a new InventoryTransaction for the given inventory.
+     * 
+     * @param inventory
+     */
     public InventoryTransaction(Inventory inventory) {
         this.inventory = inventory;
-        contents = inventory.getContents();
+        int size = inventory.getSize();
+        ItemStack[] oldContents = inventory.getContents();
+        contents = new ItemStack[size];
+        // Make new itemstacks for the entire inventory so the verify method is
+        // free to modify them. Any changes to itemstacks in the original array
+        // would write back to the inventory, which is undesirable in case the
+        // transaction cannot be completed.
+        for (int i = 0; i < size; i++) {
+            contents[i] = oldContents[i] == null ? null : new ItemStack(oldContents[i]);
+        }
     }
 
     /**
@@ -164,7 +178,8 @@ public class InventoryTransaction {
 
     /**
      * Attempts to execute the transaction on the inventory, returning true if
-     * successful.
+     * successful. If the transaction has not yet been verified, it will be
+     * verified before executing.
      * 
      * @return True if successful, false otherwise.
      */
