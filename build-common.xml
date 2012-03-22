@@ -3,7 +3,7 @@
 
 	<property name="binDir" value="bin" />
 	<property name="jarDir" value="jar" />
-	<property name="VERSION" value="3.0.1" />
+	<property name="VERSION" value="3.0.2" />
 	
 	<target name="all" depends="copyResources, makeJar" description="Create a plugin jar for the project">
 	</target>

@@ -40,14 +40,19 @@ public class EventSimulator {
     public static boolean blockPlace(BlockLocation target, int typeId, byte data, BlockLocation placedAgainst, Player player) {
         Block placedBlock = target.getBlock();
         BlockState replacedBlockState = placedBlock.getState();
-        replacedBlockState.setTypeId(typeId);
-        replacedBlockState.setRawData(data);
+        int oldType = replacedBlockState.getTypeId();
+        byte oldData = replacedBlockState.getRawData();
 
+        // Set the new state without physics.
+        placedBlock.setTypeIdAndData(typeId, data, false);
         BlockPlaceEvent placeEvent = new ArtificialBlockPlaceEvent(placedBlock, replacedBlockState, placedAgainst.getBlock(), null, player, true);
         MachinaCore.pluginManager.callEvent(placeEvent);
 
+        // Revert to the old state without physics.
+        placedBlock.setTypeIdAndData(oldType, oldData, false);
         if (placeEvent.isCancelled())
             return false;
+
         return true;
     }
 
@@ -91,11 +96,18 @@ public class EventSimulator {
     public static boolean blockPlacePretend(BlockLocation target, int typeId, BlockLocation placedAgainst, Player player) {
         Block placedBlock = target.getBlock();
         BlockState replacedBlockState = placedBlock.getState();
-        replacedBlockState.setTypeId(typeId);
+        int oldType = replacedBlockState.getTypeId();
+        byte oldData = replacedBlockState.getRawData();
+
+        // Set the new state without physics.
+        placedBlock.setTypeIdAndData(typeId, (byte) 0, false);
 
         pretendEvent = new ArtificialBlockPlaceEvent(placedBlock, replacedBlockState, placedAgainst.getBlock(), null, player, true);
         pretendEventCancelled = true;
         MachinaCore.pluginManager.callEvent(pretendEvent);
+
+        // Revert to the old state without physics.
+        placedBlock.setTypeIdAndData(oldType, oldData, false);
 
         return !pretendEventCancelled;
     }
