@@ -1,7 +1,6 @@
 package me.lyneira.MachinaBuilder;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -270,10 +269,7 @@ public class Builder extends Movable {
                     continue;
 
                 InventoryTransaction transaction = new InventoryTransaction(output);
-                Collection<ItemStack> results = BlockData.breakBlock(target);
-                transaction.add(results);
-                if (!transaction.verify())
-                    continue;
+                List<ItemStack> results = BlockData.breakBlock(target);
 
                 if (!inputManager.find(isBuildingBlock))
                     return moveStage;
@@ -281,12 +277,15 @@ public class Builder extends Movable {
                 if (!useEnergy(anchor, BlockData.getDrillTime(typeId) + buildDelay))
                     return null;
 
-                if (!EventSimulator.blockBreak(target, player))
+                if (!EventSimulator.blockBreak(target, player, results))
                     return null;
 
+                transaction.add(results);
+                // Put results in the container
+                if (!transaction.execute())
+                    continue;
+
                 target.setEmpty();
-                if (results != null)
-                    transaction.execute();
 
                 ItemStack replacementItem = inputManager.get();
                 typeId = replacementItem.getTypeId();

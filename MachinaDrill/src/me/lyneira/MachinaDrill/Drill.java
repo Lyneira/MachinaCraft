@@ -1,6 +1,5 @@
 package me.lyneira.MachinaDrill;
 
-import java.util.Collection;
 import java.util.List;
 
 import me.lyneira.MachinaCore.BlockData;
@@ -133,25 +132,23 @@ final class Drill extends Movable {
     private boolean doDrill(final BlockLocation anchor) {
         if (BlockData.isDrillable(nextTypeId)) {
             Block chestBlock = anchor.getRelative(chest.vector(yaw)).getBlock();
-            
-            Collection<ItemStack> results = BlockData.breakBlock(queuedTarget);
-            InventoryTransaction transaction = new InventoryTransaction(InventoryManager.getSafeInventory(chestBlock));
-            transaction.add(results);
 
-            if (!transaction.verify())
-                return false;
+            List<ItemStack> results = BlockData.breakBlock(queuedTarget);
+            InventoryTransaction transaction = new InventoryTransaction(InventoryManager.getSafeInventory(chestBlock));
 
             if (!useEnergy(anchor, BlockData.getDrillTime(nextTypeId)))
                 return false;
 
-            if (!EventSimulator.blockBreak(queuedTarget, player))
+            if (!EventSimulator.blockBreak(queuedTarget, player, results))
+                return false;
+
+            transaction.add(results);
+
+            // Put results in the container
+            if (!transaction.execute())
                 return false;
 
             queuedTarget.setEmpty();
-            // Put results in the container
-            if (results != null) {
-                transaction.execute();
-            }
         }
         return true;
     }

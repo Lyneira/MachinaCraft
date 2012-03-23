@@ -1,5 +1,8 @@
 package me.lyneira.MachinaCore;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -9,6 +12,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 
 /**
  * Class that simulates events.
@@ -63,11 +67,14 @@ public class EventSimulator {
      *            The target location to break at
      * @param player
      *            The player to simulate for
-     * @return True if the player may break a block at the location
+     * @param drops
+     *            The list of items that will drop from this block break. Other
+     *            plugins may have modified this list when this method returns.
+     * @return True if the player may break a block at the location.
      */
-    public static boolean blockBreak(BlockLocation target, Player player) {
+    public static boolean blockBreak(BlockLocation target, Player player, List<ItemStack> drops) {
         Block block = target.getBlock();
-        BlockBreakEvent breakEvent = new ArtificialBlockBreakEvent(block, player);
+        BlockBreakEvent breakEvent = new ArtificialBlockBreakEvent(block, player, drops);
         MachinaCore.pluginManager.callEvent(breakEvent);
         if (breakEvent.isCancelled())
             return false;
@@ -126,7 +133,7 @@ public class EventSimulator {
      */
     public static boolean blockBreakPretend(BlockLocation target, Player player) {
         Block block = target.getBlock();
-        pretendEvent = new ArtificialBlockBreakEvent(block, player);
+        pretendEvent = new ArtificialBlockBreakEvent(block, player, new ArrayList<ItemStack>(1));
         pretendEventCancelled = true;
         MachinaCore.pluginManager.callEvent(pretendEvent);
 

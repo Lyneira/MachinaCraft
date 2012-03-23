@@ -1,8 +1,11 @@
 package me.lyneira.MachinaCore;
 
+import java.util.List;
+
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.inventory.ItemStack;
 
 /**
  * Marks this event as being an artificial BlockBreakEvent. It is generated not
@@ -12,8 +15,8 @@ import org.bukkit.event.block.BlockBreakEvent;
  */
 public class ArtificialBlockBreakEvent extends BlockBreakEvent {
 
-    public ArtificialBlockBreakEvent(Block theBlock, Player player) {
-        super(theBlock, player);
+    public ArtificialBlockBreakEvent(Block theBlock, Player player, List<ItemStack> drops) {
+        super(theBlock, player, drops);
     }
 
 }

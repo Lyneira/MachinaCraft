@@ -1,7 +1,7 @@
 package me.lyneira.MachinaCore;
 
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -39,20 +39,20 @@ public final class BlockData {
      * @return The item stack resulting from the block break, or null if there
      *         is no drop
      */
-    public static final Collection<ItemStack> breakBlock(final BlockLocation location) {
+    public static final List<ItemStack> breakBlock(final BlockLocation location) {
         Block block = location.getBlock();
         BlockData data;
         int blockType = block.getTypeId();
         try {
             data = blockId[blockType];
         } catch (Exception e) {
-            return null;
+            return new ArrayList<ItemStack>(1);
         }
         // Got a BlockMetaData, now determine what to drop
 
         // Simplest case, ask bukkit
         if (data.drop < 0) {
-            return block.getDrops();
+            return new ArrayList<ItemStack>(block.getDrops());
         }
 
         int item;
@@ -77,9 +77,11 @@ public final class BlockData {
             amount = data.dropMin;
         }
         if (amount > 0) {
-            return Arrays.asList(new ItemStack[] { new ItemStack(item, amount, (short) 0, new Byte(dataValue)) });
+            List<ItemStack> drop = new ArrayList<ItemStack>(1);
+            drop.add(new ItemStack(item, amount, (short) 0, new Byte(dataValue)));
+            return drop;
         } else {
-            return null;
+            return new ArrayList<ItemStack>(1);
         }
     }
 

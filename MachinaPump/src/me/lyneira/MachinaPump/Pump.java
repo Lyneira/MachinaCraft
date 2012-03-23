@@ -245,7 +245,8 @@ final class Pump implements Machina {
     }
 
     /**
-     * Generalized middle stage of the Pump, which is to drain or fill and show progress.
+     * Generalized middle stage of the Pump, which is to drain or fill and show
+     * progress.
      */
     private abstract class Process implements Stage {
         final int width;
@@ -305,7 +306,7 @@ final class Pump implements Machina {
     }
 
     /**
-     * Drains visible water from a (roughly) square area below the tube. 
+     * Drains visible water from a (roughly) square area below the tube.
      */
     private class Drain extends Process {
         private int depth;
@@ -323,7 +324,7 @@ final class Pump implements Machina {
         }
 
         void apply(BlockLocation target) {
-            if (target.checkTypes(stationaryLiquidMaterial, liquidMaterial) && EventSimulator.blockBreak(target, player)) {
+            if (target.checkTypes(stationaryLiquidMaterial, liquidMaterial) && EventSimulator.blockBreak(target, player, new ArrayList<ItemStack>(1))) {
                 target.setEmpty();
             }
         }
@@ -352,7 +353,7 @@ final class Pump implements Machina {
     }
 
     /**
-     * Fills a (roughly) square area below the tube with water. 
+     * Fills a (roughly) square area below the tube with water.
      */
     private class Fill extends Process {
         private List<BlockLocation> topLevel;
@@ -372,7 +373,8 @@ final class Pump implements Machina {
         }
 
         void apply(BlockLocation target) {
-            if ((target.checkTypes(Material.AIR, liquidMaterial, stationaryLiquidMaterial)) && EventSimulator.blockPlace(target, stationaryLiquidMaterial.getId(), (byte) 0, target.getRelative(down), player)) {
+            if ((target.checkTypes(Material.AIR, liquidMaterial, stationaryLiquidMaterial))
+                    && EventSimulator.blockPlace(target, stationaryLiquidMaterial.getId(), (byte) 0, target.getRelative(down), player)) {
                 target.getBlock().setTypeIdAndData(stationaryLiquidMaterial.getId(), (byte) 0, true);
             }
         }
@@ -422,9 +424,9 @@ final class Pump implements Machina {
             int size = tube.size();
             if (size == 0)
                 return null;
-            
+
             BlockLocation target = tube.remove(size - 1);
-            if (!EventSimulator.blockBreak(target, player))
+            if (!EventSimulator.blockBreak(target, player, new ArrayList<ItemStack>(1)))
                 return null;
 
             if (!putDrainItem())
@@ -434,9 +436,10 @@ final class Pump implements Machina {
             return this;
         }
     }
-    
+
     /**
      * Loads the given configuration.
+     * 
      * @param configuration
      */
     static void loadConfiguration(ConfigurationSection configuration) {
