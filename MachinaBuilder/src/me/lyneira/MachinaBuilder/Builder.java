@@ -1,8 +1,10 @@
 package me.lyneira.MachinaBuilder;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import me.lyneira.MachinaCore.BlockData;
 import me.lyneira.MachinaCore.BlockLocation;
@@ -53,6 +55,17 @@ public class Builder extends Movable {
      * Whether the builder should use energy.
      */
     private static boolean useEnergy = true;
+
+    /**
+     * How many builders a player can have active at any one time. 0 means no
+     * limit.
+     */
+    private static int activeLimit = 0;
+
+    /**
+     * Keeps track of how many active builders a player has.
+     */
+    private final static Map<Player, Integer> active = new HashMap<Player, Integer>();
 
     /**
      * The amount of energy stored. This is just the number of server ticks left
@@ -204,13 +217,33 @@ public class Builder extends Movable {
     }
 
     /**
-     * Returns the burning furnace to its normal state.
+     * Increments the number of active builders.
+     */
+    void increment() {
+        final Integer newActive = active.get(player);
+        if (newActive == null)
+            active.put(player, 1);
+        else
+            active.put(player, newActive + 1);
+    }
+
+    /**
+     * Returns the burning furnace to its normal state and decrements the number
+     * of active drills.
      * 
      * @param anchor
      *            The anchor of the Drill being deactivated
      */
+    @Override
     public void onDeActivate(final BlockLocation anchor) {
         setFurnace(anchor, false);
+        final Integer newActive = active.get(player);
+        if (newActive == null)
+            return;
+        else if (newActive == 1)
+            active.remove(player);
+        else
+            active.put(player, newActive - 1);
     }
 
     /**
@@ -523,6 +556,23 @@ public class Builder extends Movable {
 
     // **** Static stuff ****
     /**
+     * Returns true if the current limit allows activating another builder for
+     * this player.
+     * 
+     * @param player
+     * @return True if the player can activate another builder.
+     */
+    static boolean canActivate(Player player) {
+        if (activeLimit == 0)
+            return true;
+        final Integer newActive = active.get(player);
+        if (newActive == null || newActive < activeLimit)
+            return true;
+
+        return false;
+    }
+
+    /**
      * Tests whether the {@link ItemStack} is a building block.
      */
     private final static Predicate<ItemStack> isBuildingBlock = new Predicate<ItemStack>() {
@@ -572,7 +622,8 @@ public class Builder extends Movable {
     static void loadConfiguration(ConfigurationSection configuration) {
         moveDelay = Math.max(configuration.getInt("move-delay", moveDelay), 1);
         buildDelay = Math.max(configuration.getInt("build-delay", buildDelay), 1);
-        maxDepth = Math.min(Math.max(configuration.getInt("max-depth", maxDepth), 1), 128);
+        maxDepth = Math.min(Math.max(configuration.getInt("max-depth", maxDepth), 1), 256);
         useEnergy = configuration.getBoolean("use-energy", useEnergy);
+        activeLimit = Math.max(configuration.getInt("active-limit", activeLimit), 0);
     }
 }

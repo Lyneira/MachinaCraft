@@ -1,8 +1,10 @@
 package me.lyneira.MachinaPump;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -32,6 +34,17 @@ final class Pump implements Machina {
     private static int maxDepth = 8;
     private static int delay = 10;
     private static final BlockVector down = new BlockVector(0, -1, 0);
+
+    /**
+     * How many drills a player can have active at any one time. 0 means no
+     * limit.
+     */
+    private static int activeLimit = 0;
+
+    /**
+     * Keeps track of how many active drills a player has.
+     */
+    private final static Map<Player, Integer> active = new HashMap<Player, Integer>();
 
     private final Player player;
     private final BlockLocation anchor;
@@ -105,10 +118,32 @@ final class Pump implements Machina {
         return true;
     }
 
+    /**
+     * Increments the number of active pumps.
+     */
+    void increment() {
+        final Integer newActive = active.get(player);
+        if (newActive == null)
+            active.put(player, 1);
+        else
+            active.put(player, newActive + 1);
+    }
+
+    /**
+     * Returns the cauldron and furnace to their normal states and decrements
+     * the number of active pumps.
+     */
     @Override
     public void onDeActivate(BlockLocation anchor) {
         setCauldron((byte) 0);
         setFurnace(anchor, false);
+        final Integer newActive = active.get(player);
+        if (newActive == null)
+            return;
+        else if (newActive == 1)
+            active.remove(player);
+        else
+            active.put(player, newActive - 1);
     }
 
     /**
@@ -437,6 +472,24 @@ final class Pump implements Machina {
         }
     }
 
+    // **** Static stuff ****
+    /**
+     * Returns true if the current limit allows activating another pump for this
+     * player.
+     * 
+     * @param player
+     * @return True if the player can activate another drill.
+     */
+    static boolean canActivate(Player player) {
+        if (activeLimit == 0)
+            return true;
+        final Integer newActive = active.get(player);
+        if (newActive == null || newActive < activeLimit)
+            return true;
+
+        return false;
+    }
+
     /**
      * Loads the given configuration.
      * 
@@ -446,5 +499,6 @@ final class Pump implements Machina {
         maxLength = Math.min(Math.max(configuration.getInt("max-length", maxLength), 1), 64);
         maxDepth = Math.min(Math.max(configuration.getInt("max-depth", maxDepth), 1), 128);
         delay = Math.max(configuration.getInt("tick-delay", delay), 1);
+        activeLimit = Math.max(configuration.getInt("active-limit", activeLimit), 0);
     }
 }

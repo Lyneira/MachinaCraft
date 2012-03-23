@@ -166,6 +166,11 @@ final class Blueprint extends MovableBlueprint {
                     return null;
                 }
                 
+                if (!Drill.canActivate(player)) {
+                    player.sendMessage("You cannot activate any more drills.");
+                    return null;
+                }
+                
                 if (EventSimulator.inventoryProtected(yaw, player, anchor, chest, furnace))
                     return null;
 
@@ -194,6 +199,11 @@ final class Blueprint extends MovableBlueprint {
                     player.sendMessage("You do not have permission to activate a vertical drill.");
                     return null;
                 }
+                
+                if (!Drill.canActivate(player)) {
+                    player.sendMessage("You cannot activate any more drills.");
+                    return null;
+                }
 
                 if (EventSimulator.inventoryProtected(yaw, player, anchor, verticalChest, verticalFurnace))
                     return null;
@@ -204,6 +214,8 @@ final class Blueprint extends MovableBlueprint {
                 break;
             }
         }
+        if (drill != null)
+            drill.increment();
         return drill;
     }
 }

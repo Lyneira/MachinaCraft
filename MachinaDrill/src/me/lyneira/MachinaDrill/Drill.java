@@ -1,6 +1,8 @@
 package me.lyneira.MachinaDrill;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import me.lyneira.MachinaCore.BlockData;
 import me.lyneira.MachinaCore.BlockLocation;
@@ -39,6 +41,17 @@ final class Drill extends Movable {
      * Whether the drill should use energy.
      */
     private static boolean useEnergy = true;
+
+    /**
+     * How many drills a player can have active at any one time. 0 means no
+     * limit.
+     */
+    private static int activeLimit = 0;
+
+    /**
+     * Keeps track of how many active drills a player has.
+     */
+    private final static Map<Player, Integer> active = new HashMap<Player, Integer>();
 
     /**
      * Array of vectors that determines where the drill looks for blocks to
@@ -302,13 +315,33 @@ final class Drill extends Movable {
     }
 
     /**
-     * Returns the burning furnace to its normal state.
+     * Increments the number of active drills.
+     */
+    void increment() {
+        final Integer newActive = active.get(player);
+        if (newActive == null)
+            active.put(player, 1);
+        else
+            active.put(player, newActive + 1);
+    }
+
+    /**
+     * Returns the burning furnace to its normal state and decrements the number
+     * of active drills.
      * 
      * @param anchor
      *            The anchor of the Drill being deactivated
      */
+    @Override
     public void onDeActivate(final BlockLocation anchor) {
         setFurnace(anchor, false);
+        final Integer newActive = active.get(player);
+        if (newActive == null)
+            return;
+        else if (newActive == 1)
+            active.remove(player);
+        else
+            active.put(player, newActive - 1);
     }
 
     /**
@@ -351,6 +384,24 @@ final class Drill extends Movable {
         return null;
     }
 
+    // **** Static stuff ****
+    /**
+     * Returns true if the current limit allows activating another drill for
+     * this player.
+     * 
+     * @param player
+     * @return True if the player can activate another drill.
+     */
+    static boolean canActivate(Player player) {
+        if (activeLimit == 0)
+            return true;
+        final Integer newActive = active.get(player);
+        if (newActive == null || newActive < activeLimit)
+            return true;
+
+        return false;
+    }
+
     /**
      * Loads the given configuration.
      * 
@@ -359,5 +410,6 @@ final class Drill extends Movable {
     static void loadConfiguration(ConfigurationSection configuration) {
         moveDelay = Math.max(configuration.getInt("move-delay", moveDelay), 1);
         useEnergy = configuration.getBoolean("use-energy", useEnergy);
+        activeLimit = Math.max(configuration.getInt("active-limit", activeLimit), 0);
     }
 }

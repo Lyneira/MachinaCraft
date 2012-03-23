@@ -59,7 +59,7 @@ public final class BlockLocation {
     public final Block getBlock() {
         return world.getBlockAt(x, y, z);
     }
-    
+
     /**
      * Returns the World corresponding to this {@link BlockLocation}
      * 
@@ -85,7 +85,7 @@ public final class BlockLocation {
      * 
      * @return True if this location's type matches one the given materials
      */
-    public final boolean checkTypes(final Material ... materials) {
+    public final boolean checkTypes(final Material... materials) {
         int id = world.getBlockTypeIdAt(x, y, z);
         for (Material m : materials) {
             if (id == m.getId()) {
@@ -132,7 +132,7 @@ public final class BlockLocation {
     public final void setTypeId(final int typeId) {
         world.getBlockAt(x, y, z).setTypeId(typeId);
     }
-    
+
     /**
      * Sets the data at this {@link BlockLocation}.
      * 
@@ -194,9 +194,10 @@ public final class BlockLocation {
     public final BlockLocation getRelative(final BlockVector blockVector) {
         return blockVector.apply(world, x, y, z);
     }
- 
+
     /**
-     * Gets the {@link BlockLocation} at the given {@link BlockVector} at the given distance.
+     * Gets the {@link BlockLocation} at the given {@link BlockVector} at the
+     * given distance.
      * 
      * @param blockVector
      *            Face of this {@link BlockLocation} to return
@@ -227,7 +228,14 @@ public final class BlockLocation {
      *            The item stack to drop
      */
     public final void dropItem(final ItemStack item) {
-        world.dropItem(new Location(world, (double) x + 0.5, (double) y + 0.5, (double) z + 0.5), item);
+        world.dropItem(new Location(world, x + 0.5, y + 0.5, z + 0.5), item);
+    }
+
+    /**
+     * @return A location centered in the middle of this {@link BlockLocation}.
+     */
+    public final Location getLocation() {
+        return new Location(world, x + 0.5, y + 0.5, z + 0.5);
     }
 
     @Override

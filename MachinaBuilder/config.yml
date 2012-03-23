@@ -5,8 +5,10 @@
 # build-delay: The number of ticks it takes to place a block. 
 # max-depth: The maximum depth at which the builder can build.
 # use-energy: Whether the builder needs fuel to run.
+# active-limit: How many builders a player can have active at any one time. 0 means no limit.
 
 move-delay: 20
 build-delay: 10
 max-depth: 6
 use-energy: true
+active-limit: 0

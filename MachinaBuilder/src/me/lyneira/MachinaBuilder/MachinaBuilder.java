@@ -22,8 +22,7 @@ public class MachinaBuilder extends JavaPlugin {
         PluginDescriptionFile pdf = getDescription();
         log.info(pdf.getName() + " version " + pdf.getVersion() + " is now enabled.");
         
-        ConfigurationManager config = new ConfigurationManager(this);
-        Builder.loadConfiguration(config.getAll());
+        Builder.loadConfiguration(new ConfigurationManager(this).getAll());
 
         machinaCore = (MachinaCore) getServer().getPluginManager().getPlugin("MachinaCore");
         machinaCore.registerBlueprint(Blueprint.instance);

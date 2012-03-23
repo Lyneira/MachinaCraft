@@ -7,6 +7,7 @@ import me.lyneira.MachinaCore.InventoryManager;
 import me.lyneira.MachinaCore.InventoryTransaction;
 import me.lyneira.MachinaFactory.Component;
 import me.lyneira.MachinaFactory.ComponentActivateException;
+import me.lyneira.MachinaFactory.ComponentBlueprint;
 import me.lyneira.MachinaFactory.ComponentDetectException;
 import me.lyneira.MachinaFactory.PacketHandler;
 import me.lyneira.MachinaFactory.PacketListener;
@@ -20,20 +21,25 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
 /**
- * Component that will send items from its chest through a pipeline.
+ * Component that will send items from its container through a pipeline.
  * 
  * @author Lyneira
  */
-public class ItemRelay extends Component implements PipelineEndpoint {
+public abstract class ItemRelay extends Component implements PipelineEndpoint {
 
     private static final int delay = 20;
-
-    private final Blueprint blueprint;
+    /**
+     * Number of ticks to stay active when the item relay cannot do anything.
+     */
+    private static final int maxAge = 10;
+    
+    final Blueprint blueprint;
     private final Pipeline pipeline;
     private final Player player;
+    int age = 0;
 
-    ItemRelay(Blueprint blueprint, BlockRotation yaw, Player player, BlockLocation anchor) throws ComponentActivateException, ComponentDetectException {
-        super(blueprint.blueprint, anchor, yaw);
+    ItemRelay(Blueprint blueprint, ComponentBlueprint componentBlueprint, BlockRotation yaw, Player player, BlockLocation anchor) throws ComponentActivateException, ComponentDetectException {
+        super(componentBlueprint, anchor, yaw);
         this.blueprint = blueprint;
         this.player = player;
         pipeline = new Pipeline(anchor, player, sender());
@@ -43,17 +49,26 @@ public class ItemRelay extends Component implements PipelineEndpoint {
     public HeartBeatEvent heartBeat(BlockLocation anchor) {
         if (!player.isOnline())
             return null;
+        
+        if (age++ >= maxAge)
+            return null;
 
+        relayActions();
         state = state.run();
         if (state == null)
             return null;
 
         return new HeartBeatEvent(delay);
     }
-
-    private final BlockLocation chest() {
-        return anchor.getRelative(blueprint.chest.vector(yaw));
+    
+    /**
+     * Called before item sending takes place. Overridde if necessary.
+     */
+    void relayActions() {
+        
     }
+
+    abstract BlockLocation container();
 
     private final BlockLocation sender() {
         return anchor.getRelative(blueprint.sender.vector(yaw));
@@ -63,21 +78,22 @@ public class ItemRelay extends Component implements PipelineEndpoint {
         if (item == null)
             return false;
 
-        age = 0;
-        InventoryTransaction transaction = new InventoryTransaction(((InventoryHolder) chest().getBlock().getState()).getInventory());
+        InventoryTransaction transaction = new InventoryTransaction(((InventoryHolder) container().getBlock().getState()).getInventory());
         transaction.add(item);
-        return transaction.execute();
+        if (transaction.execute()) {
+            age = 0;
+            return true;
+        }
+        return false;
     }
 
     boolean handle(Inventory inventory) {
         if (inventory == null)
             return false;
 
-        Inventory myInventory = (((InventoryHolder) chest().getBlock().getState()).getInventory());
+        Inventory myInventory = (((InventoryHolder) container().getBlock().getState()).getInventory());
         if (inventory.equals(myInventory))
             return false;
-
-        age = 0;
 
         InventoryManager input = new InventoryManager(inventory);
         InventoryTransaction transaction = new InventoryTransaction(myInventory);
@@ -88,6 +104,7 @@ public class ItemRelay extends Component implements PipelineEndpoint {
             transaction.add(item);
             if (transaction.execute()) {
                 input.decrement();
+                age = 0;
                 return true;
             }
         }
@@ -112,10 +129,7 @@ public class ItemRelay extends Component implements PipelineEndpoint {
     private final State sendItem = new State() {
         @Override
         public State run() {
-            if (age >= maxAge)
-                return null;
-            age++;
-            InventoryManager manager = new InventoryManager(((InventoryHolder) chest().getBlock().getState()).getInventory());
+            InventoryManager manager = new InventoryManager(((InventoryHolder) container().getBlock().getState()).getInventory());
             if (manager.findFirst()) {
                 ItemStack item = manager.get();
                 item.setAmount(1);
@@ -129,7 +143,8 @@ public class ItemRelay extends Component implements PipelineEndpoint {
                     }
                 } catch (PipelineException e) {
                     // Can't recover if the pipeline is broken
-                    return null;
+                    age = maxAge - 2;
+                    return receiveOnly;
                 }
 
             }
@@ -140,18 +155,15 @@ public class ItemRelay extends Component implements PipelineEndpoint {
     private final State sendInventory = new State() {
         @Override
         public State run() {
-            if (age++ >= maxAge)
-                return null;
-
-            age++;
-            Inventory inventory = ((InventoryHolder) chest().getBlock().getState()).getInventory();
+            Inventory inventory = ((InventoryHolder) container().getBlock().getState()).getInventory();
 
             boolean sendResult = false;
             try {
                 sendResult = pipeline.sendPacket(inventory);
             } catch (PipelineException e) {
                 // Can't recover if the pipeline is broken
-                return null;
+                age = maxAge - 2;
+                return receiveOnly;
             }
             if (sendResult) {
                 age = 0;
@@ -160,12 +172,13 @@ public class ItemRelay extends Component implements PipelineEndpoint {
             return this;
         }
     };
-
-    private int age = 0;
-    /**
-     * Number of ticks to keep when encountering no items to send.
-     */
-    private static final int maxAge = 10;
+    
+    private final State receiveOnly = new State() {
+        @Override
+        public State run() {
+            return this;
+        }
+    };
 
     /**
      * Starting state.

@@ -6,7 +6,9 @@
 # max-depth: The maximum depth the pump will fill or drain at.
 # tick-delay: The number of server ticks it takes to fill or drain one block.
 #             20 ticks = 1 second.
+# active-limit: How many pumps a player can have active at any one time. 0 means no limit.
 
 max-length: 9
 max-depth: 8
 tick-delay: 10
+active-limit: 0

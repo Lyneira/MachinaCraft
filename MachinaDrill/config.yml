@@ -3,6 +3,8 @@
 # move-delay: The number of server ticks it takes for the drill to move.
 #             20 ticks = 1 second.
 # use-energy: Whether the drill needs fuel to run.
+# active-limit: How many drills a player can have active at any one time. 0 means no limit.
 
 move-delay: 20
 use-energy: true
+active-limit: 0

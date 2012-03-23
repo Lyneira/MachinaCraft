@@ -57,7 +57,13 @@ final class Blueprint implements MachinaBlueprint {
                 player.sendMessage("You do not have permission to activate a pump.");
                 return null;
             }
-            return new Pump(yaw, player, anchor, leverFace, cauldron, lavaMode);
+            if (!Pump.canActivate(player)) {
+                player.sendMessage("You cannot activate any more pumps.");
+                return null;
+            }
+            Pump pump = new Pump(yaw, player, anchor, leverFace, cauldron, lavaMode);
+            pump.increment();
+            return pump;
         }
         return null;
     }

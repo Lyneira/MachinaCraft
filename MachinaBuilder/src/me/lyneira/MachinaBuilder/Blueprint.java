@@ -120,6 +120,10 @@ public class Blueprint extends MovableBlueprint {
                 player.sendMessage("You do not have permission to activate a builder.");
                 return null;
             }
+            if (!Builder.canActivate(player)) {
+                player.sendMessage("You cannot activate any more builders.");
+                return null;
+            }
 
             if ((furnace == furnaceBasic && EventSimulator.inventoryProtected(yaw, player, anchor, chest, furnaceBasic))
                     || EventSimulator.inventoryProtected(yaw, player, anchor, chest, chestRoad, furnaceRoad))
@@ -141,6 +145,8 @@ public class Blueprint extends MovableBlueprint {
                 builder.onDeActivate(anchor);
                 builder = null;
             }
+            if (builder != null)
+                builder.increment();
             return builder;
         }
 

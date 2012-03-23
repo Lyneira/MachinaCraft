@@ -24,16 +24,21 @@ import me.lyneira.MachinaFactory.ComponentDetectException;
 public class Blueprint implements MachinaBlueprint {
     static final Material anchorMaterial = Material.BRICK;
     final BlueprintBlock chest;
+    final BlueprintBlock dispenser;
     final BlueprintBlock sender;
-    final ComponentBlueprint blueprint;
+    final ComponentBlueprint blueprintChest;
+    final ComponentBlueprint blueprintDispenser;
 
     /**
      * The blueprints for the base, inactive and active states are specified
      * here.
      */
     public Blueprint() {
-        BlueprintBlock[] blueprintBase = { new BlueprintBlock(new BlockVector(0, 0, 0), anchorMaterial, true), //
+        BlueprintBlock[] blueprintBaseChest = { new BlueprintBlock(new BlockVector(0, 0, 0), anchorMaterial, true), //
                 chest = new BlueprintBlock(new BlockVector(-1, 0, 0), Material.CHEST, true), //
+        };
+        BlueprintBlock[] blueprintBaseDispenser = { new BlueprintBlock(new BlockVector(0, 0, 0), anchorMaterial, true), //
+                dispenser = new BlueprintBlock(new BlockVector(-1, 0, 0), Material.DISPENSER, true), //
         };
         BlueprintBlock[] blueprintInactive = { new BlueprintBlock(new BlockVector(1, 0, 0), Material.WOOD, false), //
                 new BlueprintBlock(new BlockVector(1, 1, 0), Material.IRON_FENCE, false), //
@@ -42,7 +47,8 @@ public class Blueprint implements MachinaBlueprint {
         BlueprintBlock[] blueprintActive = { new BlueprintBlock(new BlockVector(1, 0, 0), Material.IRON_FENCE, false), //
                 sender = new BlueprintBlock(new BlockVector(2, 0, 0), Material.WOOD, false), //
         };
-        blueprint = new ComponentBlueprint(blueprintBase, blueprintInactive, blueprintActive);
+        blueprintChest = new ComponentBlueprint(blueprintBaseChest, blueprintInactive, blueprintActive);
+        blueprintDispenser = new ComponentBlueprint(blueprintBaseDispenser, blueprintInactive, blueprintActive);
     }
 
     @Override
@@ -52,8 +58,12 @@ public class Blueprint implements MachinaBlueprint {
         if (!anchor.checkType(anchorMaterial))
             return null;
 
+        BlockLocation container = null;
+        Material containerMaterial = null;
         for (BlockRotation i : BlockRotation.values()) {
-            if (anchor.getRelative(i.getYawFace()).checkType(Material.CHEST)) {
+            container = anchor.getRelative(i.getYawFace());
+            containerMaterial = container.getType();
+            if (containerMaterial == Material.CHEST || containerMaterial == Material.DISPENSER) {
                 yaw = i.getOpposite();
                 break;
             }
@@ -67,11 +77,15 @@ public class Blueprint implements MachinaBlueprint {
             return null;
         }
 
-        if (EventSimulator.inventoryProtected(player, anchor.getRelative(yaw.getOpposite().getYawFace())))
+        if (EventSimulator.inventoryProtected(player, container))
             return null;
 
         try {
-            return new ItemRelay(this, yaw, player, anchor);
+            if (containerMaterial == Material.CHEST) {
+                return new ChestRelay(this, yaw, player, anchor);
+            } else if (containerMaterial == Material.DISPENSER) {
+                return new DispenserRelay(this, yaw, player, anchor);
+            }
         } catch (ComponentDetectException e) {
         } catch (ComponentActivateException e) {
         }
