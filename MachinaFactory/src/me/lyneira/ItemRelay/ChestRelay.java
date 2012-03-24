@@ -19,7 +19,7 @@ public class ChestRelay extends ItemRelay {
     }
 
     @Override
-    BlockLocation container() {
+    protected BlockLocation container() {
         return anchor.getRelative(blueprint.chest.vector(yaw));
     }
 

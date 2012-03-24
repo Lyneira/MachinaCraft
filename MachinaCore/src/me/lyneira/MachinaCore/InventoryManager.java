@@ -10,9 +10,9 @@ import org.bukkit.inventory.ItemStack;
 import com.google.common.base.Predicate;
 
 /**
- * Class for processing of an Inventory one item at a time. Maintains a cursor to the current
- * {@link ItemStack}, starting at the first slot. The cursor can be manipulated
- * by the find function.
+ * Class for processing of an Inventory one item at a time. Maintains a cursor
+ * to the current {@link ItemStack}, starting at the first slot. The cursor can
+ * be manipulated by the find function.
  * 
  * @author Lyneira
  */
@@ -49,6 +49,30 @@ public class InventoryManager {
         ItemStack[] contents = inventory.getContents();
         for (index = 0; index < contents.length; index++) {
             if (contents[index] != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Finds the first slot matching the given item. Amount is not checked.
+     * 
+     * @param material
+     * @return True if an item was found.
+     */
+    public boolean findItemType(ItemStack item) {
+        ItemStack[] contents = inventory.getContents();
+        for (index = 0; index < contents.length; index++) {
+            ItemStack c = contents[index];
+            if (c == null)
+                if (item == null)
+                    return true;
+                else
+                    continue;
+            else if (item == null)
+                continue;
+            else if (c.getTypeId() == item.getTypeId() && c.getDurability() == item.getDurability()) {
                 return true;
             }
         }

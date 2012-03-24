@@ -28,8 +28,11 @@ public class DispenserRelay extends ItemRelay {
         super(blueprint, blueprint.blueprintDispenser, yaw, player, anchor);
     }
 
+    /**
+     * Sucks items within a certain distance into the dispenser.
+     */
     @Override
-    void relayActions() {
+    protected void relayActions() {
         BlockLocation container = container();
         Location location = container.getLocation();
         for (Entity i : container.getWorld().getEntitiesByClass(Item.class)) {
@@ -47,7 +50,7 @@ public class DispenserRelay extends ItemRelay {
     }
 
     @Override
-    BlockLocation container() {
+    protected BlockLocation container() {
         return anchor.getRelative(blueprint.dispenser.vector(yaw));
     }
 }

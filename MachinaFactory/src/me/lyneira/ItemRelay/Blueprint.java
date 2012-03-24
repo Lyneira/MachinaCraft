@@ -23,11 +23,13 @@ import me.lyneira.MachinaFactory.ComponentDetectException;
  */
 public class Blueprint implements MachinaBlueprint {
     static final Material anchorMaterial = Material.BRICK;
+    final BlueprintBlock sender;
     final BlueprintBlock chest;
     final BlueprintBlock dispenser;
-    final BlueprintBlock sender;
+    final BlueprintBlock furnace = new BlueprintBlock(new BlockVector(-1, 0, 0), Material.FURNACE, true);
     final ComponentBlueprint blueprintChest;
     final ComponentBlueprint blueprintDispenser;
+    final ComponentBlueprint blueprintFurnace;
 
     /**
      * The blueprints for the base, inactive and active states are specified
@@ -40,6 +42,9 @@ public class Blueprint implements MachinaBlueprint {
         BlueprintBlock[] blueprintBaseDispenser = { new BlueprintBlock(new BlockVector(0, 0, 0), anchorMaterial, true), //
                 dispenser = new BlueprintBlock(new BlockVector(-1, 0, 0), Material.DISPENSER, true), //
         };
+        BlueprintBlock[] blueprintBaseFurnace = { new BlueprintBlock(new BlockVector(0, 0, 0), anchorMaterial, true), //
+                // We leave out the furnace from the blueprint and verify it manually.
+        };
         BlueprintBlock[] blueprintInactive = { new BlueprintBlock(new BlockVector(1, 0, 0), Material.WOOD, false), //
                 new BlueprintBlock(new BlockVector(1, 1, 0), Material.IRON_FENCE, false), //
         };
@@ -49,6 +54,7 @@ public class Blueprint implements MachinaBlueprint {
         };
         blueprintChest = new ComponentBlueprint(blueprintBaseChest, blueprintInactive, blueprintActive);
         blueprintDispenser = new ComponentBlueprint(blueprintBaseDispenser, blueprintInactive, blueprintActive);
+        blueprintFurnace = new ComponentBlueprint(blueprintBaseFurnace, blueprintInactive, blueprintActive);
     }
 
     @Override
@@ -60,11 +66,18 @@ public class Blueprint implements MachinaBlueprint {
 
         BlockLocation container = null;
         Material containerMaterial = null;
-        for (BlockRotation i : BlockRotation.values()) {
+        ROTATIONS: for (BlockRotation i : BlockRotation.values()) {
             container = anchor.getRelative(i.getYawFace());
+
             containerMaterial = container.getType();
-            if (containerMaterial == Material.CHEST || containerMaterial == Material.DISPENSER) {
+            switch (containerMaterial) {
+            case CHEST:
+            case DISPENSER:
+            case FURNACE:
+            case BURNING_FURNACE:
                 yaw = i.getOpposite();
+                break ROTATIONS;
+            default:
                 break;
             }
         }
@@ -81,10 +94,16 @@ public class Blueprint implements MachinaBlueprint {
             return null;
 
         try {
-            if (containerMaterial == Material.CHEST) {
+            switch (containerMaterial) {
+            case CHEST:
                 return new ChestRelay(this, yaw, player, anchor);
-            } else if (containerMaterial == Material.DISPENSER) {
+            case DISPENSER:
                 return new DispenserRelay(this, yaw, player, anchor);
+            case FURNACE:
+            case BURNING_FURNACE:
+                return new FurnaceRelay(this, yaw, player, anchor);
+            default:
+                break;
             }
         } catch (ComponentDetectException e) {
         } catch (ComponentActivateException e) {

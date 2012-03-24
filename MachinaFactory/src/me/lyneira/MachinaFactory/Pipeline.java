@@ -70,8 +70,10 @@ public class Pipeline {
      * @return True if the payload was successfully handled.
      * @throws PipelineException
      *             The pipeline is no longer intact.
+     * @throws PacketTypeUnsupportedException
+     *             The packet type could not be handled by the receiving end.
      */
-    public <P> boolean sendPacket(P payload) throws PipelineException {
+    public <P> boolean sendPacket(P payload) throws PipelineException, PacketTypeUnsupportedException {
         verify();
         return endpoint.getHandler().handle(endpoint, payload);
     }
@@ -87,14 +89,12 @@ public class Pipeline {
             throw new PipelineException(source);
 
         for (PipelineNode node : route) {
-            if (!node.verify()) {
+            if (!node.verify())
                 throw new PipelineException(source);
-            }
         }
-        
-        if (endpoint instanceof Machina && !MachinaFactory.machinaCore.exists(destination)) {
+
+        if (endpoint instanceof Machina && !MachinaFactory.machinaCore.exists(destination))
             throw new PipelineException(source);
-        }
 
         if (!endpoint.verify())
             throw new PipelineException(source);

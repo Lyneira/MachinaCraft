@@ -21,6 +21,7 @@ import me.lyneira.MachinaFactory.ComponentActivateException;
 import me.lyneira.MachinaFactory.ComponentDetectException;
 import me.lyneira.MachinaFactory.PacketHandler;
 import me.lyneira.MachinaFactory.PacketListener;
+import me.lyneira.MachinaFactory.PacketTypeUnsupportedException;
 import me.lyneira.MachinaFactory.Pipeline;
 import me.lyneira.MachinaFactory.PipelineEndpoint;
 import me.lyneira.MachinaFactory.PipelineException;
@@ -64,10 +65,9 @@ public class Fabricator extends Component implements PipelineEndpoint {
 
     @Override
     public HeartBeatEvent heartBeat(BlockLocation anchor) {
-        if (age >= maxAge)
+        if (age++ >= maxAge)
             return null;
 
-        age++;
         // Handle all transactions here.
         for (Iterator<InventoryHolder> it = transactions.iterator(); it.hasNext();) {
             InventoryHolder holder = it.next();
@@ -91,13 +91,17 @@ public class Fabricator extends Component implements PipelineEndpoint {
             boolean sendResult = false;
             try {
                 sendResult = pipeline.sendPacket(recipeTransaction.result.clone());
+            } catch (PacketTypeUnsupportedException e) {
+                // Other end can't handle items
+                return null;
             } catch (PipelineException e) {
-                // Pipeline is broken, no point continuing.
+                // Pipeline is broken
                 return null;
             }
 
             if (sendResult) {
-                // Make a new transaction here in case the fabricator fed the result back to the source inventory.
+                // Make a new transaction here in case the fabricator fed the
+                // result back to the source inventory.
                 transaction = new InventoryTransaction(inventory);
                 transaction.remove(recipeTransaction.ingredients);
                 transaction.execute();

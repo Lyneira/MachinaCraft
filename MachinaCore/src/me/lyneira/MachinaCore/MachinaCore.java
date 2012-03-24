@@ -19,6 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public final class MachinaCore extends JavaPlugin {
     final static Logger log = Logger.getLogger("Minecraft");
+    static MachinaCore plugin;
     static PluginManager pluginManager;
     /**
      * This is a hashmap of the blueprint's class name to its blueprint. This
@@ -27,6 +28,7 @@ public final class MachinaCore extends JavaPlugin {
     private final Map<Class<?>, MachinaBlueprint> blueprints = new LinkedHashMap<Class<?>, MachinaBlueprint>();
 
     public final void onEnable() {
+        plugin = this;
         PluginDescriptionFile pdf = getDescription();
         log.info(pdf.getName() + " version " + pdf.getVersion() + " is now enabled.");
 

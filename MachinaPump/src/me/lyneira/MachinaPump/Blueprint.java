@@ -8,7 +8,6 @@ import org.bukkit.inventory.ItemStack;
 
 import me.lyneira.MachinaCore.BlockLocation;
 import me.lyneira.MachinaCore.BlockRotation;
-import me.lyneira.MachinaCore.Fuel;
 import me.lyneira.MachinaCore.Machina;
 import me.lyneira.MachinaCore.MachinaBlueprint;
 
@@ -38,7 +37,7 @@ final class Blueprint implements MachinaBlueprint {
             BlockLocation location = anchor.getRelative(face);
             if (location.checkType(Material.FURNACE)) {
                 yaw = i.getOpposite();
-                ItemStack item = ((Furnace) location.getBlock().getState()).getInventory().getItem(Fuel.smeltSlot);
+                ItemStack item = ((Furnace) location.getBlock().getState()).getInventory().getSmelting();
                 if (item != null && item.getType() == Material.IRON_BLOCK) {
                     lavaMode = true;
                 } else {

@@ -1,14 +1,20 @@
 package me.lyneira.MachinaCore;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Furnace;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.inventory.FurnaceInventory;
+import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
 
 /**
  * Represents fuel properties and implements fuel consumption from a furnace.
@@ -20,9 +26,11 @@ public class Fuel {
         // Cannot instantiate this class.
     }
 
-    public static final int smeltSlot = 0;
-    public static final int fuelSlot = 1;
     private static final Map<Integer, Integer> burnTimes = new HashMap<Integer, Integer>(24);
+    /**
+     * Lazy instantiation for plugins that may add furnace recipes.
+     */
+    private static Set<Material> burnable = null;
 
     private static final int blazeRodTime = 2400;
     private static final int coalTime = 1600;
@@ -31,9 +39,9 @@ public class Fuel {
 
     static {
         burnTimes.put(Material.BLAZE_ROD.getId(), blazeRodTime);
-        
+
         burnTimes.put(Material.COAL.getId(), coalTime);
-        
+
         burnTimes.put(Material.WOOD.getId(), woodTime);
         burnTimes.put(Material.LOG.getId(), woodTime);
         burnTimes.put(Material.FENCE.getId(), woodTime);
@@ -46,7 +54,7 @@ public class Fuel {
         burnTimes.put(Material.NOTE_BLOCK.getId(), woodTime);
         burnTimes.put(Material.LOCKED_CHEST.getId(), woodTime);
         burnTimes.put(Material.FENCE_GATE.getId(), woodTime);
-        
+
         burnTimes.put(Material.SAPLING.getId(), saplingTime);
         burnTimes.put(Material.STICK.getId(), saplingTime);
         burnTimes.put(Material.SUGAR_CANE.getId(), saplingTime);
@@ -63,11 +71,59 @@ public class Fuel {
      * @return The burn time. Returns 0 for any material that is not a fuel.
      */
     public static int burnTime(int typeId) {
-        int burnTime = 0;
-        if (burnTimes.containsKey(typeId)) {
-            burnTime = burnTimes.get(typeId);
-        }
+        final Integer burnTime = burnTimes.get(typeId);
+        if (burnTime == null)
+            return 0;
         return burnTime;
+    }
+
+    /**
+     * Returns the base Minecraft burn time for the given material. This will
+     * ignore any changes made to burn times in the config file.
+     * 
+     * @param material
+     * @return The burn time. Returns 0 for any material that is not a fuel.
+     */
+    public static int burnTimeBase(Material material) {
+        switch (material) {
+        case BLAZE_ROD:
+            return blazeRodTime;
+
+        case COAL:
+            return coalTime;
+
+        case WOOD:
+        case LOG:
+        case FENCE:
+        case WOOD_STAIRS:
+        case TRAP_DOOR:
+        case WORKBENCH:
+        case BOOKSHELF:
+        case CHEST:
+        case JUKEBOX:
+        case NOTE_BLOCK:
+        case LOCKED_CHEST:
+        case FENCE_GATE:
+            return woodTime;
+
+        case SAPLING:
+        case STICK:
+            return saplingTime;
+        default:
+            return 0;
+        }
+    }
+
+    /**
+     * Returns true if this material can be burned in a furnace.
+     * 
+     * @param material
+     * @return
+     */
+    public static boolean isBurnable(Material material) {
+        if (burnable == null)
+            burnable = getBurnableMaterials();
+        return (burnable.contains(material));
     }
 
     /**
@@ -79,21 +135,14 @@ public class Fuel {
      */
     public static int consume(final Furnace furnace) {
         try {
-            Inventory furnaceInventory = furnace.getInventory();
-            ItemStack fuelStack = furnaceInventory.getItem(fuelSlot);
+            FurnaceInventory furnaceInventory = furnace.getInventory();
+            ItemStack fuelStack = furnaceInventory.getFuel();
             if (fuelStack == null)
                 return 0;
             int burnTime = burnTime(fuelStack.getType().getId());
-            int amount = fuelStack.getAmount();
             if (burnTime > 0) {
-                if (amount == 0) {
-                    burnTime = 0;
-                } else if (amount == 1) {
-                    furnaceInventory.clear(fuelSlot);
-                } else {
-                    fuelStack.setAmount(amount - 1);
-                    furnaceInventory.setItem(fuelSlot, fuelStack);
-                }
+                fuelStack.setAmount(fuelStack.getAmount() - 1);
+                furnaceInventory.setFuel(fuelStack);
             }
             return burnTime;
         } catch (Exception e) {
@@ -152,5 +201,16 @@ public class Fuel {
             }
             burnTimes.put(typeId, configuration.getInt(id, 0));
         }
+    }
+
+    private static Set<Material> getBurnableMaterials() {
+        Set<Material> burnables = new HashSet<Material>(24);
+        for (Iterator<Recipe> it = MachinaCore.plugin.getServer().recipeIterator(); it.hasNext();) {
+            Recipe recipe = it.next();
+            if (recipe instanceof FurnaceRecipe) {
+                burnables.add(((FurnaceRecipe) recipe).getInput().getType());
+            }
+        }
+        return burnables;
     }
 }

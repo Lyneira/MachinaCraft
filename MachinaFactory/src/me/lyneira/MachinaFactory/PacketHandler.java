@@ -33,7 +33,7 @@ public class PacketHandler {
      * @param payload
      * @return True if the payload was handled successfully.
      */
-    <P> boolean handle(PipelineEndpoint endpoint, P payload) {
+    <P> boolean handle(PipelineEndpoint endpoint, P payload) throws PacketTypeUnsupportedException {
         for (int i = 0; i < listeners.length; i++) {
             if (types[i].isInstance(payload)) {
                 @SuppressWarnings("unchecked")
@@ -41,6 +41,6 @@ public class PacketHandler {
                 return l.handle(endpoint, payload);
             }
         }
-        return false;
+        throw new PacketTypeUnsupportedException();
     }
 }

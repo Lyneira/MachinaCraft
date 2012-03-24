@@ -10,12 +10,15 @@ import org.bukkit.entity.Player;
 
 /**
  * A potential target node in a pipeline.
+ * 
  * @author Lyneira
- *
+ * 
  */
 class TargetNode extends PipelineNode {
     /**
-     * Constructs a new TargetNode for the given location, with the given previous node.
+     * Constructs a new TargetNode for the given location, with the given
+     * previous node.
+     * 
      * @param previous
      * @param location
      * @param type
@@ -26,16 +29,19 @@ class TargetNode extends PipelineNode {
 
     @Override
     PipelineEndpoint target(BlockLocation anchor, Player player) {
-        switch (type) {
-        case AIR:
-            return null;
-        case CHEST:
-        case DISPENSER:
-            try {
-                return new ContainerEndpoint(player, location);
-            } catch (PipelineException e) {
+        try {
+            switch (type) {
+            case AIR:
                 return null;
+            case CHEST:
+            case DISPENSER:
+                return new ContainerEndpoint(player, location);
+            case FURNACE:
+            case BURNING_FURNACE:
+                return new FurnaceEndpoint(player, location);
             }
+        } catch (PipelineException e) {
+            return null;
         }
         if (location.equals(anchor))
             return null;

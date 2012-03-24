@@ -13,7 +13,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Furnace;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.ItemStack;
 
 import me.lyneira.MachinaCore.BlockLocation;
@@ -193,16 +193,16 @@ final class Pump implements Machina {
      *         slot.
      */
     boolean putDrainItem() {
-        Inventory inventory = ((Furnace) anchor.getRelative(backward).getBlock().getState()).getInventory();
-        ItemStack item = inventory.getItem(Fuel.smeltSlot);
+        FurnaceInventory inventory = ((Furnace) anchor.getRelative(backward).getBlock().getState()).getInventory();
+        ItemStack item = inventory.getSmelting();
         if (item == null) {
-            inventory.setItem(Fuel.smeltSlot, new ItemStack(tubeMaterial, 1));
+            inventory.setSmelting(new ItemStack(tubeMaterial, 1));
             return true;
         } else if (item.getType() == tubeMaterial) {
             int amount = item.getAmount();
             if (amount < tubeMaterial.getMaxStackSize()) {
                 item.setAmount(amount + 1);
-                inventory.setItem(Fuel.smeltSlot, item);
+                inventory.setSmelting(item);
                 return true;
             }
         }
@@ -233,21 +233,16 @@ final class Pump implements Machina {
                 return stop();
 
             // Try to take a drain block from the furnace.
-            Inventory inventory = ((Furnace) anchor.getRelative(backward).getBlock().getState()).getInventory();
-            ItemStack item = inventory.getItem(Fuel.smeltSlot);
+            FurnaceInventory inventory = ((Furnace) anchor.getRelative(backward).getBlock().getState()).getInventory();
+            ItemStack item = inventory.getSmelting();
             if (item != null && item.getType() == tubeMaterial) {
                 // Before taking, we have to simulate whether we can actually
                 // place the block.
                 if (!EventSimulator.blockPlace(target, tubeMaterial.getId(), (byte) 0, target.getRelative(backward, size), player))
                     return stop();
 
-                int amount = item.getAmount();
-                if (amount > 1) {
-                    item.setAmount(amount - 1);
-                    inventory.setItem(Fuel.smeltSlot, item);
-                } else {
-                    inventory.clear(Fuel.smeltSlot);
-                }
+                item.setAmount(item.getAmount() - 1);
+                inventory.setSmelting(item);
                 target.setType(tubeMaterial);
                 tube.add(target);
                 return this;
@@ -259,8 +254,8 @@ final class Pump implements Machina {
             if (tube.size() == 0)
                 return null;
             // Check which mode the pump should operate in.
-            Inventory inventory = ((Furnace) anchor.getRelative(backward).getBlock().getState()).getInventory();
-            ItemStack item = inventory.getItem(Fuel.fuelSlot);
+            FurnaceInventory inventory = ((Furnace) anchor.getRelative(backward).getBlock().getState()).getInventory();
+            ItemStack item = inventory.getFuel();
             if (item != null && item.getType() == filledBucketMaterial) {
                 if (filledBucketMaterial == Material.WATER_BUCKET && anchor.getWorld().getEnvironment() == World.Environment.NETHER && !player.hasPermission("machinapump.nether-water")) {
                     player.sendMessage("You do not have permission to pour water with a pump in the nether.");
