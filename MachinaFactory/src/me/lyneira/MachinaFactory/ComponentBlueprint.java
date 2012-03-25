@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import me.lyneira.MachinaCore.BlockData;
 import me.lyneira.MachinaCore.BlockLocation;
 import me.lyneira.MachinaCore.BlockRotation;
 import me.lyneira.MachinaCore.BlueprintBlock;
@@ -17,6 +18,7 @@ public class ComponentBlueprint {
     final List<BlueprintBlock> blueprintBase;
     final List<BlueprintBlock> blueprintInactive;
     final List<BlueprintBlock> blueprintActive;
+    final int[] dataIndices;
 
     /**
      * Blocks that need collision detection when activating.
@@ -38,9 +40,10 @@ public class ComponentBlueprint {
     /**
      * Constructs a ComponentBlueprint from the given three blueprints. While
      * inactive the component will consist of the base and inactive blueprints.
-     * While active, the active blueprint replaces the inactive blueprint.<br>
-     * <br>
+     * While active, the active blueprint replaces the inactive blueprint.
+     * <p>
      * Note: Attachables such as a torch should be put last in their array.
+     * </p>
      * 
      * @param blueprintBase
      *            An array of {@link BlueprintBlock}s that is present in either
@@ -53,6 +56,26 @@ public class ComponentBlueprint {
      *            inactive blueprint while the component is powered on.
      */
     public ComponentBlueprint(BlueprintBlock[] blueprintBase, BlueprintBlock[] blueprintInactive, BlueprintBlock[] blueprintActive) {
+        // Verify whether active and inactive have the same size and contain the
+        // same block type IDs in the same order.
+        if (blueprintInactive.length != blueprintActive.length)
+            throw new Error("Error creating new ComponentBlueprint: blueprintInactive and blueprintActive must be the same size.");
+
+        // Process the copyData and copyInventory values
+        List<Integer> dataIndices = new ArrayList<Integer>();
+        for (int i = 0; i < blueprintInactive.length; i++) {
+            int typeId = blueprintInactive[i].typeId;
+            if (typeId != blueprintActive[i].typeId) {
+                throw new Error("Error creating new ComponentBlueprint: blueprintInactive and blueprintActive must contain the same blueprint block types in the same order.");
+            }
+            if (BlockData.copyData(typeId))
+                dataIndices.add(i);
+        }
+
+        this.dataIndices = new int[dataIndices.size()];
+        for (int i = 0; i < dataIndices.size(); i++)
+            this.dataIndices[i] = dataIndices.get(i);
+
         this.blueprintBase = (blueprintBase == null) ? Arrays.asList(new BlueprintBlock[] {}) : Arrays.asList(blueprintBase.clone());
         this.blueprintInactive = (blueprintInactive == null) ? Arrays.asList(new BlueprintBlock[] {}) : Arrays.asList(blueprintInactive.clone());
         this.blueprintActive = (blueprintActive == null) ? Arrays.asList(new BlueprintBlock[] {}) : Arrays.asList(blueprintActive.clone());
@@ -60,6 +83,7 @@ public class ComponentBlueprint {
         activateDiffMinus = negativeDifference(this.blueprintInactive, this.blueprintActive);
         deactivateDiffPlus = positiveDifference(this.blueprintInactive, this.blueprintActive);
         deactivateDiffMinus = negativeDifference(this.blueprintActive, this.blueprintInactive);
+
     }
 
     /**

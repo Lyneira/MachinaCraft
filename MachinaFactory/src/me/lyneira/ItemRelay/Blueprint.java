@@ -22,7 +22,7 @@ import me.lyneira.MachinaFactory.ComponentDetectException;
  * @author Lyneira
  */
 public class Blueprint implements MachinaBlueprint {
-    static final Material anchorMaterial = Material.BRICK;
+    private static final Material anchorMaterial = Material.BRICK;
     final BlueprintBlock sender;
     final BlueprintBlock chest;
     final BlueprintBlock dispenser;
@@ -43,10 +43,10 @@ public class Blueprint implements MachinaBlueprint {
                 dispenser = new BlueprintBlock(new BlockVector(-1, 0, 0), Material.DISPENSER, true), //
         };
         BlueprintBlock[] blueprintBaseFurnace = { new BlueprintBlock(new BlockVector(0, 0, 0), anchorMaterial, true), //
-                // We leave out the furnace from the blueprint and verify it manually.
+        // We leave out the furnace from the blueprint and verify it manually.
         };
-        BlueprintBlock[] blueprintInactive = { new BlueprintBlock(new BlockVector(1, 0, 0), Material.WOOD, false), //
-                new BlueprintBlock(new BlockVector(1, 1, 0), Material.IRON_FENCE, false), //
+        BlueprintBlock[] blueprintInactive = { new BlueprintBlock(new BlockVector(1, 1, 0), Material.IRON_FENCE, false), //
+                new BlueprintBlock(new BlockVector(1, 0, 0), Material.WOOD, false), //
         };
 
         BlueprintBlock[] blueprintActive = { new BlueprintBlock(new BlockVector(1, 0, 0), Material.IRON_FENCE, false), //

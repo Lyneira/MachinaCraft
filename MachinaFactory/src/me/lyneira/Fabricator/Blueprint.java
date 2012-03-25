@@ -22,7 +22,7 @@ import me.lyneira.MachinaFactory.MachinaFactory;
  * @author Lyneira
  */
 public class Blueprint implements MachinaBlueprint {
-    static final Material anchorMaterial = Material.BRICK;
+    private static final Material anchorMaterial = Material.BRICK;
     final MachinaFactory plugin;
     final BlueprintBlock chest;
     final BlueprintBlock sender;
@@ -38,8 +38,8 @@ public class Blueprint implements MachinaBlueprint {
                 new BlueprintBlock(new BlockVector(1, 0, 0), Material.WORKBENCH, true), //
                 chest = new BlueprintBlock(new BlockVector(0, 1, 0), Material.CHEST, false), //
         };
-        BlueprintBlock[] blueprintInactive = { new BlueprintBlock(new BlockVector(2, 0, 0), Material.WOOD, false), //
-                new BlueprintBlock(new BlockVector(2, 1, 0), Material.IRON_FENCE, false), //
+        BlueprintBlock[] blueprintInactive = { new BlueprintBlock(new BlockVector(2, 1, 0), Material.IRON_FENCE, false), //
+                new BlueprintBlock(new BlockVector(2, 0, 0), Material.WOOD, false), //
         };
 
         BlueprintBlock[] blueprintActive = { new BlueprintBlock(new BlockVector(2, 0, 0), Material.IRON_FENCE, false), //

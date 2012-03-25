@@ -1,0 +1,9 @@
+# HoverPad configuration file.
+#
+# The material ids to be used for the hoverpad are specified here. Only solid blocks are valid.
+#
+# inner-material: id of the inner blocks (wooden planks by default)
+# outer-material: id of the outer blocks (wool by default)
+
+inner-material: 5
+outer-material: 35

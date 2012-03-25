@@ -29,7 +29,7 @@ class BlueprintModule {
     BlueprintModule(final ModuleFactory blueprintSouth) {
         List<BlueprintBlock> blueprintFinal = blueprintSouth.getBlueprintFinal();
         size = blueprintFinal.size();
-        blueprint = blueprintFinal.toArray(new BlueprintBlock[0]);
+        blueprint = blueprintFinal.toArray(new BlueprintBlock[size]);
 
         // Initialize the vector arrays for each rotation.
         for (BlockRotation rotation : BlockRotation.values()) {
@@ -137,7 +137,7 @@ class BlueprintModule {
     }
 
     /**
-     * Returns an array of indices whose blocks need their data copied. during a
+     * Returns an array of indices whose blocks need their data copied during a
      * move.
      * 
      * @return An array of indices for data blocks
@@ -165,7 +165,7 @@ class BlueprintModule {
     }
 
     /**
-     * Returns an array of indices whose blocks need their inventory copied.
+     * Returns an array of indices whose blocks need their inventory copied
      * during a move.
      * 
      * @return An array of indices for inventory blocks

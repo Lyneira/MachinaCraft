@@ -152,7 +152,7 @@ public final class BlockData {
 
         set(Material.COBBLESTONE.getId()).solid(true).drillable(true).drillTime(breakTimeMedium);
 
-        set(Material.WOOD.getId()).solid(true).drillable(true).drillTime(breakTimeMedium);
+        set(Material.WOOD.getId()).solid(true).drillable(true).copyData(true).drillTime(breakTimeMedium);
 
         set(Material.SAPLING.getId()).drillable(true).copyData(true).attached(true);
 
@@ -190,7 +190,7 @@ public final class BlockData {
 
         set(Material.DISPENSER.getId()).solid(true).copyData(true).inventory(true);
 
-        set(Material.SANDSTONE.getId()).solid(true).drillable(true).drillTime(breakTimeFast);
+        set(Material.SANDSTONE.getId()).solid(true).drillable(true).copyData(true).drillTime(breakTimeFast);
 
         set(Material.NOTE_BLOCK.getId()).solid(true).drillable(true).drillTime(breakTimeMedium);
 

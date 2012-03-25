@@ -28,11 +28,14 @@ public abstract class Component implements Machina, EndpointVerify {
      * Constructs a new Component from the ComponentBlueprint and activates it.
      * The constructor takes care of detecting the non-key blocks of the
      * blueprint and throws an exception if it failed to detect them.
+     * 
      * @param blueprint
      * @param anchor
      * @param yaw
-     * @throws ComponentActivateException The component could not activate due to a collision.
-     * @throws ComponentDetectException The component could not be detected.
+     * @throws ComponentActivateException
+     *             The component could not activate due to a collision.
+     * @throws ComponentDetectException
+     *             The component could not be detected.
      */
     protected Component(ComponentBlueprint blueprint, BlockLocation anchor, BlockRotation yaw) throws ComponentActivateException, ComponentDetectException {
         this.anchor = anchor;
@@ -47,14 +50,27 @@ public abstract class Component implements Machina, EndpointVerify {
         if (detectCollision(blueprint.activateDiffPlus))
             throw new ComponentActivateException();
 
+        // Copy data
+        byte dataValues[] = new byte[blueprint.dataIndices.length];
+        for (int i = 0; i < dataValues.length; i++) {
+            dataValues[i] = anchor.getRelative(blueprint.blueprintInactive.get(blueprint.dataIndices[i]).vector(yaw)).getBlock().getData();
+        }
+
         // Clear the negative difference in reverse order.
         for (ListIterator<BlueprintBlock> it = blueprint.activateDiffMinus.listIterator(blueprint.activateDiffMinus.size()); it.hasPrevious();) {
             anchor.getRelative(it.previous().vector(yaw)).setEmpty();
         }
 
-        // Place the active blueprint now.
-        for (BlueprintBlock i : blueprint.blueprintActive) {
-            anchor.getRelative(i.vector(yaw)).setTypeId(i.typeId);
+        // Place the active blueprint now while copying data if necessary.
+        int dataIndex = 0;
+        for (int i = 0; i < blueprint.blueprintActive.size(); i++) {
+            BlueprintBlock block = blueprint.blueprintActive.get(i);
+            if (i == blueprint.dataIndices[dataIndex]) {
+                anchor.getRelative(block.vector(yaw)).getBlock().setTypeIdAndData(block.typeId, dataValues[dataIndex], true);
+                dataIndex++;
+            } else {
+                anchor.getRelative(block.vector(yaw)).setTypeId(block.typeId);
+            }
         }
     }
 
@@ -98,14 +114,27 @@ public abstract class Component implements Machina, EndpointVerify {
         if (detectCollision(blueprint.deactivateDiffPlus))
             return;
 
+        // Copy data
+        byte dataValues[] = new byte[blueprint.dataIndices.length];
+        for (int i = 0; i < dataValues.length; i++) {
+            dataValues[i] = anchor.getRelative(blueprint.blueprintActive.get(blueprint.dataIndices[i]).vector(yaw)).getBlock().getData();
+        }
+
         // Clear the negative difference in reverse order.
         for (ListIterator<BlueprintBlock> it = blueprint.deactivateDiffMinus.listIterator(blueprint.deactivateDiffMinus.size()); it.hasPrevious();) {
             this.anchor.getRelative(it.previous().vector(yaw)).setEmpty();
         }
 
-        // Place the inactive blueprint now.
-        for (BlueprintBlock i : blueprint.blueprintInactive) {
-            this.anchor.getRelative(i.vector(yaw)).setTypeId(i.typeId);
+        // Place the inactive blueprint now while copying data if necessary.
+        int dataIndex = 0;
+        for (int i = 0; i < blueprint.blueprintInactive.size(); i++) {
+            BlueprintBlock block = blueprint.blueprintInactive.get(i);
+            if (i == blueprint.dataIndices[dataIndex]) {
+                anchor.getRelative(block.vector(yaw)).getBlock().setTypeIdAndData(block.typeId, dataValues[dataIndex], true);
+                dataIndex++;
+            } else {
+                anchor.getRelative(block.vector(yaw)).setTypeId(block.typeId);
+            }
         }
     }
 
