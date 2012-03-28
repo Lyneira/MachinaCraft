@@ -107,9 +107,14 @@ public class InventoryManager {
         ItemStack item = inventory.getItem(index);
         if (item == null)
             return;
-
-        item.setAmount(item.getAmount() - 1);
-        inventory.setItem(index, item);
+        
+        int newAmount = item.getAmount() - 1;
+        if (newAmount < 1) {
+            inventory.clear(index);
+        } else {
+            item.setAmount(newAmount - 1);
+            inventory.setItem(index, item);
+        }
     }
 
     /**

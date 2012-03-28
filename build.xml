@@ -10,6 +10,10 @@
 		<ant dir="MachinaPump" />
 		<ant dir="HoverPad" />
 		<ant dir="MachinaFactory" />
+
+		<copy todir="${jarDir}">
+			<fileset dir="resources" includes="*" />
+		</copy>
 	</target>
 
 	<target name="clean">

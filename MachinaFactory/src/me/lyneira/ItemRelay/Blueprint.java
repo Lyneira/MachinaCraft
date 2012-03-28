@@ -90,7 +90,7 @@ public class Blueprint implements MachinaBlueprint {
             return null;
         }
 
-        if (EventSimulator.inventoryProtected(player, container))
+        if (EventSimulator.inventoryProtectedStatic(player, container))
             return null;
 
         try {

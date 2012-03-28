@@ -1,0 +1,29 @@
+# == MachinaCraft permissions.yml ==
+# Convenience permission file for bukkit's permissions.yml.
+#
+# This file can be used on a server without a permissions mod to allow everyone
+# on the server access to all basic machinacraft functionality.
+#
+# On servers that do use a permission setup, you can change the default option to:
+# default: op
+# and use the master machinacraft permission to easily control all machinacraft
+# access via your permissions plugin.
+#
+# == How to use ==
+# * If your permissions.yml file in your bukkit folder is empty, you can
+#   replace it with this file.
+# * Otherwise, add the contents below to your existing configuration to use the
+#   machinacraft convenience permission.
+# * To allow the pump to work with lava, uncomment the bottom line that reads:
+#   machinapump.lava.all: true
+
+machinacraft:
+    default: true
+    description: All basic MachinaCraft functionality
+    children:
+        machinadrill.all: true
+        machinabuilder.all: true
+        machinapump.all: true
+        hoverpad: true
+        machinafactory.all: true
+#        machinapump.lava.all: true

@@ -20,7 +20,7 @@ public class ContainerEndpoint implements PipelineEndpoint {
     ContainerEndpoint(Player player, BlockLocation location) throws PipelineException {
         this.location = location;
 
-        if (EventSimulator.inventoryProtected(player, location))
+        if (EventSimulator.inventoryProtectedStatic(player, location))
             throw new PipelineException(location);
     }
 

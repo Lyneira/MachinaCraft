@@ -126,8 +126,8 @@ public final class BlockLocation {
     /**
      * Sets the Material at this {@link BlockLocation}.
      * 
-     * @param type
-     *            The Material to set to
+     * @param typeId
+     *            The type id to set
      */
     public final void setTypeId(final int typeId) {
         world.getBlockAt(x, y, z).setTypeId(typeId);
@@ -141,6 +141,16 @@ public final class BlockLocation {
      */
     public final void setData(final byte data) {
         world.getBlockAt(x, y, z).setData(data);
+    }
+    
+    /**
+     * Sets the type id and data at this {@link BlockLocation}.
+     * 
+     * @param type The type id to set
+     * @param data The data to set
+     */
+    public final void setTypeIdAndData(final int typeId, final byte data, boolean applyPhysics) {
+        world.getBlockAt(x, y, z).setTypeIdAndData(typeId, data, applyPhysics);
     }
 
     /**

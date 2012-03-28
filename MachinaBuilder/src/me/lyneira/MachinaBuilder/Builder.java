@@ -310,7 +310,7 @@ public class Builder extends Movable {
                 if (!useEnergy(anchor, BlockData.getDrillTime(typeId) + buildDelay))
                     return null;
 
-                if (!EventSimulator.blockBreak(target, player, results))
+                if (!EventSimulator.blockBreak(target, player))
                     return null;
 
                 transaction.add(results);
@@ -395,7 +395,7 @@ public class Builder extends Movable {
                 byte data = item.getData().getData();
 
                 manager.decrement();
-                target.getBlock().setTypeIdAndData(typeId, data, false);
+                target.getBlock().setTypeIdAndData(typeId, data, true);
             }
             if (depth == 1) {
                 return moveStage;

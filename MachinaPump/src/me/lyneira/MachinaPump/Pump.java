@@ -189,16 +189,17 @@ final class Pump implements Machina {
      * Adds a drain block to the furnace's smelt slot for the deconstruction of
      * a drain.
      * 
+     * @param data The data value of the tube material to check.
      * @return True if a drain block item could be added to the furnace smelt
      *         slot.
      */
-    boolean putDrainItem() {
+    boolean putDrainItem(byte data) {
         FurnaceInventory inventory = ((Furnace) anchor.getRelative(backward).getBlock().getState()).getInventory();
         ItemStack item = inventory.getSmelting();
         if (item == null) {
-            inventory.setSmelting(new ItemStack(tubeMaterial, 1));
+            inventory.setSmelting(new ItemStack(tubeMaterial, 1, data));
             return true;
-        } else if (item.getType() == tubeMaterial) {
+        } else if (item.getType() == tubeMaterial && item.getDurability() == data) {
             int amount = item.getAmount();
             if (amount < tubeMaterial.getMaxStackSize()) {
                 item.setAmount(amount + 1);
@@ -236,14 +237,20 @@ final class Pump implements Machina {
             FurnaceInventory inventory = ((Furnace) anchor.getRelative(backward).getBlock().getState()).getInventory();
             ItemStack item = inventory.getSmelting();
             if (item != null && item.getType() == tubeMaterial) {
+                byte data = (byte) item.getDurability();
                 // Before taking, we have to simulate whether we can actually
                 // place the block.
                 if (!EventSimulator.blockPlace(target, tubeMaterial.getId(), (byte) 0, target.getRelative(backward, size), player))
                     return stop();
 
-                item.setAmount(item.getAmount() - 1);
-                inventory.setSmelting(item);
-                target.setType(tubeMaterial);
+                int newAmount = item.getAmount() - 1;
+                if (newAmount < 1) {
+                    inventory.setSmelting(null);
+                } else {
+                    item.setAmount(newAmount);
+                    inventory.setSmelting(item);
+                }
+                target.setTypeIdAndData(tubeMaterial.getId(), data, true);
                 tube.add(target);
                 return this;
             }
@@ -354,7 +361,7 @@ final class Pump implements Machina {
         }
 
         void apply(BlockLocation target) {
-            if (target.checkTypes(stationaryLiquidMaterial, liquidMaterial) && EventSimulator.blockBreak(target, player, new ArrayList<ItemStack>(1))) {
+            if (target.checkTypes(stationaryLiquidMaterial, liquidMaterial) && EventSimulator.blockBreak(target, player)) {
                 target.setEmpty();
             }
         }
@@ -456,10 +463,11 @@ final class Pump implements Machina {
                 return null;
 
             BlockLocation target = tube.remove(size - 1);
-            if (!EventSimulator.blockBreak(target, player, new ArrayList<ItemStack>(1)))
+            byte data = target.getBlock().getData();
+            if (!EventSimulator.blockBreak(target, player))
                 return null;
 
-            if (!putDrainItem())
+            if (!putDrainItem(data))
                 return null;
 
             target.setEmpty();

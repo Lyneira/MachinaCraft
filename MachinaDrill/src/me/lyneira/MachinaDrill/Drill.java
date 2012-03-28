@@ -152,7 +152,7 @@ final class Drill extends Movable {
             if (!useEnergy(anchor, BlockData.getDrillTime(nextTypeId)))
                 return false;
 
-            if (!EventSimulator.blockBreak(queuedTarget, player, results))
+            if (!EventSimulator.blockBreak(queuedTarget, player))
                 return false;
 
             transaction.add(results);

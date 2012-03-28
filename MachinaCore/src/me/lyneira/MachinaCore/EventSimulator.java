@@ -1,8 +1,5 @@
 package me.lyneira.MachinaCore;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -12,7 +9,6 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemStack;
 
 /**
  * Class that simulates events.
@@ -72,9 +68,9 @@ public class EventSimulator {
      *            plugins may have modified this list when this method returns.
      * @return True if the player may break a block at the location.
      */
-    public static boolean blockBreak(BlockLocation target, Player player, List<ItemStack> drops) {
+    public static boolean blockBreak(BlockLocation target, Player player) {
         Block block = target.getBlock();
-        BlockBreakEvent breakEvent = new ArtificialBlockBreakEvent(block, player, drops);
+        BlockBreakEvent breakEvent = new ArtificialBlockBreakEvent(block, player);
         MachinaCore.pluginManager.callEvent(breakEvent);
         if (breakEvent.isCancelled())
             return false;
@@ -133,7 +129,7 @@ public class EventSimulator {
      */
     public static boolean blockBreakPretend(BlockLocation target, Player player) {
         Block block = target.getBlock();
-        pretendEvent = new ArtificialBlockBreakEvent(block, player, new ArrayList<ItemStack>(1));
+        pretendEvent = new ArtificialBlockBreakEvent(block, player);
         pretendEventCancelled = true;
         MachinaCore.pluginManager.callEvent(pretendEvent);
 
@@ -163,7 +159,8 @@ public class EventSimulator {
 
     /**
      * Function for testing whether one or more inventories inside a machina are
-     * protected from the player.
+     * protected from the player. Intended for moving machina as this will break
+     * LWC protections and the like.
      * 
      * @param yaw
      *            The direction of the machina
@@ -188,6 +185,8 @@ public class EventSimulator {
 
     /**
      * Tests whether the inventory in this block is protected from the player.
+     * Intended for still machina, this test won't break an LWC protection upon
+     * success.
      * 
      * @param player
      *            The player to simulate for
@@ -196,8 +195,8 @@ public class EventSimulator {
      * @return False if and only if the player may interact with and break the
      *         given block. True otherwise.
      */
-    public static boolean inventoryProtected(Player player, BlockLocation target) {
-        if (!(blockRightClick(target, player, BlockFace.NORTH) && blockBreakPretend(target, player)))
+    public static boolean inventoryProtectedStatic(Player player, BlockLocation target) {
+        if (!(blockRightClick(target, player, BlockFace.NORTH)))
             return true;
         return false;
     }
