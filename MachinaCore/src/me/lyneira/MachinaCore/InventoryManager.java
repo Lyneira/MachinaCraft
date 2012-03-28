@@ -112,7 +112,7 @@ public class InventoryManager {
         if (newAmount < 1) {
             inventory.clear(index);
         } else {
-            item.setAmount(newAmount - 1);
+            item.setAmount(newAmount);
             inventory.setItem(index, item);
         }
     }
