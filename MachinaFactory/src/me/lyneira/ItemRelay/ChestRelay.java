@@ -14,8 +14,8 @@ import org.bukkit.entity.Player;
  */
 public class ChestRelay extends ItemRelay {
 
-    ChestRelay(Blueprint blueprint, BlockRotation yaw, Player player, BlockLocation anchor) throws ComponentActivateException, ComponentDetectException {
-        super(blueprint, blueprint.blueprintChest, yaw, player, anchor);
+    ChestRelay(Blueprint blueprint, BlockLocation anchor, BlockRotation yaw, Player player) throws ComponentActivateException, ComponentDetectException {
+        super(blueprint, blueprint.blueprintChest, anchor, yaw, player);
     }
 
     @Override

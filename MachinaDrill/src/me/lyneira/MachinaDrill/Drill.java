@@ -12,9 +12,9 @@ import me.lyneira.MachinaCore.BlueprintBlock;
 import me.lyneira.MachinaCore.EventSimulator;
 import me.lyneira.MachinaCore.Fuel;
 import me.lyneira.MachinaCore.HeartBeatEvent;
-import me.lyneira.MachinaCore.InventoryManager;
-import me.lyneira.MachinaCore.InventoryTransaction;
 import me.lyneira.MachinaCore.Movable;
+import me.lyneira.util.InventoryManager;
+import me.lyneira.util.InventoryTransaction;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;

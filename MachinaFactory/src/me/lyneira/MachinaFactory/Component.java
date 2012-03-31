@@ -65,7 +65,7 @@ public abstract class Component implements Machina, EndpointVerify {
         int dataIndex = 0;
         for (int i = 0; i < blueprint.blueprintActive.size(); i++) {
             BlueprintBlock block = blueprint.blueprintActive.get(i);
-            if (i == blueprint.dataIndices[dataIndex]) {
+            if (dataValues.length != 0 && i == blueprint.dataIndices[dataIndex]) {
                 anchor.getRelative(block.vector(yaw)).getBlock().setTypeIdAndData(block.typeId, dataValues[dataIndex], true);
                 dataIndex++;
             } else {
@@ -129,7 +129,7 @@ public abstract class Component implements Machina, EndpointVerify {
         int dataIndex = 0;
         for (int i = 0; i < blueprint.blueprintInactive.size(); i++) {
             BlueprintBlock block = blueprint.blueprintInactive.get(i);
-            if (i == blueprint.dataIndices[dataIndex]) {
+            if (dataValues.length != 0 && i == blueprint.dataIndices[dataIndex]) {
                 anchor.getRelative(block.vector(yaw)).getBlock().setTypeIdAndData(block.typeId, dataValues[dataIndex], true);
                 dataIndex++;
             } else {

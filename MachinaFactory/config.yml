@@ -1,0 +1,9 @@
+# MachinaFactory configuration file.
+#
+# core-material: The block id of the material to use as the centerpiece for
+#     MachinaFactory components. (default: 45 - brick block)
+# pipeline-material: The block id of the material to use for pipelines between
+#     MachinaFactory components. (default: 5 - wooden planks)
+
+core-material: 45
+pipeline-material: 5

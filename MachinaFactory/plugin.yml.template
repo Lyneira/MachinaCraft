@@ -14,7 +14,7 @@ permissions:
             machinafactory.itemrelay: true
             machinafactory.fabricator: true
     machinafactory.itemrelay:
-        description: Allows use of an Item Relay
+        description: Allows use of Item Relays and Splitters
         default: op
     machinafactory.fabricator:
         description: Allows use of a Fabricator

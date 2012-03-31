@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import me.lyneira.MachinaFactory.ComponentActivateException;
+import me.lyneira.util.ItemUtils;
 
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -78,7 +79,9 @@ class RecipeVerifier {
     }
 
     /**
-     * Iterates through the given Recipe iterator and finds the recipe laid out on this verifier's inventory. 
+     * Iterates through the given Recipe iterator and finds the recipe laid out
+     * on this verifier's inventory.
+     * 
      * @param it
      * @return A list of ingredients needed for each combine.
      */
@@ -108,7 +111,7 @@ class RecipeVerifier {
         List<ItemStack> collected = new ArrayList<ItemStack>(ingredients.size());
         INGREDIENTS: for (ItemStack ingredient : ingredients) {
             for (ItemStack item : collected) {
-                if (itemCompareCollect(item, ingredient)) {
+                if (ItemUtils.itemEqualsTypeAndData(item, ingredient)) {
                     item.setAmount(item.getAmount() + ingredient.getAmount());
                     continue INGREDIENTS;
                 }
@@ -128,7 +131,7 @@ class RecipeVerifier {
                 if (ingredient == null)
                     continue;
                 for (ItemStack item : collected) {
-                    if (itemCompareCollect(item, ingredient)) {
+                    if (ItemUtils.itemEqualsTypeAndData(item, ingredient)) {
                         item.setAmount(item.getAmount() + ingredient.getAmount());
                         continue INGREDIENTS;
                     }
@@ -155,7 +158,7 @@ class RecipeVerifier {
                 for (Iterator<ItemStack> it = ingredients.iterator(); it.hasNext();) {
                     ItemStack ingredient = it.next();
 
-                    if (itemCompareShapeless(recipeItem, ingredient)) {
+                    if (ItemUtils.recipeIngredientEqualsTypeAndData(ingredient, recipeItem)) {
                         int amount = ingredient.getAmount();
                         if (amount == 1)
                             it.remove();
@@ -209,82 +212,15 @@ class RecipeVerifier {
                 else
                     item = matrix[i][j];
 
-                if (itemCompareShaped(item, ingredient))
+                if (ItemUtils.recipeIngredientSafeEqualsTypeAndData(ingredient, item))
                     continue;
                 return false;
             }
         }
         return true;
     }
-    
+
     ItemStack getResult() {
         return result;
-    }
-
-    /**
-     * Compares an itemstack to a recipe ingredient and returns true if they
-     * match. A data value of -1 in the ingredient allows any data value to
-     * match.
-     * 
-     * @param item
-     * @param ingredient
-     * @return True if item matches ingredient.
-     */
-    private final static boolean itemCompareShaped(ItemStack item, ItemStack ingredient) {
-        if (item == null) {
-            if (ingredient == null) {
-                return true;
-            }
-            return false;
-        } else if (ingredient == null) {
-            return false;
-        }
-
-        if (item.getTypeId() != ingredient.getTypeId())
-            return false;
-
-        short ingredientData = ingredient.getDurability();
-        if (ingredientData == -1 || ingredientData == item.getDurability()) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Compares an itemstack to a recipe ingredient and returns true if they
-     * match. A data value of -1 in the ingredient allows any data value to
-     * match. No nullchecks.
-     * 
-     * @param item
-     * @param ingredient
-     * @return True if item matches ingredient.
-     */
-    private final static boolean itemCompareShapeless(ItemStack item, ItemStack ingredient) {
-        if (item.getTypeId() != ingredient.getTypeId())
-            return false;
-
-        short ingredientData = ingredient.getDurability();
-        if (ingredientData == -1 || ingredientData == item.getDurability()) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Compares an itemstack to a recipe ingredient and returns true if they
-     * match. Matches on exact data values. No nullchecks.
-     * 
-     * @param item
-     * @param ingredient
-     * @return True if item matches ingredient.
-     */
-    private final static boolean itemCompareCollect(ItemStack item, ItemStack ingredient) {
-        if (item.getTypeId() != ingredient.getTypeId())
-            return false;
-
-        if (ingredient.getDurability() == item.getDurability()) {
-            return true;
-        }
-        return false;
     }
 }

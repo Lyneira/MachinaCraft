@@ -3,7 +3,6 @@ package me.lyneira.ItemRelay;
 import me.lyneira.MachinaCore.BlockLocation;
 import me.lyneira.MachinaCore.BlockRotation;
 import me.lyneira.MachinaCore.HeartBeatEvent;
-import me.lyneira.MachinaCore.InventoryManager;
 import me.lyneira.MachinaFactory.Component;
 import me.lyneira.MachinaFactory.ComponentActivateException;
 import me.lyneira.MachinaFactory.ComponentBlueprint;
@@ -15,6 +14,7 @@ import me.lyneira.MachinaFactory.PacketTypeUnsupportedException;
 import me.lyneira.MachinaFactory.Pipeline;
 import me.lyneira.MachinaFactory.PipelineEndpoint;
 import me.lyneira.MachinaFactory.PipelineException;
+import me.lyneira.util.InventoryManager;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -39,7 +39,7 @@ public abstract class ItemRelay extends Component implements PipelineEndpoint {
     protected final Player player;
     protected int age = 0;
 
-    protected ItemRelay(Blueprint blueprint, ComponentBlueprint componentBlueprint, BlockRotation yaw, Player player, BlockLocation anchor) throws ComponentActivateException, ComponentDetectException {
+    protected ItemRelay(Blueprint blueprint, ComponentBlueprint componentBlueprint, BlockLocation anchor, BlockRotation yaw, Player player) throws ComponentActivateException, ComponentDetectException {
         super(componentBlueprint, anchor, yaw);
         this.blueprint = blueprint;
         this.player = player;

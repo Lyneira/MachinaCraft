@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import me.lyneira.MachinaCore.BlockLocation;
+import me.lyneira.MachinaCore.ConfigurationManager;
 import me.lyneira.MachinaCore.Machina;
 import me.lyneira.MachinaCore.MachinaBlueprint;
 import me.lyneira.MachinaCore.MachinaCore;
@@ -42,10 +43,14 @@ public class MachinaFactory extends JavaPlugin {
         log.info(pdf.getName() + " version " + pdf.getVersion() + " is now enabled.");
 
         machinaCore = (MachinaCore) getServer().getPluginManager().getPlugin("MachinaCore");
+        
+        ConfigurationManager config = new ConfigurationManager(this);
+        ComponentBlueprint.loadConfiguration(config.getAll());
 
         // Enable built-in components.
         registerFactoryBlueprint(new me.lyneira.ItemRelay.Blueprint(), me.lyneira.ItemRelay.ItemRelay.class, true);
         registerFactoryBlueprint(new me.lyneira.Fabricator.Blueprint(this), me.lyneira.Fabricator.Fabricator.class, false);
+        registerFactoryBlueprint(new me.lyneira.ItemSplitter.Blueprint(), me.lyneira.ItemSplitter.ItemSplitter.class, false);
     }
 
     @Override

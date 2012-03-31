@@ -2,9 +2,9 @@ package me.lyneira.ItemRelay;
 
 import me.lyneira.MachinaCore.BlockLocation;
 import me.lyneira.MachinaCore.BlockRotation;
-import me.lyneira.MachinaCore.InventoryTransaction;
 import me.lyneira.MachinaFactory.ComponentActivateException;
 import me.lyneira.MachinaFactory.ComponentDetectException;
+import me.lyneira.util.InventoryTransaction;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -24,8 +24,8 @@ public class DispenserRelay extends ItemRelay {
 
     private static final double suctionDistance = 3;
 
-    DispenserRelay(Blueprint blueprint, BlockRotation yaw, Player player, BlockLocation anchor) throws ComponentActivateException, ComponentDetectException {
-        super(blueprint, blueprint.blueprintDispenser, yaw, player, anchor);
+    DispenserRelay(Blueprint blueprint, BlockLocation anchor, BlockRotation yaw, Player player) throws ComponentActivateException, ComponentDetectException {
+        super(blueprint, blueprint.blueprintDispenser, anchor, yaw, player);
     }
 
     /**

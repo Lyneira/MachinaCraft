@@ -1,4 +1,4 @@
-package me.lyneira.MachinaCore;
+package me.lyneira.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,7 +37,7 @@ public class InventoryTransaction {
         // would write back to the inventory, which is undesirable in case the
         // transaction cannot be completed.
         for (int i = 0; i < size; i++) {
-            contents[i] = oldContents[i] == null ? null : new ItemStack(oldContents[i]);
+            contents[i] = (oldContents[i] == null ? null : new ItemStack(oldContents[i]));
         }
     }
 
@@ -203,7 +203,7 @@ public class InventoryTransaction {
     private final int first(ItemStack item) {
         for (int i = 0; i < contents.length; i++) {
             ItemStack c = contents[i];
-            if (c != null && matchItemTypes(item, c)) {
+            if (c != null && ItemUtils.recipeIngredientEqualsTypeAndData(item, c)) {
                 return i;
             }
         }
@@ -221,7 +221,7 @@ public class InventoryTransaction {
     private final int firstPartial(ItemStack item) {
         for (int i = 0; i < contents.length; i++) {
             ItemStack c = contents[i];
-            if (c != null && matchItemTypes(item, c) && c.getAmount() < c.getMaxStackSize()) {
+            if (c != null && ItemUtils.recipeIngredientEqualsTypeAndData(item, c) && c.getAmount() < c.getMaxStackSize()) {
                 return i;
             }
         }
@@ -240,23 +240,5 @@ public class InventoryTransaction {
                 return i;
         }
         return -1;
-    }
-
-    /**
-     * Returns true if item and content match. -1 durability on item means any
-     * data value is allowed.
-     * 
-     * @param item
-     * @param content
-     * @return True if the item types match.
-     */
-    private static final boolean matchItemTypes(ItemStack item, ItemStack content) {
-        if (item.getTypeId() != content.getTypeId())
-            return false;
-
-        if (item.getDurability() == -1 || item.getDurability() == content.getDurability()) {
-            return true;
-        }
-        return true;
     }
 }

@@ -22,7 +22,7 @@ import me.lyneira.MachinaFactory.ComponentDetectException;
  * @author Lyneira
  */
 public class Blueprint implements MachinaBlueprint {
-    private static final Material anchorMaterial = Material.BRICK;
+    private final Material anchorMaterial;
     final BlueprintBlock sender;
     final BlueprintBlock chest;
     final BlueprintBlock dispenser;
@@ -36,6 +36,7 @@ public class Blueprint implements MachinaBlueprint {
      * here.
      */
     public Blueprint() {
+        anchorMaterial = ComponentBlueprint.coreMaterial();
         BlueprintBlock[] blueprintBaseChest = { new BlueprintBlock(new BlockVector(0, 0, 0), anchorMaterial, true), //
                 chest = new BlueprintBlock(new BlockVector(-1, 0, 0), Material.CHEST, true), //
         };
@@ -46,11 +47,11 @@ public class Blueprint implements MachinaBlueprint {
         // We leave out the furnace from the blueprint and verify it manually.
         };
         BlueprintBlock[] blueprintInactive = { new BlueprintBlock(new BlockVector(1, 1, 0), Material.IRON_FENCE, false), //
-                new BlueprintBlock(new BlockVector(1, 0, 0), Material.WOOD, false), //
+                new BlueprintBlock(new BlockVector(1, 0, 0), ComponentBlueprint.pipelineMaterial(), false), //
         };
 
         BlueprintBlock[] blueprintActive = { new BlueprintBlock(new BlockVector(1, 0, 0), Material.IRON_FENCE, false), //
-                sender = new BlueprintBlock(new BlockVector(2, 0, 0), Material.WOOD, false), //
+                sender = new BlueprintBlock(new BlockVector(2, 0, 0), ComponentBlueprint.pipelineMaterial(), false), //
         };
         blueprintChest = new ComponentBlueprint(blueprintBaseChest, blueprintInactive, blueprintActive);
         blueprintDispenser = new ComponentBlueprint(blueprintBaseDispenser, blueprintInactive, blueprintActive);
@@ -96,12 +97,12 @@ public class Blueprint implements MachinaBlueprint {
         try {
             switch (containerMaterial) {
             case CHEST:
-                return new ChestRelay(this, yaw, player, anchor);
+                return new ChestRelay(this, anchor, yaw, player);
             case DISPENSER:
-                return new DispenserRelay(this, yaw, player, anchor);
+                return new DispenserRelay(this, anchor, yaw, player);
             case FURNACE:
             case BURNING_FURNACE:
-                return new FurnaceRelay(this, yaw, player, anchor);
+                return new FurnaceRelay(this, anchor, yaw, player);
             default:
                 break;
             }

@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Queue;
 import java.util.Set;
 
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import me.lyneira.MachinaCore.BlockLocation;
@@ -123,13 +122,13 @@ public class Pipeline {
         graph.add(start);
         q.add(start);
         for (PipelineNode node = q.poll(); node != null && graph.size() < maxSize; node = q.poll()) {
-            // TODO: If node is valid listener: do stuff
+            // TODO: If node is valid listener: do stuff?
             endpoint = node.target(anchor, player);
             if (endpoint != null) {
                 endnode = node;
                 break;
             }
-            for (PipelineNode i : node.neighbors(Material.WOOD)) {
+            for (PipelineNode i : node.neighbors(ComponentBlueprint.pipelineMaterial)) {
                 if (!graph.contains(i)) {
                     graph.add(i);
                     q.add(i);

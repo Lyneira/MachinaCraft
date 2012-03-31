@@ -1,4 +1,5 @@
-package me.lyneira.MachinaCore;
+package me.lyneira.util;
+
 
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -65,16 +66,8 @@ public class InventoryManager {
         ItemStack[] contents = inventory.getContents();
         for (index = 0; index < contents.length; index++) {
             ItemStack c = contents[index];
-            if (c == null)
-                if (item == null)
-                    return true;
-                else
-                    continue;
-            else if (item == null)
-                continue;
-            else if (c.getTypeId() == item.getTypeId() && c.getDurability() == item.getDurability()) {
+            if (ItemUtils.itemSafeEqualsTypeAndData(item, c))
                 return true;
-            }
         }
         return false;
     }
@@ -107,7 +100,7 @@ public class InventoryManager {
         ItemStack item = inventory.getItem(index);
         if (item == null)
             return;
-        
+
         int newAmount = item.getAmount() - 1;
         if (newAmount < 1) {
             inventory.clear(index);

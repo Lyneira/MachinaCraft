@@ -19,8 +19,8 @@ import org.bukkit.inventory.ItemStack;
 
 public class FurnaceRelay extends ItemRelay {
 
-    FurnaceRelay(Blueprint blueprint, BlockRotation yaw, Player player, BlockLocation anchor) throws ComponentActivateException, ComponentDetectException {
-        super(blueprint, blueprint.blueprintFurnace, yaw, player, anchor);
+    FurnaceRelay(Blueprint blueprint, BlockLocation anchor, BlockRotation yaw, Player player) throws ComponentActivateException, ComponentDetectException {
+        super(blueprint, blueprint.blueprintFurnace, anchor, yaw, player);
         state = furnaceSendItem;
     }
 
@@ -83,7 +83,7 @@ public class FurnaceRelay extends ItemRelay {
     };
 
     /**
-     * Listener for item stacks.
+     * Listener for inventories.
      */
     private static final PacketListener<Inventory> inventoryListener = new PacketListener<Inventory>() {
         @Override

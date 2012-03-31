@@ -2,7 +2,7 @@ package me.lyneira.MachinaFactory;
 
 import me.lyneira.MachinaCore.BlockLocation;
 import me.lyneira.MachinaCore.Fuel;
-import me.lyneira.MachinaCore.InventoryManager;
+import me.lyneira.util.InventoryManager;
 
 import org.bukkit.block.Furnace;
 import org.bukkit.entity.Player;

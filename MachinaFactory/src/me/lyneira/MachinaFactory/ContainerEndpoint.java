@@ -6,7 +6,7 @@ import org.bukkit.inventory.ItemStack;
 
 import me.lyneira.MachinaCore.BlockLocation;
 import me.lyneira.MachinaCore.EventSimulator;
-import me.lyneira.MachinaCore.InventoryTransaction;
+import me.lyneira.util.InventoryTransaction;
 
 /**
  * Built-in endpoint for chests and dispensers.

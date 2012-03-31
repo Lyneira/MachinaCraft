@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
+
 import me.lyneira.MachinaCore.BlockData;
 import me.lyneira.MachinaCore.BlockLocation;
 import me.lyneira.MachinaCore.BlockRotation;
@@ -15,6 +18,8 @@ import me.lyneira.MachinaCore.BlueprintBlock;
  * @author Lyneira
  */
 public class ComponentBlueprint {
+    private static Material coreMaterial = Material.BRICK;
+    static Material pipelineMaterial = Material.WOOD;
     final List<BlueprintBlock> blueprintBase;
     final List<BlueprintBlock> blueprintInactive;
     final List<BlueprintBlock> blueprintActive;
@@ -166,5 +171,36 @@ public class ComponentBlueprint {
                 result.add(i);
         }
         return result;
+    }
+    
+    /**
+     * Returns the material for the core block of MachinaFactory components.
+     * @return
+     */
+    public static final Material coreMaterial() {
+        return coreMaterial;
+    }
+    
+    /**
+     * Returns the material used for pipelines.
+     * @return
+     */
+    public static final Material pipelineMaterial() {
+        return pipelineMaterial;
+    }
+    
+    /**
+     * Loads the given configuration.
+     * 
+     * @param configuration
+     */
+    static void loadConfiguration(ConfigurationSection configuration) {
+        Material material = Material.getMaterial(configuration.getInt("core-material", coreMaterial.getId()));
+        if (material != null)
+            coreMaterial = material;
+        material = Material.getMaterial(configuration.getInt("pipeline-material", pipelineMaterial.getId()));
+        if (material != null)
+            pipelineMaterial = material;
+        
     }
 }
