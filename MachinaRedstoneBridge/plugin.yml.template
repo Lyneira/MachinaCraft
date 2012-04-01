@@ -1,0 +1,6 @@
+name: MachinaRedstoneBridge
+version: @VERSION@
+description: Allows a machina to be activated through a redstone signal.
+author: Lyneira
+main: me.lyneira.MachinaRedstoneBridge.MachinaRedstoneBridge
+depend: [MachinaCore]

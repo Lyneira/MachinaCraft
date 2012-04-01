@@ -62,7 +62,7 @@ public final class MachinaCore extends JavaPlugin {
      * @param item
      *            The item in the player's hand
      */
-    final void onLever(Player player, final BlockLocation location, final BlockFace leverFace, ItemStack item) {
+    public final void onLever(Player player, final BlockLocation location, final BlockFace leverFace, ItemStack item) {
         if (MachinaRunner.exists(location)) {
             // Machina exists, run onLever.
             MachinaRunner.onLever(location, player, item);

@@ -29,7 +29,7 @@ public class ItemSplitter extends InventoryProcessor {
     /**
      * Number of ticks to stay active when the item relay cannot do anything.
      */
-    protected static final int maxAge = 10;
+    protected static final int maxAge = 11;
 
     Blueprint blueprint;
     protected final Player player;

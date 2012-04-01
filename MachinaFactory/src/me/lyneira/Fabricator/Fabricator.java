@@ -22,7 +22,7 @@ import me.lyneira.util.InventoryTransaction;
 public class Fabricator extends InventoryProcessor {
 
     private static final int delay = 20;
-    private static final int maxAge = 10;
+    private static final int maxAge = 11;
 
     private final Blueprint blueprint;
     private final Pipeline pipeline;

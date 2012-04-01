@@ -10,6 +10,7 @@
 		<ant dir="MachinaPump" />
 		<ant dir="HoverPad" />
 		<ant dir="MachinaFactory" />
+		<ant dir="MachinaRedstoneBridge" />
 
 		<copy todir="${jarDir}">
 			<fileset dir="resources" includes="*" />
