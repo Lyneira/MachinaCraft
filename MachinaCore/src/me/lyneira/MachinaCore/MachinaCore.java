@@ -38,7 +38,8 @@ public final class MachinaCore extends JavaPlugin {
 
         ConfigurationManager config = new ConfigurationManager(this);
         Fuel.loadConfiguration(config.getSection("fuels"));
-        BlockData.loadConfiguration(config.getSection("blocks"));
+        BlockData.loadBlockConfiguration(config.getSection("blocks"));
+        BlockData.loadBreakTimeConfiguration(config.getSection("break-times"));
     }
 
     public final void onDisable() {

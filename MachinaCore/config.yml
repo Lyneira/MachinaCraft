@@ -10,7 +10,9 @@
 #  It is recommended to only define properties that you know you want to change.
 #     solid: <boolean> - default: false - Whether the block is solid, meaning a machina could rest on it.
 #     drillable: <boolean> - default: false - Whether the block can be drilled.
-#     drillTime: <integer> - default: 1 - The number of ticks it takes to drill this block.
+#     drillTime: <integer> - default: 'instant' - The number of ticks it takes to drill this block.
+#         This can be specified as an integer or as one of the break times below: netherrack, fast, medium, slow, tough, obsidian.
+#         The special value 'instant' is the minimum break time possible.
 #     drop: <integer> - default: -1 - The item id to drop when this block is broken. Default is to break the block as if a player had dug it.
 #     data: <integer> - default: -1 - The data value to set for the item dropped. Only used if drop is non-negative. Default is to use the block's data value.
 #     dropMin: <integer> - default: 1 - The minimum amount to drop. If less than 1, nothing will be dropped unless dropRandom causes the result to be above 0.
@@ -18,6 +20,14 @@
 #     copyData: <boolean> - default: false - (ADVANCED) Whether to preserve the block's data value when moving as part of a machina.
 #     hasInventory: <boolean> - default: false - (ADVANCED) Whether the block has an inventory that should be preserved when moving as part of a machina.
 #     attached: <boolean> - default: false - (ADVANCED) Whether the block can only exist attached to another block. (levers, ladders, rails, doors, etc)
+#
+# break-times section: Specifies the time required to break various block types, in server ticks.
+#     netherrack: Netherrack.
+#     fast: Soft blocks like dirt, grass, sand, gravel.
+#     medium: Materials like stone and wood.
+#     slow: Ore blocks.
+#     tough: Iron and Diamond blocks.
+#     obsidian: Obsidian.
 #
 # To provide a shorthand way to make many blocks non-breakable by drills, a list of ids can be given to the drill-block list.
 #
@@ -29,3 +39,11 @@
 #    5:
 #        solid: false
 #        drillable: false
+break-times:
+    netherrack: 4
+    fast: 7
+    medium: 15
+    slow: 20
+    tough: 25
+    obsidian: 220
+    

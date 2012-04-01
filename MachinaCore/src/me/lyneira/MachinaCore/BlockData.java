@@ -19,12 +19,21 @@ public final class BlockData {
     private static final int blockIdLimit = 256;
     private static BlockData[] blockId = new BlockData[blockIdLimit];
     private static final Random generator = new Random();
-    private static final int breakTimeNetherrack = 4;
-    private static final int breakTimeFast = 7;
-    private static final int breakTimeMedium = 15;
-    private static final int breakTimeSlow = 20;
-    private static final int breakTimeIronDiamondBlock = 25;
-    private static final int breakTimeObsidian = 220;
+    private static final BreakTime breakTimeInstant = new BreakTime(1);
+    private static final BreakTime breakTimeNetherrack = new BreakTime(4);
+    private static final BreakTime breakTimeFast = new BreakTime(7);
+    private static final BreakTime breakTimeMedium = new BreakTime(15);
+    private static final BreakTime breakTimeSlow = new BreakTime(20);
+    private static final BreakTime breakTimeTough = new BreakTime(25);
+    private static final BreakTime breakTimeObsidian = new BreakTime(220);
+
+    private static class BreakTime {
+        int time;
+
+        BreakTime(final int time) {
+            this.time = time;
+        }
+    }
 
     private BlockData() {
         // Only this class can instantiate itself.
@@ -99,7 +108,7 @@ public final class BlockData {
     /**
      * How long (in server ticks) it takes to drill this block.
      */
-    private int drillTime = 1;
+    private BreakTime drillTime = breakTimeInstant;
 
     /**
      * What item Id will be dropped when this block is drilled. A value of 0
@@ -224,7 +233,7 @@ public final class BlockData {
 
         set(Material.GOLD_BLOCK.getId()).solid(true).drillable(true).drillTime(breakTimeSlow);
 
-        set(Material.IRON_BLOCK.getId()).solid(true).drillable(true).drillTime(breakTimeIronDiamondBlock);
+        set(Material.IRON_BLOCK.getId()).solid(true).drillable(true).drillTime(breakTimeTough);
 
         set(Material.DOUBLE_STEP.getId()).solid(true).drillable(true).copyData(true).drillTime(breakTimeMedium);
 
@@ -254,7 +263,7 @@ public final class BlockData {
 
         set(Material.DIAMOND_ORE.getId()).drillable(true).solid(true).drillTime(breakTimeSlow);
 
-        set(Material.DIAMOND_BLOCK.getId()).drillable(true).solid(true).drillTime(breakTimeIronDiamondBlock);
+        set(Material.DIAMOND_BLOCK.getId()).drillable(true).solid(true).drillTime(breakTimeTough);
 
         set(Material.WORKBENCH.getId()).drillable(true).solid(true).drillTime(breakTimeMedium);
 
@@ -380,9 +389,9 @@ public final class BlockData {
         set(Material.ENDER_PORTAL.getId()).copyData(true);
 
         set(Material.ENDER_STONE.getId()).solid(true).drillable(true).drillTime(breakTimeSlow);
-        
+
         set(Material.REDSTONE_LAMP_OFF.getId()).solid(true).drillable(true).drillTime(breakTimeFast);
-        
+
         set(Material.REDSTONE_LAMP_ON.getId()).solid(true).drillable(true).drillTime(breakTimeFast);
     }
 
@@ -397,7 +406,7 @@ public final class BlockData {
         return this;
     }
 
-    private final BlockData drillTime(final int drillTime) {
+    private final BlockData drillTime(final BreakTime drillTime) {
         this.drillTime = drillTime;
         return this;
     }
@@ -447,7 +456,7 @@ public final class BlockData {
         return blockId[typeId];
     }
 
-    static final void loadConfiguration(ConfigurationSection configuration) {
+    static final void loadBlockConfiguration(ConfigurationSection configuration) {
         if (configuration == null)
             return;
 
@@ -486,17 +495,48 @@ public final class BlockData {
 
             ConfigurationSection blockSection = configuration.getConfigurationSection(configItem);
 
-            data.solid(blockSection.getBoolean("solid", false));
-            data.drillable(blockSection.getBoolean("drillable", false));
-            data.drillTime(blockSection.getInt("drillTime", 1));
-            data.drop(blockSection.getInt("drop", -1));
-            data.data(blockSection.getInt("data", -1));
-            data.dropMin(blockSection.getInt("dropMin", 1));
-            data.dropRandom(blockSection.getInt("dropRandom", 0));
-            data.copyData(blockSection.getBoolean("copyData", false));
-            data.inventory(blockSection.getBoolean("hasInventory", false));
-            data.attached(blockSection.getBoolean("attached", false));
+            data.solid(blockSection.getBoolean("solid", data.solid));
+            data.drillable(blockSection.getBoolean("drillable", data.drillable));
+            String breakTime = blockSection.getString("drillTime");
+            if (breakTime != null) {
+                if (breakTime.equals("instant")) {
+                    data.drillTime(breakTimeInstant);
+                } else if (breakTime.equals("netherrack")) {
+                    data.drillTime(breakTimeNetherrack);
+                } else if (breakTime.equals("fast")) {
+                    data.drillTime(breakTimeFast);
+                } else if (breakTime.equals("medium")) {
+                    data.drillTime(breakTimeMedium);
+                } else if (breakTime.equals("slow")) {
+                    data.drillTime(breakTimeSlow);
+                } else if (breakTime.equals("tough")) {
+                    data.drillTime(breakTimeTough);
+                } else if (breakTime.equals("obsidian")) {
+                    data.drillTime(breakTimeObsidian);
+                } else {
+                    // It might be an int, so try that instead.
+                    data.drillTime(new BreakTime(Math.max(blockSection.getInt("drillTime", 1), 1)));
+                }
+            }
+            data.drop(blockSection.getInt("drop", data.drop));
+            data.data(blockSection.getInt("data", data.data));
+            data.dropMin(blockSection.getInt("dropMin", data.dropMin));
+            data.dropRandom(blockSection.getInt("dropRandom", data.dropRandom));
+            data.copyData(blockSection.getBoolean("copyData", data.copyData));
+            data.inventory(blockSection.getBoolean("hasInventory", data.hasInventory));
+            data.attached(blockSection.getBoolean("attached", data.attached));
         }
+    }
+
+    static final void loadBreakTimeConfiguration(ConfigurationSection configuration) {
+        if (configuration == null)
+            return;
+        breakTimeNetherrack.time = Math.max(configuration.getInt("netherrack", breakTimeNetherrack.time), 1);
+        breakTimeFast.time = Math.max(configuration.getInt("fast", breakTimeFast.time), 1);
+        breakTimeMedium.time = Math.max(configuration.getInt("medium", breakTimeMedium.time), 1);
+        breakTimeSlow.time = Math.max(configuration.getInt("slow", breakTimeSlow.time), 1);
+        breakTimeTough.time = Math.max(configuration.getInt("tough", breakTimeTough.time), 1);
+        breakTimeObsidian.time = Math.max(configuration.getInt("obsidian", breakTimeObsidian.time), 1);
     }
 
     /**
@@ -538,9 +578,9 @@ public final class BlockData {
      */
     public static final int getDrillTime(final int typeId) {
         try {
-            return blockId[typeId].drillTime;
+            return blockId[typeId].drillTime.time;
         } catch (Exception e) {
-            return breakTimeMedium;
+            return breakTimeInstant.time;
         }
     }
 
