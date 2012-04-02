@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.bukkit.Achievement;
 import org.bukkit.Effect;
@@ -42,15 +43,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.map.MapView;
 import org.bukkit.metadata.MetadataValue;
-import org.bukkit.permissions.Permission;
-import org.bukkit.permissions.PermissionAttachment;
-import org.bukkit.permissions.PermissionAttachmentInfo;
+import org.bukkit.permissions.PermissibleBase;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
-public class DummyPlayer implements Player {
+public class DummyPlayer extends PermissibleBase implements Player {
+    private static final DummyServerOperator operator = new DummyServerOperator();
 
     private final PlayerInventory inventory = new DummyPlayerInventory(this);
     private final CraftingInventory craftingInventory = new DummyCraftingInventory(this);
@@ -58,10 +58,13 @@ public class DummyPlayer implements Player {
     private final Server server;
     private final World world;
     private final UUID uuid = UUID.randomUUID();
-    
-    public DummyPlayer(Server server, World world) {
+    private final Logger log;
+
+    public DummyPlayer(Server server, World world, Logger log) {
+        super(operator);
         this.server = server;
         this.world = world;
+        this.log = log;
     }
 
     @Override
@@ -474,79 +477,6 @@ public class DummyPlayer implements Player {
     }
 
     @Override
-    public PermissionAttachment addAttachment(Plugin plugin) {
-        //TODO
-        return null;
-    }
-
-    @Override
-    public PermissionAttachment addAttachment(Plugin plugin, int ticks) {
-        //TODO
-        return null;
-    }
-
-    @Override
-    public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value) {
-        //TODO
-        return null;
-    }
-
-    @Override
-    public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value, int ticks) {
-        //TODO
-        return null;
-    }
-
-    @Override
-    public Set<PermissionAttachmentInfo> getEffectivePermissions() {
-        //TODO
-        return new HashSet<PermissionAttachmentInfo>(0);
-    }
-
-    @Override
-    public boolean hasPermission(String name) {
-        // TODO Implement this via config?
-        return true;
-    }
-
-    @Override
-    public boolean hasPermission(Permission perm) {
-        // TODO
-        return false;
-    }
-
-    @Override
-    public boolean isPermissionSet(String name) {
-        // TODO
-        return false;
-    }
-
-    @Override
-    public boolean isPermissionSet(Permission perm) {
-        // TODO
-        return false;
-    }
-
-    @Override
-    public void recalculatePermissions() {
-        // TODO
-    }
-
-    @Override
-    public void removeAttachment(PermissionAttachment attachment) {
-        // TODO
-    }
-
-    @Override
-    public boolean isOp() {
-        return false;
-    }
-
-    @Override
-    public void setOp(boolean value) {
-    }
-
-    @Override
     public void abandonConversation(Conversation conversation) {
     }
 
@@ -570,10 +500,14 @@ public class DummyPlayer implements Player {
 
     @Override
     public void sendMessage(String message) {
+        log.info(String.format("[%s] %s: %s", world.getName(), getName(), message));
     }
 
     @Override
     public void sendMessage(String[] messages) {
+        for (String message : messages) {
+            sendMessage(message);
+        }
     }
 
     @Override

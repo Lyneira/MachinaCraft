@@ -1,23 +1,30 @@
 package me.lyneira.MachinaRedstoneBridge;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
 import me.lyneira.DummyPlayer.DummyPlayer;
 import me.lyneira.MachinaCore.BlockLocation;
+import me.lyneira.MachinaCore.ConfigurationManager;
 import me.lyneira.MachinaCore.MachinaCore;
 
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.material.Lever;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
@@ -34,6 +41,7 @@ public class MachinaRedstoneBridge extends JavaPlugin implements Runnable {
     private final Set<Block> queuedBlocks = new LinkedHashSet<Block>();
 
     private MachinaCore machinaCore;
+    private List<Permission> permissions;
     private Map<World, Player> dummyPlayers;
 
     private boolean queueScheduled = false;
@@ -47,8 +55,10 @@ public class MachinaRedstoneBridge extends JavaPlugin implements Runnable {
         machinaCore = (MachinaCore) getServer().getPluginManager().getPlugin("MachinaCore");
         scheduler = getServer().getScheduler();
         dummyPlayers = new HashMap<World, Player>(8);
+        
+        scheduler.scheduleSyncDelayedTask(this, loadConfiguration);
 
-        this.getServer().getPluginManager().registerEvents(new RedstoneBridgeListener(this), this);
+        getServer().getPluginManager().registerEvents(new RedstoneBridgeListener(this), this);
     }
 
     @Override
@@ -88,7 +98,12 @@ public class MachinaRedstoneBridge extends JavaPlugin implements Runnable {
             Player player = dummyPlayers.get(block.getWorld());
             if (player == null) {
                 World world = block.getWorld();
-                player = new DummyPlayer(getServer(), world);
+                player = new DummyPlayer(getServer(), world, log);
+                // Add permissions to the player.
+                PermissionAttachment attachment = player.addAttachment(this);
+                for (Permission p : permissions) {
+                    attachment.setPermission(p, true);
+                }
                 dummyPlayers.put(world, player);
             }
 
@@ -106,4 +121,28 @@ public class MachinaRedstoneBridge extends JavaPlugin implements Runnable {
     void log(String message) {
         log.info("MachinaRedstoneBridge: " + message);
     }
+
+    private Runnable loadConfiguration = new Runnable() {
+        @Override
+        public void run() {
+            ConfigurationManager config = new ConfigurationManager(MachinaRedstoneBridge.this);
+            ConfigurationSection configuration = config.getAll();
+
+            List<String> permissionStrings = configuration.getStringList("permissions");
+            if (permissionStrings == null) {
+                permissions = new ArrayList<Permission>(0);
+                return;
+            }
+            PluginManager pluginManager = getServer().getPluginManager();
+            permissions = new ArrayList<Permission>(permissionStrings.size());
+            for (String p : permissionStrings) {
+                log(String.format("Trying to get permission %s", p));
+                Permission permission = pluginManager.getPermission(p);
+                if (permission != null) {
+                    log(String.format("I added %s", p));
+                    permissions.add(permission);
+                }
+            }
+        }
+    };
 }

@@ -1,0 +1,11 @@
+# MachinaRedstoneBridge configuration file.
+#
+# This plugin allows a redstone signal to activate a machina.
+# A machina activated by redstone will be owned by a fake player.
+# This configuration file specifies the permissions for the fake player.
+
+permissions:
+    - machinadrill.all
+    - machinabuilder.all
+    - machinapump.all
+    - machinafactory.all
