@@ -28,9 +28,9 @@ class RedstoneBridgeListener implements Listener {
             ((Diode) block.getState().getData()).getFacing();
             BlockFace direction = ((Diode) block.getState().getData()).getFacing();
             Block target = block.getRelative(direction);
-            if (target.getTypeId() == bridgeBlock) {
+            if (block.getRelative(BlockFace.DOWN).getTypeId() == bridgeBlock) {
                 // Queue up the bridge's target.
-                plugin.queueDetect(target.getRelative(direction));
+                plugin.queueDetect(target);
             }
         }
     }

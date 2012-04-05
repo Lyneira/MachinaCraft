@@ -6,8 +6,7 @@ import java.util.List;
 import org.bukkit.inventory.ItemStack;
 
 /**
- * Abstract class for the blueprint of a {@link Movable} machina. It is intended
- * to be implemented as a singleton.
+ * Abstract class for the blueprint of a {@link Movable} machina.
  * 
  * @author Lyneira
  */

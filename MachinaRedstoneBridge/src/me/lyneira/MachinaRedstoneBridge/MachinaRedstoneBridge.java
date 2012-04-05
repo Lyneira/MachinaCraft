@@ -136,10 +136,8 @@ public class MachinaRedstoneBridge extends JavaPlugin implements Runnable {
             PluginManager pluginManager = getServer().getPluginManager();
             permissions = new ArrayList<Permission>(permissionStrings.size());
             for (String p : permissionStrings) {
-                log(String.format("Trying to get permission %s", p));
                 Permission permission = pluginManager.getPermission(p);
                 if (permission != null) {
-                    log(String.format("I added %s", p));
                     permissions.add(permission);
                 }
             }

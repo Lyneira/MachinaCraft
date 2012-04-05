@@ -4,10 +4,11 @@
 # This file can be used on a server without a permissions mod to allow everyone
 # on the server access to all basic machinacraft functionality.
 #
-# On servers that do use a permission setup, you can change the default option to:
+# If you do have a permission plugin, you can change the default option to:
 # default: op
-# and use the master machinacraft permission to easily control all machinacraft
-# access via your permissions plugin.
+# 
+# You can use the global permission node 'machinacraft' to control access with
+# your permissions plugin. 
 #
 # == How to use ==
 # * If your permissions.yml file in your bukkit folder is empty, you can
