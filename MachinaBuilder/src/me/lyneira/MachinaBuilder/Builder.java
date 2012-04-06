@@ -1,22 +1,17 @@
 package me.lyneira.MachinaBuilder;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import me.lyneira.MachinaCore.BlockData;
 import me.lyneira.MachinaCore.BlockLocation;
 import me.lyneira.MachinaCore.BlockRotation;
-import me.lyneira.MachinaCore.BlockVector;
 import me.lyneira.MachinaCore.BlueprintBlock;
-import me.lyneira.MachinaCore.EventSimulator;
 import me.lyneira.MachinaCore.Fuel;
 import me.lyneira.MachinaCore.HeartBeatEvent;
 import me.lyneira.MachinaCore.Movable;
 import me.lyneira.util.InventoryManager;
-import me.lyneira.util.InventoryTransaction;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -25,7 +20,6 @@ import org.bukkit.block.Furnace;
 import org.bukkit.block.Sign;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import com.google.common.base.Predicate;
@@ -35,7 +29,7 @@ import com.google.common.base.Predicate;
  * 
  * @author Lyneira
  */
-public class Builder extends Movable {
+public abstract class Builder extends Movable {
     /**
      * The number of server ticks to wait for a move action.
      */
@@ -44,12 +38,7 @@ public class Builder extends Movable {
     /**
      * The number of server ticks to wait for a build action.
      */
-    private static int buildDelay = 10;
-
-    /**
-     * The maximum depth to which the Builder will drop blocks.
-     */
-    private static int maxDepth = 6;
+    protected static int buildDelay = 10;
 
     /**
      * Whether the builder should use energy.
@@ -79,20 +68,28 @@ public class Builder extends Movable {
     private BlockLocation newAnchor;
 
     /**
-     * All the heads in this builder.
-     */
-    private final List<BlueprintBlock> heads = new ArrayList<BlueprintBlock>(3);
-
-    /**
      * {@link BlueprintBlock} pointing to this builder's furnace.
      */
     private final BlueprintBlock furnace;
+    
+    /**
+     * Central base of the builder for ground checks.
+     */
+    private final BlueprintBlock centralBase;
+    
+    /**
+     * Supply chest used for building rails.
+     */
+    private final BlueprintBlock supplyChest;
+    
+    /**
+     * Primary head of the builder for move permission checks and sign rotation.
+     */
+    private final BlueprintBlock primaryHead;
 
-    private Stage stage = null;
-    private final Stage firstStage;
-    private final Stage buildStage = new Build();
-    private final Stage moveStage = new Move();
-    private final Stage roadStage = new Road();
+    protected State state = null;
+    private final State startingState;
+    protected final State moveState = new Move();
 
     /**
      * Creates a new drill.
@@ -106,23 +103,18 @@ public class Builder extends Movable {
      * @param modules
      *            The active modules for the drill
      */
-    Builder(final Blueprint blueprint, final List<Integer> modules, final BlockRotation yaw, Player player, BlockLocation anchor, BlueprintBlock furnace) {
+    Builder(final Blueprint blueprint, final List<Integer> modules, final BlockRotation yaw, Player player, BlockLocation anchor, //
+            BlueprintBlock furnace, BlueprintBlock centralBase, BlueprintBlock primaryHead, BlueprintBlock supplyChest) {
         super(blueprint, modules, yaw, player);
-
         this.furnace = furnace;
-        heads.add(Blueprint.primaryHead);
-        if (hasModule(Blueprint.leftModule))
-            heads.add(Blueprint.leftHead);
-        if (hasModule(Blueprint.rightModule))
-            heads.add(Blueprint.rightHead);
+        this.centralBase = centralBase;
+        this.primaryHead = primaryHead;
+        this.supplyChest = supplyChest;
+
         // Set furnace to burning state.
         setFurnace(anchor, true);
-        setChest(anchor, Blueprint.chest);
-        if (hasModule(Blueprint.backendRoadModule)) {
-            setChest(anchor, Blueprint.chestRoad);
-            firstStage = roadStage;
-        } else
-            firstStage = buildStage;
+        setContainers(anchor);
+        startingState = getStartingState();
     }
 
     /**
@@ -134,19 +126,19 @@ public class Builder extends Movable {
             return null;
 
         newAnchor = null;
-        if (stage == null) {
-            stage = firstStage;
+        if (state == null) {
+            state = startingState;
         } else {
-            stage = stage.run(anchor);
+            state = state.run(anchor);
         }
 
-        if (stage == null)
+        if (state == null)
             return null;
 
         if (newAnchor == null) {
-            return new HeartBeatEvent(stage.enqueue(anchor));
+            return new HeartBeatEvent(state.enqueue(anchor));
         } else {
-            return new HeartBeatEvent(stage.enqueue(newAnchor), newAnchor);
+            return new HeartBeatEvent(state.enqueue(newAnchor), newAnchor);
         }
     }
 
@@ -170,10 +162,8 @@ public class Builder extends Movable {
         rotate(anchor, rotateBy);
         // Set furnace to correct direction.
         setFurnace(anchor, true);
-        setChest(anchor, Blueprint.chest);
-        if (hasModule(Blueprint.backendRoadModule))
-            setChest(anchor, Blueprint.chestRoad);
-        stage = null;
+        setContainers(anchor);
+        state = null;
     }
 
     /**
@@ -185,7 +175,7 @@ public class Builder extends Movable {
      *            The amount of energy needed for the next action
      * @return True if enough energy could be used up
      */
-    private boolean useEnergy(final BlockLocation anchor, final int energy) {
+    protected boolean useEnergy(final BlockLocation anchor, final int energy) {
         if (!useEnergy)
             return true;
 
@@ -254,7 +244,7 @@ public class Builder extends Movable {
      * @param burning
      *            Whether the furnace should be burning.
      */
-    void setFurnace(final BlockLocation anchor, final boolean burning) {
+    private final void setFurnace(final BlockLocation anchor, final boolean burning) {
         Block furnaceBlock = anchor.getRelative(furnace.vector(yaw)).getBlock();
         Fuel.setFurnace(furnaceBlock, yaw.getOpposite(), burning);
     }
@@ -264,199 +254,47 @@ public class Builder extends Movable {
      * 
      * @param anchor
      */
-    void setChest(final BlockLocation anchor, final BlueprintBlock chest) {
+    protected void setChest(final BlockLocation anchor, final BlueprintBlock chest) {
         Block chestBlock = anchor.getRelative(chest.vector(yaw)).getBlock();
         if (chestBlock.getType() == Material.CHEST)
             chestBlock.setData(yaw.getOpposite().getYawData());
     }
+    
+    /**
+     * Method used to set all the containers on a builder after it has rotated.
+     * @param anchor
+     */
+    protected abstract void setContainers(final BlockLocation anchor);
 
     /**
-     * Represents a stage in the operation of the Builder
+     * Represents a state in the operation of the Builder
      */
-    private interface Stage {
-        Stage run(BlockLocation anchor);
+    protected interface State {
+        /**
+         * Executes the state and returns the next state.
+         * @param anchor
+         * @return
+         */
+        State run(BlockLocation anchor);
 
+        /**
+         * Enqueues the state and returns the delay needed before it can execute.
+         * @param anchor
+         * @return
+         */
         int enqueue(BlockLocation anchor);
     }
-
+    
     /**
-     * In this stage, the builder replaces existing solid blocks directly below
-     * its heads with blocks from the front chest. Replaced blocks are put in
-     * the rear chest.
+     * Returns the starting state of the builder.
+     * @return
      */
-    private class Road implements Stage {
-        private final List<BlockLocation> targets = new ArrayList<BlockLocation>(3);
-
-        @Override
-        public Stage run(BlockLocation anchor) {
-            Block inputBlock = anchor.getRelative(Blueprint.chest.vector(yaw)).getBlock();
-            Block outputBlock = anchor.getRelative(Blueprint.chestRoad.vector(yaw)).getBlock();
-            InventoryManager inputManager = new InventoryManager(InventoryManager.getSafeInventory(inputBlock));
-            Inventory output = InventoryManager.getSafeInventory(outputBlock);
-
-            Iterator<BlockLocation> targetIterator = targets.iterator();
-            while (targetIterator.hasNext()) {
-                BlockLocation target = targetIterator.next();
-                int typeId = target.getTypeId();
-                if (!BlockData.isDrillable(typeId))
-                    continue;
-
-                InventoryTransaction transaction = new InventoryTransaction(output);
-                List<ItemStack> results = BlockData.breakBlock(target);
-
-                if (!inputManager.find(isBuildingBlock))
-                    return moveStage;
-
-                if (!useEnergy(anchor, BlockData.getDrillTime(typeId) + buildDelay))
-                    return null;
-
-                if (!EventSimulator.blockBreak(target, player))
-                    return null;
-
-                transaction.add(results);
-                // Put results in the container
-                if (!transaction.execute())
-                    continue;
-
-                target.setEmpty();
-
-                ItemStack replacementItem = inputManager.get();
-                typeId = replacementItem.getTypeId();
-                byte data = replacementItem.getData().getData();
-                if (!canPlace(target, typeId, data, target.getRelative(BlockFace.UP)))
-                    return null;
-
-                inputManager.decrement();
-                target.getBlock().setTypeIdAndData(typeId, data, false);
-            }
-            return buildStage;
-        }
-
-        @Override
-        public int enqueue(BlockLocation anchor) {
-            BlockVector down = new BlockVector(BlockFace.DOWN);
-            int time = 0;
-            Block inputBlock = anchor.getRelative(Blueprint.chest.vector(yaw)).getBlock();
-            InventoryManager manager = new InventoryManager(InventoryManager.getSafeInventory(inputBlock));
-
-            if (!manager.find(isBuildingBlock)) {
-                stage = buildStage;
-                return buildStage.enqueue(anchor);
-            }
-
-            targets.clear();
-            for (BlueprintBlock i : heads) {
-                BlockLocation target = anchor.getRelative(i.vector(yaw).add(down));
-                int typeId = target.getTypeId();
-                if (BlockData.isDrillable(typeId) && !(BlockData.isSolid(typeId) && manager.inventory.contains(typeId))) {
-                    time += BlockData.getDrillTime(typeId) + buildDelay;
-                    targets.add(target);
-                }
-            }
-            if (targets.size() == 0) {
-                stage = buildStage;
-                return buildStage.enqueue(anchor);
-            } else {
-                return time;
-            }
-        }
-    }
-
-    /**
-     * In this stage, the builder places solid blocks into buildable locations
-     * below its heads, up to the maximum depth.
-     */
-    private class Build implements Stage {
-        private final List<BlockLocation> targets = new ArrayList<BlockLocation>(3);
-        private int depth;
-
-        @Override
-        public Stage run(BlockLocation anchor) {
-            Block chestBlock = anchor.getRelative(Blueprint.chest.vector(yaw)).getBlock();
-            InventoryManager manager = new InventoryManager(InventoryManager.getSafeInventory(chestBlock));
-
-            Iterator<BlockLocation> targetIterator = targets.iterator();
-            while (targetIterator.hasNext()) {
-                BlockLocation target = targetIterator.next();
-                if (!validBuildLocation(target))
-                    continue;
-
-                if (!manager.find(isBuildingBlock))
-                    return moveStage;
-
-                if (!useEnergy(anchor, buildDelay))
-                    return null;
-
-                ItemStack item = manager.get();
-                int typeId = item.getTypeId();
-                byte data = item.getData().getData();
-                if (!canPlace(target, typeId, data, target.getRelative(BlockFace.DOWN)))
-                    continue;
-
-                manager.decrement();
-                target.getBlock().setTypeIdAndData(typeId, data, true);
-            }
-            if (depth == 1) {
-                return moveStage;
-            } else {
-                return this;
-            }
-        }
-
-        @Override
-        public int enqueue(BlockLocation anchor) {
-            targets.clear();
-            BlockVector down = new BlockVector(BlockFace.DOWN);
-            depth = 1;
-
-            List<BlockLocation> visible = new ArrayList<BlockLocation>(3);
-            for (BlueprintBlock i : heads) {
-                visible.add(anchor.getRelative(i.vector(yaw)));
-            }
-
-            // Filter the visible locations downward until only the lowest level
-            // remains.
-            for (int i = 1; i <= maxDepth; i++) {
-                Iterator<BlockLocation> it = visible.iterator();
-
-                if (!it.hasNext())
-                    break;
-
-                do {
-                    BlockLocation target = it.next().getRelative(down, i);
-                    if (validBuildLocation(target)) {
-                        BlockLocation ground = target.getRelative(down);
-                        // A potential target must have ground beneath it to
-                        // place on.
-                        if (validPlaceAgainst(ground)) {
-                            if (i == depth) {
-                                targets.add(target);
-                            } else {
-                                depth = i;
-                                targets.clear();
-                                targets.add(target);
-                            }
-                        }
-                    } else {
-                        it.remove();
-                    }
-                } while (it.hasNext());
-            }
-
-            int numTargets = targets.size();
-            if (numTargets == 0) {
-                stage = moveStage;
-                return stage.enqueue(anchor);
-            } else {
-                return buildDelay * numTargets;
-            }
-        }
-    }
+    protected abstract State getStartingState();
 
     /**
      * In this stage, the builder attempts to move forward.
      */
-    private class Move implements Stage {
+    protected class Move implements State {
         /**
          * Moves the drill forward if there is empty space to move into, and
          * ground to stand on.
@@ -465,14 +303,14 @@ public class Builder extends Movable {
          *            The anchor of the Drill to move
          */
         @Override
-        public Stage run(BlockLocation anchor) {
+        public State run(BlockLocation anchor) {
             // Check if a sign pointing left or right is present and rotate.
             BlockRotation signRotation = readRotationSign(anchor);
 
             // Check for ground at the new base
             BlockFace face = yaw.getYawFace();
             BlockLocation movedAnchor = anchor.getRelative(face);
-            BlockLocation ground = movedAnchor.getRelative(Blueprint.centralBase.vector(yaw).add(BlockFace.DOWN));
+            BlockLocation ground = movedAnchor.getRelative(centralBase.vector(yaw).add(BlockFace.DOWN));
             if (!BlockData.isSolid(ground.getTypeId())) {
                 return null;
             }
@@ -485,7 +323,7 @@ public class Builder extends Movable {
             // Simulate a block place event to give protection plugins a chance
             // to
             // stop the move
-            if (!canMove(movedAnchor, Blueprint.primaryHead)) {
+            if (!canMove(movedAnchor, primaryHead)) {
                 return null;
             }
 
@@ -503,7 +341,7 @@ public class Builder extends Movable {
             if (signRotation != null) {
                 doRotate(newAnchor, signRotation);
             }
-            return firstStage;
+            return startingState;
         }
 
         private void buildRail(BlockLocation anchor) {
@@ -516,7 +354,7 @@ public class Builder extends Movable {
             if (!BlockData.isSolid(ground.getTypeId()))
                 return;
 
-            Block chestBlock = anchor.getRelative(Blueprint.chest.vector(yaw)).getBlock();
+            Block chestBlock = anchor.getRelative(supplyChest.vector(yaw)).getBlock();
             InventoryManager manager = new InventoryManager(InventoryManager.getSafeInventory(chestBlock));
 
             if (!manager.find(isRail))
@@ -532,7 +370,7 @@ public class Builder extends Movable {
         }
 
         private BlockRotation readRotationSign(BlockLocation anchor) {
-            BlockLocation signLocation = anchor.getRelative(Blueprint.primaryHead.vector(yaw).add(yaw.getYawVector(), 2));
+            BlockLocation signLocation = anchor.getRelative(primaryHead.vector(yaw).add(yaw.getYawVector(), 2));
             if (!signLocation.checkTypes(Material.SIGN_POST, Material.SIGN))
                 return null;
             String[] lines = ((Sign) signLocation.getBlock().getState()).getLines();
@@ -561,7 +399,7 @@ public class Builder extends Movable {
      * @param player
      * @return True if the player can activate another builder.
      */
-    static boolean canActivate(Player player) {
+    public static boolean canActivate(Player player) {
         if (activeLimit == 0)
             return true;
         final Integer newActive = active.get(player);
@@ -574,7 +412,7 @@ public class Builder extends Movable {
     /**
      * Tests whether the {@link ItemStack} is a building block.
      */
-    private final static Predicate<ItemStack> isBuildingBlock = new Predicate<ItemStack>() {
+    protected final static Predicate<ItemStack> isBuildingBlock = new Predicate<ItemStack>() {
         public boolean apply(ItemStack item) {
             return (item != null && BlockData.isSolid(item.getTypeId()));
         }
@@ -583,7 +421,7 @@ public class Builder extends Movable {
     /**
      * Tests whether the {@link ItemStack} is a piece of rail.
      */
-    private final static Predicate<ItemStack> isRail = new Predicate<ItemStack>() {
+    protected final static Predicate<ItemStack> isRail = new Predicate<ItemStack>() {
         public boolean apply(ItemStack item) {
             if (item == null)
                 return false;
@@ -598,7 +436,7 @@ public class Builder extends Movable {
      * @param target
      * @return True if this location is valid
      */
-    private static boolean validBuildLocation(BlockLocation target) {
+    protected static boolean validBuildLocation(BlockLocation target) {
         return target.checkTypes(Material.AIR, Material.WATER, Material.STATIONARY_WATER, Material.LONG_GRASS, Material.SNOW);
     }
 
@@ -609,7 +447,7 @@ public class Builder extends Movable {
      * @param target
      * @return True if this location is valid to place against
      */
-    private static boolean validPlaceAgainst(BlockLocation target) {
+    protected static boolean validPlaceAgainst(BlockLocation target) {
         return (!target.checkTypes(Material.AIR, Material.WATER, Material.STATIONARY_WATER, Material.LONG_GRASS, Material.SNOW));
     }
 
@@ -621,7 +459,7 @@ public class Builder extends Movable {
     static void loadConfiguration(ConfigurationSection configuration) {
         moveDelay = Math.max(configuration.getInt("move-delay", moveDelay), 1);
         buildDelay = Math.max(configuration.getInt("build-delay", buildDelay), 1);
-        maxDepth = Math.min(Math.max(configuration.getInt("max-depth", maxDepth), 1), 256);
+        BlockDropperBuilder.maxDepth = Math.min(Math.max(configuration.getInt("max-depth", BlockDropperBuilder.maxDepth), 1), 256);
         useEnergy = configuration.getBoolean("use-energy", useEnergy);
         activeLimit = Math.max(configuration.getInt("active-limit", activeLimit), 0);
     }

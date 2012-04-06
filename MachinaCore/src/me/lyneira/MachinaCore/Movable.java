@@ -237,10 +237,9 @@ public abstract class Movable implements Machina {
             moveData[i].get(oldAnchor, modules.get(i));
         }
 
-        // * Destroy the negative difference, with attachables included
-        // first
+        // Destroy the negative difference, with attachables included first
         clearBehind(oldAnchor, face);
-        // * Put new blocks, attachables last
+        // Put new blocks, attachables last
         put(newAnchor);
 
         for (int i = 0; i < moduleCount; i++) {
@@ -262,10 +261,9 @@ public abstract class Movable implements Machina {
             moveData[i].get(oldAnchor, modules.get(i));
         }
 
-        // * Destroy the negative difference, with attachables included
-        // first
+        // Destroy the entire machina, with attachables included first
         clearFull(oldAnchor);
-        // * Put new blocks, attachables last
+        // Put new blocks, attachables last
         put(newAnchor);
 
         for (int i = 0; i < moduleCount; i++) {

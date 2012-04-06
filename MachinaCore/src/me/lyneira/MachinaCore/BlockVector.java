@@ -126,14 +126,16 @@ public final class BlockVector {
      * @return A new rotated BlockVector
      */
     public final BlockVector rotated(final BlockRotation rotate) {
-        if (rotate == BlockRotation.ROTATE_90) {
-            return new BlockVector(z, y, -x);
-        } else if (rotate == BlockRotation.ROTATE_180) {
-            return new BlockVector(-x, y, -z);
-        } else if (rotate == BlockRotation.ROTATE_270) {
-            return new BlockVector(-z, y, x);
-        } else { // ROTATE_0
+        switch (rotate) {
+        case ROTATE_0:
             return new BlockVector(x, y, z);
+        case ROTATE_90:
+            return new BlockVector(z, y, -x);
+        case ROTATE_180:
+            return new BlockVector(-x, y, -z);
+        case ROTATE_270:
+        default:
+            return new BlockVector(-z, y, x);
         }
     }
 

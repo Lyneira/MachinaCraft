@@ -83,12 +83,12 @@ public class DummyPlayer extends PermissibleBase implements Player {
 
     @Override
     public ItemStack getItemInHand() {
-        return null;
+        return new ItemStack(Material.AIR);
     }
 
     @Override
     public ItemStack getItemOnCursor() {
-        return null;
+        return new ItemStack(Material.AIR);
     }
 
     @Override

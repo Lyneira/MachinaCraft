@@ -16,6 +16,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class MachinaBuilder extends JavaPlugin {
     private final static Logger log = Logger.getLogger("Minecraft");
     private MachinaCore machinaCore;
+    private Blueprint blueprint;
 
     @Override
     public final void onEnable() {
@@ -24,9 +25,11 @@ public class MachinaBuilder extends JavaPlugin {
         
         ConfigurationManager config = new ConfigurationManager(this);
         Builder.loadConfiguration(config.getAll());
+        
+        blueprint = Blueprint.blueprint();
 
         machinaCore = (MachinaCore) getServer().getPluginManager().getPlugin("MachinaCore");
-        machinaCore.registerBlueprint(Blueprint.instance);
+        machinaCore.registerBlueprint(blueprint);
     }
 
     @Override
@@ -34,7 +37,7 @@ public class MachinaBuilder extends JavaPlugin {
         PluginDescriptionFile pdf = getDescription();
         log.info(pdf.getName() + " is now disabled.");
 
-        machinaCore.unRegisterBlueprint(Blueprint.instance);
+        machinaCore.unRegisterBlueprint(blueprint);
     }
     
     static void log(String message) {

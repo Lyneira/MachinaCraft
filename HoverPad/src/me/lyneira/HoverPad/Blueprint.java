@@ -73,7 +73,7 @@ class Blueprint extends MovableBlueprint {
     }
 
     /**
-     * Static blueprint constructor so that we have a blueprintfactory to give to super()
+     * Static blueprint constructor so that we have a {@link BlueprintFactory} to give to super()
      * @return A new Blueprint
      */
     static Blueprint blueprint() {

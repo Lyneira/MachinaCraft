@@ -27,6 +27,7 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.util.permissions.DefaultPermissions;
 
 /**
  * Plugin that attempts to activate a machina if a repeater powers an activator
@@ -137,6 +138,9 @@ public class MachinaRedstoneBridge extends JavaPlugin implements Runnable {
             permissions = new ArrayList<Permission>(permissionStrings.size());
             for (String p : permissionStrings) {
                 Permission permission = pluginManager.getPermission(p);
+                if (permission == null) {
+                    permission = DefaultPermissions.registerPermission(new Permission(p));
+                }
                 if (permission != null) {
                     permissions.add(permission);
                 }

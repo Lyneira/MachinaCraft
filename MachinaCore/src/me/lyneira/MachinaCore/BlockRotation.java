@@ -123,15 +123,17 @@ public enum BlockRotation {
     }
 
     public static final BlockRotation yawFromBlockFace(BlockFace face) throws Exception {
-        if (face == BlockFace.SOUTH)
+        switch(face) {
+        case SOUTH:
             return ROTATE_0;
-        else if (face == BlockFace.EAST)
+        case EAST:
             return ROTATE_90;
-        else if (face == BlockFace.NORTH)
+        case NORTH:
             return ROTATE_180;
-        else if (face == BlockFace.WEST)
+        case WEST:
             return ROTATE_270;
-        else
+        default:
             throw new Exception("Invalid BlockFace given to yawFromBlockFace, must be one of: SOUTH, EAST, NORTH, WEST");
+        }
     }
 }
