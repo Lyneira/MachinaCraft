@@ -25,7 +25,7 @@ import org.bukkit.inventory.ItemStack;
 import com.google.common.base.Predicate;
 
 /**
- * Builder operation class
+ * Abstract builder that can move and build rail behind its furnace.
  * 
  * @author Lyneira
  */
@@ -71,25 +71,28 @@ public abstract class Builder extends Movable {
      * {@link BlueprintBlock} pointing to this builder's furnace.
      */
     private final BlueprintBlock furnace;
-    
+
     /**
      * Central base of the builder for ground checks.
      */
     private final BlueprintBlock centralBase;
-    
+
     /**
      * Supply chest used for building rails.
      */
     private final BlueprintBlock supplyChest;
-    
+
     /**
      * Primary head of the builder for move permission checks and sign rotation.
      */
     private final BlueprintBlock primaryHead;
 
-    protected State state = null;
-    private final State startingState;
+    protected final Blueprint blueprint;
+
+    protected final State startingState;
     protected final State moveState = new Move();
+    protected final State getBearings = new GetBearings();
+    protected State state = getBearings;
 
     /**
      * Creates a new drill.
@@ -105,7 +108,8 @@ public abstract class Builder extends Movable {
      */
     Builder(final Blueprint blueprint, final List<Integer> modules, final BlockRotation yaw, Player player, BlockLocation anchor, //
             BlueprintBlock furnace, BlueprintBlock centralBase, BlueprintBlock primaryHead, BlueprintBlock supplyChest) {
-        super(blueprint, modules, yaw, player);
+        super(blueprint.blueprint, modules, yaw, player);
+        this.blueprint = blueprint;
         this.furnace = furnace;
         this.centralBase = centralBase;
         this.primaryHead = primaryHead;
@@ -126,9 +130,9 @@ public abstract class Builder extends Movable {
             return null;
 
         newAnchor = null;
-        if (state == null) {
-            state = startingState;
-        } else {
+        if (state == null)
+            state = getBearings;
+        else {
             state = state.run(anchor);
         }
 
@@ -151,7 +155,7 @@ public abstract class Builder extends Movable {
      * @param newYaw
      *            The new direction
      */
-    void doRotate(final BlockLocation anchor, final BlockRotation newYaw) {
+    protected void doRotate(final BlockLocation anchor, final BlockRotation newYaw) {
         BlockRotation rotateBy = newYaw.subtract(yaw);
         if (rotateBy == BlockRotation.ROTATE_0) {
             return;
@@ -259,9 +263,10 @@ public abstract class Builder extends Movable {
         if (chestBlock.getType() == Material.CHEST)
             chestBlock.setData(yaw.getOpposite().getYawData());
     }
-    
+
     /**
      * Method used to set all the containers on a builder after it has rotated.
+     * 
      * @param anchor
      */
     protected abstract void setContainers(final BlockLocation anchor);
@@ -272,29 +277,36 @@ public abstract class Builder extends Movable {
     protected interface State {
         /**
          * Executes the state and returns the next state.
+         * 
          * @param anchor
          * @return
          */
         State run(BlockLocation anchor);
 
         /**
-         * Enqueues the state and returns the delay needed before it can execute.
+         * Enqueues the state and returns the delay needed before it can
+         * execute.
+         * 
          * @param anchor
          * @return
          */
         int enqueue(BlockLocation anchor);
     }
-    
+
     /**
-     * Returns the starting state of the builder.
-     * @return
+     * Returns the starting state of the builder. This method is called before
+     * your subclass is fully constructed, so you can't rely on any internal
+     * fields yet. The builder's startingState field will be set to the return
+     * value of this field.
+     * 
+     * @return The starting state the builder will use.
      */
     protected abstract State getStartingState();
 
     /**
      * In this stage, the builder attempts to move forward.
      */
-    protected class Move implements State {
+    private class Move implements State {
         /**
          * Moves the drill forward if there is empty space to move into, and
          * ground to stand on.
@@ -315,14 +327,12 @@ public abstract class Builder extends Movable {
                 return null;
             }
 
-            // Collision detection
             if (detectCollision(anchor, face)) {
                 return null;
             }
 
             // Simulate a block place event to give protection plugins a chance
-            // to
-            // stop the move
+            // to stop the move
             if (!canMove(movedAnchor, primaryHead)) {
                 return null;
             }
@@ -332,7 +342,6 @@ public abstract class Builder extends Movable {
                 return null;
             }
 
-            // Okay to move.
             moveByFace(anchor, face);
 
             buildRail(movedAnchor);
@@ -340,11 +349,12 @@ public abstract class Builder extends Movable {
             newAnchor = movedAnchor;
             if (signRotation != null) {
                 doRotate(newAnchor, signRotation);
+                return getBearings;
             }
             return startingState;
         }
 
-        private void buildRail(BlockLocation anchor) {
+        protected void buildRail(BlockLocation anchor) {
             BlockLocation target = anchor.getRelative(furnace.vector(yaw).add(yaw.getOpposite().getYawFace()));
             BlockLocation ground = target.getRelative(BlockFace.DOWN);
 
@@ -369,7 +379,7 @@ public abstract class Builder extends Movable {
             target.setTypeId(typeId);
         }
 
-        private BlockRotation readRotationSign(BlockLocation anchor) {
+        protected BlockRotation readRotationSign(BlockLocation anchor) {
             BlockLocation signLocation = anchor.getRelative(primaryHead.vector(yaw).add(yaw.getYawVector(), 2));
             if (!signLocation.checkTypes(Material.SIGN_POST, Material.SIGN))
                 return null;
@@ -389,6 +399,19 @@ public abstract class Builder extends Movable {
         public int enqueue(BlockLocation anchor) {
             return moveDelay;
         }
+    }
+    
+    private class GetBearings implements State {
+        @Override
+        public State run(BlockLocation anchor) {
+            return startingState;
+        }
+
+        @Override
+        public int enqueue(BlockLocation anchor) {
+            return 10;
+        }
+        
     }
 
     // **** Static stuff ****

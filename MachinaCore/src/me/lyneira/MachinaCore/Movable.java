@@ -72,6 +72,7 @@ public abstract class Movable implements Machina {
         blueprint.unifyVectors(moduleIndices, yaw, unifiedVectors);
     }
 
+    @Override
     public boolean verify(final BlockLocation anchor) {
         for (int i = 0; i < size; i++) {
             if (anchor.getRelative(unifiedVectors[i]).getTypeId() != unifiedBlueprint[i].typeId) {
@@ -293,8 +294,9 @@ public abstract class Movable implements Machina {
         clearFull(anchor);
 
         yaw = yaw.add(rotateBy);
-        // Re-initialize the vectors
+        // Re-initialize the vectors, also clear the differences since they are only valid for a given yaw.
         blueprint.unifyVectors(modules, yaw, unifiedVectors);
+        differences.clear();
 
         // * Put new blocks, attachables last
         put(anchor);

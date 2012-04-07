@@ -7,15 +7,20 @@ import me.lyneira.MachinaCore.BlockRotation;
 
 import org.bukkit.entity.Player;
 
+/**
+ * Basic BlockDropperBuilder
+ * 
+ * @author Lyneira
+ */
 public class BasicBuilder extends BlockDropperBuilder {
 
     BasicBuilder(Blueprint blueprint, List<Integer> modules, BlockRotation yaw, Player player, BlockLocation anchor) {
-        super(blueprint, modules, yaw, player, anchor, Blueprint.basicFurnace);
+        super(blueprint, modules, yaw, player, anchor, blueprint.basicFurnace);
     }
 
     @Override
     protected void setContainers(BlockLocation anchor) {
-        setChest(anchor, Blueprint.basicChest);
+        setChest(anchor, blueprint.basicChest);
     }
 
     @Override

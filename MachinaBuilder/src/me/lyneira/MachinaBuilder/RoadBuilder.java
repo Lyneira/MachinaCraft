@@ -19,17 +19,22 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+/**
+ * BlockDropperBuilder that also lays roads by replacing blocks under it with those from its chest. 
+ * 
+ * @author Lyneira
+ */
 public class RoadBuilder extends BlockDropperBuilder {
     protected final State buildState = new Build();
 
     RoadBuilder(Blueprint blueprint, List<Integer> modules, BlockRotation yaw, Player player, BlockLocation anchor) {
-        super(blueprint, modules, yaw, player, anchor, Blueprint.basicFurnaceRoad);
+        super(blueprint, modules, yaw, player, anchor, blueprint.basicFurnaceRoad);
     }
     
     @Override
     protected void setContainers(BlockLocation anchor) {
-        setChest(anchor, Blueprint.basicChest);
-        setChest(anchor, Blueprint.basicChestRoad);
+        setChest(anchor, blueprint.basicChest);
+        setChest(anchor, blueprint.basicChestRoad);
     }
     
     /**
@@ -42,8 +47,8 @@ public class RoadBuilder extends BlockDropperBuilder {
 
         @Override
         public State run(BlockLocation anchor) {
-            Block inputBlock = anchor.getRelative(Blueprint.basicChest.vector(yaw)).getBlock();
-            Block outputBlock = anchor.getRelative(Blueprint.basicChestRoad.vector(yaw)).getBlock();
+            Block inputBlock = anchor.getRelative(blueprint.basicChest.vector(yaw)).getBlock();
+            Block outputBlock = anchor.getRelative(blueprint.basicChestRoad.vector(yaw)).getBlock();
             InventoryManager inputManager = new InventoryManager(InventoryManager.getSafeInventory(inputBlock));
             Inventory output = InventoryManager.getSafeInventory(outputBlock);
 
@@ -89,7 +94,7 @@ public class RoadBuilder extends BlockDropperBuilder {
         public int enqueue(BlockLocation anchor) {
             BlockVector down = new BlockVector(BlockFace.DOWN);
             int time = 0;
-            Block inputBlock = anchor.getRelative(Blueprint.basicChest.vector(yaw)).getBlock();
+            Block inputBlock = anchor.getRelative(blueprint.basicChest.vector(yaw)).getBlock();
             InventoryManager manager = new InventoryManager(InventoryManager.getSafeInventory(inputBlock));
 
             if (!manager.find(isBuildingBlock)) {

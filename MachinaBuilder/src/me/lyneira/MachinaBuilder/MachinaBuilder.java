@@ -26,10 +26,10 @@ public class MachinaBuilder extends JavaPlugin {
         ConfigurationManager config = new ConfigurationManager(this);
         Builder.loadConfiguration(config.getAll());
         
-        blueprint = Blueprint.blueprint();
+        blueprint = new Blueprint();
 
         machinaCore = (MachinaCore) getServer().getPluginManager().getPlugin("MachinaCore");
-        machinaCore.registerBlueprint(blueprint);
+        machinaCore.registerBlueprint(blueprint.blueprint);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class MachinaBuilder extends JavaPlugin {
         PluginDescriptionFile pdf = getDescription();
         log.info(pdf.getName() + " is now disabled.");
 
-        machinaCore.unRegisterBlueprint(blueprint);
+        machinaCore.unRegisterBlueprint(blueprint.blueprint);
     }
     
     static void log(String message) {

@@ -15,6 +15,11 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+/**
+ * Abstract builder that drops blocks under its heads.
+ *  
+ * @author Lyneira
+ */
 public abstract class BlockDropperBuilder extends Builder {
     
     /**
@@ -26,16 +31,14 @@ public abstract class BlockDropperBuilder extends Builder {
      * The maximum depth to which the Builder will drop blocks.
      */
     protected static int maxDepth = 6;
-    
-    protected State buildState;
 
     BlockDropperBuilder(Blueprint blueprint, List<Integer> modules, BlockRotation yaw, Player player, BlockLocation anchor, BlueprintBlock furnace) {
-        super(blueprint, modules, yaw, player, anchor, furnace, Blueprint.basicCentralBase, Blueprint.basicHeadPrimary, Blueprint.basicChest);
-        heads.add(Blueprint.basicHeadPrimary);
-        if (hasModule(Blueprint.moduleBasicLeft))
-            heads.add(Blueprint.basicHeadLeft);
-        if (hasModule(Blueprint.moduleBasicRight))
-            heads.add(Blueprint.basicHeadRight);
+        super(blueprint, modules, yaw, player, anchor, furnace, blueprint.basicCentralBase, blueprint.basicHeadPrimary, blueprint.basicChest);
+        heads.add(blueprint.basicHeadPrimary);
+        if (hasModule(blueprint.moduleBasicLeft))
+            heads.add(blueprint.basicHeadLeft);
+        if (hasModule(blueprint.moduleBasicRight))
+            heads.add(blueprint.basicHeadRight);
     }
 
     /**
@@ -48,7 +51,7 @@ public abstract class BlockDropperBuilder extends Builder {
 
         @Override
         public State run(BlockLocation anchor) {
-            Block chestBlock = anchor.getRelative(Blueprint.basicChest.vector(yaw)).getBlock();
+            Block chestBlock = anchor.getRelative(blueprint.basicChest.vector(yaw)).getBlock();
             InventoryManager manager = new InventoryManager(InventoryManager.getSafeInventory(chestBlock));
 
             Iterator<BlockLocation> targetIterator = targets.iterator();

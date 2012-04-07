@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import me.lyneira.MachinaFactory.ComponentActivateException;
+import me.lyneira.util.InventoryManager;
 import me.lyneira.util.ItemUtils;
 
 import org.bukkit.inventory.Inventory;
@@ -33,49 +34,11 @@ class RecipeVerifier {
      * @param inventory
      */
     RecipeVerifier(Inventory inventory) throws ComponentActivateException {
-        // Get the entire contents of the left 3x3 slots from the chest
-        // inventory.
-        ItemStack[][] chestRecipeContents = new ItemStack[][] { new ItemStack[] { inventory.getItem(0), //
-                inventory.getItem(1), //
-                inventory.getItem(2), //
-        }, new ItemStack[] { inventory.getItem(9), //
-                inventory.getItem(10), //
-                inventory.getItem(11), //
-        }, new ItemStack[] { inventory.getItem(18), //
-                inventory.getItem(19), //
-                inventory.getItem(20), //
-        } };
-        int iMin = 3;
-        int iMax = -1;
-        int jMin = 3;
-        int jMax = -1;
-        // Determine the size and position of the recipe here.
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (chestRecipeContents[i][j] != null) {
-                    if (i < iMin)
-                        iMin = i;
-                    if (i > iMax)
-                        iMax = i;
-                    if (j < jMin)
-                        jMin = j;
-                    if (j > jMax)
-                        jMax = j;
-                }
-            }
-        }
-        rows = 1 + iMax - iMin;
-        columns = 1 + jMax - jMin;
-        if (rows < 1 || columns < 1)
+        matrix = InventoryManager.detectPattern(inventory);
+        if (matrix == null)
             throw new ComponentActivateException();
-
-        // Create correctly sized matrix
-        matrix = new ItemStack[rows][columns];
-        for (int i = iMin; i <= iMax; i++) {
-            for (int j = jMin; j <= jMax; j++) {
-                matrix[i - iMin][j - jMin] = chestRecipeContents[i][j];
-            }
-        }
+        rows = matrix.length;
+        columns = matrix[0].length;
     }
 
     /**

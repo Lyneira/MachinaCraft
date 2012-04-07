@@ -1,6 +1,5 @@
 package me.lyneira.util;
 
-
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.inventory.DoubleChestInventory;
@@ -31,8 +30,8 @@ public class InventoryManager {
      * @param predicate
      * @return True if an ItemStack was found.
      */
-    public boolean find(Predicate<ItemStack> predicate) {
-        ItemStack[] contents = inventory.getContents();
+    public final boolean find(final Predicate<ItemStack> predicate) {
+        final ItemStack[] contents = inventory.getContents();
         for (index = 0; index < contents.length; index++) {
             if (predicate.apply(contents[index])) {
                 return true;
@@ -46,8 +45,8 @@ public class InventoryManager {
      * 
      * @return True if an item was found.
      */
-    public boolean findFirst() {
-        ItemStack[] contents = inventory.getContents();
+    public final boolean findFirst() {
+        final ItemStack[] contents = inventory.getContents();
         for (index = 0; index < contents.length; index++) {
             if (contents[index] != null) {
                 return true;
@@ -62,11 +61,29 @@ public class InventoryManager {
      * @param material
      * @return True if an item was found.
      */
-    public boolean findItemType(ItemStack item) {
-        ItemStack[] contents = inventory.getContents();
+    public final boolean findItemType(final ItemStack item) {
+        final ItemStack[] contents = inventory.getContents();
         for (index = 0; index < contents.length; index++) {
-            ItemStack c = contents[index];
+            final ItemStack c = contents[index];
             if (ItemUtils.itemSafeEqualsTypeAndData(item, c))
+                return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Finds the first slot matching the given type id and data. This won't find items of type 0 (air).
+     * @param typeId
+     * @param data
+     * @return True if an item was found.
+     */
+    public final boolean findItemTypeAndData(final int typeId, final byte data) {
+        final ItemStack[] contents = inventory.getContents();
+        for (index = 0; index < contents.length; index++) {
+            final ItemStack c = contents[index];
+            if (c == null)
+                continue;
+            if (c.getTypeId() == typeId && c.getDurability() == data)
                 return true;
         }
         return false;
@@ -135,6 +152,8 @@ public class InventoryManager {
         inventory.clear(index);
     }
 
+    // **** Static stuff ****
+
     /**
      * Returns the inventory belonging only to the given block, filtering out
      * double inventories. Does not check whether the given block has an
@@ -155,5 +174,77 @@ public class InventoryManager {
         } else {
             return inventory;
         }
+    }
+
+    /**
+     * Detects a pattern of items placed on the left hand side of the inventory,
+     * maximum size 3x3. Dispenser and chest inventories supported.
+     * 
+     * @param inventory
+     * @return A matrix of itemstacks, null values mean an empty slot. Returns
+     *         null if no pattern could be found.
+     */
+    public static ItemStack[][] detectPattern(Inventory inventory) {
+        final int size = inventory.getSize();
+        final ItemStack[][] contents;
+        if (size == 9) {
+            // Dispenser
+            contents = new ItemStack[][] { new ItemStack[] { inventory.getItem(0), //
+                    inventory.getItem(1), //
+                    inventory.getItem(2), //
+            }, new ItemStack[] { inventory.getItem(3), //
+                    inventory.getItem(4), //
+                    inventory.getItem(5), //
+            }, new ItemStack[] { inventory.getItem(6), //
+                    inventory.getItem(7), //
+                    inventory.getItem(8), //
+            } };
+        } else if (size == 27 || size == 2 * 27) {
+            // Chest inventory
+            contents = new ItemStack[][] { new ItemStack[] { inventory.getItem(0), //
+                    inventory.getItem(1), //
+                    inventory.getItem(2), //
+            }, new ItemStack[] { inventory.getItem(9), //
+                    inventory.getItem(10), //
+                    inventory.getItem(11), //
+            }, new ItemStack[] { inventory.getItem(18), //
+                    inventory.getItem(19), //
+                    inventory.getItem(20), //
+            } };
+        } else {
+            return null;
+        }
+        int iMin = 3;
+        int iMax = -1;
+        int jMin = 3;
+        int jMax = -1;
+        // Determine the size and position of the recipe here.
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (contents[i][j] != null) {
+                    if (i < iMin)
+                        iMin = i;
+                    if (i > iMax)
+                        iMax = i;
+                    if (j < jMin)
+                        jMin = j;
+                    if (j > jMax)
+                        jMax = j;
+                }
+            }
+        }
+        final int rows = 1 + iMax - iMin;
+        final int columns = 1 + jMax - jMin;
+        if (rows < 1 || columns < 1)
+            return null;
+
+        // Create correctly sized matrix
+        final ItemStack[][] matrix = new ItemStack[rows][columns];
+        for (int i = iMin; i <= iMax; i++) {
+            for (int j = jMin; j <= jMax; j++) {
+                matrix[i - iMin][j - jMin] = contents[i][j];
+            }
+        }
+        return matrix;
     }
 }
