@@ -13,6 +13,7 @@ import me.lyneira.MachinaCore.EventSimulator;
 import me.lyneira.util.InventoryManager;
 import me.lyneira.util.InventoryTransaction;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
@@ -106,7 +107,8 @@ public class RoadBuilder extends BlockDropperBuilder {
             for (BlueprintBlock i : heads) {
                 BlockLocation target = anchor.getRelative(i.vector(yaw).add(down));
                 int typeId = target.getTypeId();
-                if (BlockData.isDrillable(typeId) && !(BlockData.isSolid(typeId) && manager.inventory.contains(typeId))) {
+                // Obsidian cannot be replaced by the builder as its head is made of iron.
+                if (BlockData.isDrillable(typeId) && typeId != Material.OBSIDIAN.getId() && !(BlockData.isSolid(typeId) && manager.inventory.contains(typeId))) {
                     time += BlockData.getDrillTime(typeId) + buildDelay;
                     targets.add(target);
                 }

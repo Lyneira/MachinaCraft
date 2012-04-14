@@ -69,11 +69,15 @@ final class Drill extends Movable {
      * The next target location for the drill.
      */
     private BlockLocation queuedTarget = null;
+    
+    private int queuedDrillTime = 1;
 
     /**
      * The typeId of the next target location.
      */
     private int nextTypeId;
+    
+    private final boolean fastMode;
 
     private BlockFace direction;
     private final BlueprintBlock chest;
@@ -91,6 +95,7 @@ final class Drill extends Movable {
      *            The direction of the drill
      * @param moduleIndices
      *            The active modules for the drill
+     * @throws Exception 
      */
     Drill(final Blueprint blueprint, final List<Integer> moduleIndices, final BlockRotation yaw, Player player, BlockLocation anchor, BlueprintBlock chest, BlueprintBlock head, BlueprintBlock furnace) {
         super(blueprint, moduleIndices, yaw, player);
@@ -101,9 +106,19 @@ final class Drill extends Movable {
         if (hasModule(Blueprint.mainModule)) {
             drillPattern = Blueprint.horizontalDrillPattern.get(yaw);
             direction = yaw.getYawFace();
-        } else if (hasModule(Blueprint.verticalModule)) {
+            if (hasModule(Blueprint.headFast)) {
+                fastMode = true;
+            } else {
+                fastMode = false;
+            }
+        } else {
             drillPattern = Blueprint.verticalDrillPattern;
             direction = BlockFace.DOWN;
+            if (hasModule(Blueprint.verticalHeadFast)) {
+                fastMode = true;
+            } else {
+                fastMode = false;
+            }
         }
         // Set furnace to burning state.
         setFurnace(anchor, true);
@@ -149,7 +164,7 @@ final class Drill extends Movable {
             List<ItemStack> results = BlockData.breakBlock(queuedTarget);
             InventoryTransaction transaction = new InventoryTransaction(InventoryManager.getSafeInventory(chestBlock));
 
-            if (!useEnergy(anchor, BlockData.getDrillTime(nextTypeId)))
+            if (!useEnergy(anchor, queuedDrillTime))
                 return false;
 
             if (!EventSimulator.blockBreak(queuedTarget, player))
@@ -251,6 +266,10 @@ final class Drill extends Movable {
             BlockLocation location = anchor.getRelative(i);
             int typeId = location.getTypeId();
             if (BlockData.isDrillable(typeId)) {
+                // Obsidian can only be dug with a diamond head.
+                if (!fastMode && typeId == Material.OBSIDIAN.getId()) {
+                    return null;
+                }
                 return location;
             }
         }
@@ -270,7 +289,11 @@ final class Drill extends Movable {
             return moveDelay;
         } else {
             nextTypeId = queuedTarget.getTypeId();
-            return BlockData.getDrillTime(nextTypeId);
+            queuedDrillTime = BlockData.getDrillTime(nextTypeId);
+            if (fastMode) {
+                queuedDrillTime = Math.round(queuedDrillTime * 0.8F);
+            }
+            return queuedDrillTime;
         }
     }
 
@@ -411,5 +434,6 @@ final class Drill extends Movable {
         moveDelay = Math.max(configuration.getInt("move-delay", moveDelay), 1);
         useEnergy = configuration.getBoolean("use-energy", useEnergy);
         activeLimit = Math.max(configuration.getInt("active-limit", activeLimit), 0);
+        Blueprint.activationDepthLimit = configuration.getInt("depth-limit", Blueprint.activationDepthLimit);
     }
 }

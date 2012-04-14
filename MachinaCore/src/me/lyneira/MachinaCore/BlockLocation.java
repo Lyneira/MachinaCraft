@@ -14,9 +14,9 @@ import org.bukkit.inventory.ItemStack;
  */
 public final class BlockLocation {
     private final World world;
-    private final int x;
-    private final int y;
-    private final int z;
+    public final int x;
+    public final int y;
+    public final int z;
 
     /**
      * Constructs a new {@link BlockLocation} with the given coordinates
@@ -142,12 +142,14 @@ public final class BlockLocation {
     public final void setData(final byte data) {
         world.getBlockAt(x, y, z).setData(data);
     }
-    
+
     /**
      * Sets the type id and data at this {@link BlockLocation}.
      * 
-     * @param type The type id to set
-     * @param data The data to set
+     * @param type
+     *            The type id to set
+     * @param data
+     *            The data to set
      */
     public final void setTypeIdAndData(final int typeId, final byte data, boolean applyPhysics) {
         world.getBlockAt(x, y, z).setTypeIdAndData(typeId, data, applyPhysics);

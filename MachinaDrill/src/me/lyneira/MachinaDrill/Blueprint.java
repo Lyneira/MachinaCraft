@@ -28,15 +28,22 @@ import org.bukkit.inventory.ItemStack;
  */
 final class Blueprint extends MovableBlueprint {
     private static BlueprintFactory blueprint;
+    static int activationDepthLimit = 0;
+
     final static int mainModule;
+    final static int headNormal;
+    final static int headFast;
     final static int verticalModule;
+    final static int verticalHeadNormal;
+    final static int verticalHeadFast;
     final static Map<BlockRotation, BlockVector[]> horizontalDrillPattern = new EnumMap<BlockRotation, BlockVector[]>(BlockRotation.class);
     final static BlockVector[] verticalDrillPattern;
 
     final static int drillPatternSize;
     private final static Material anchorMaterial = Material.GOLD_BLOCK;
     private final static Material baseMaterial = Material.WOOD;
-    final static Material headMaterial = Material.IRON_BLOCK;
+    final static Material headMaterialNormal = Material.IRON_BLOCK;
+    final static Material headMaterialFast = Material.DIAMOND_BLOCK;
     private final static Material furnaceMaterial = Material.FURNACE;
     private final static Material burningFurnaceMaterial = Material.BURNING_FURNACE;
     final static Material chestMaterial = Material.CHEST;
@@ -46,16 +53,16 @@ final class Blueprint extends MovableBlueprint {
     final static BlueprintBlock centralBase;
     final static BlueprintBlock head;
     final static BlueprintBlock furnace;
-    
+
     final static BlueprintBlock verticalChest;
     final static BlueprintBlock verticalHead;
     final static BlueprintBlock verticalFurnace;
 
     static {
-        blueprint = new BlueprintFactory(2);
-        
+        blueprint = new BlueprintFactory(6);
+
         mainModule = blueprint.newModule();
-        
+
         // Add key blocks to the blueprint
         // The lever is always key.
         blueprint.addKey(new BlockVector(0, 1, 0), Material.LEVER, mainModule);
@@ -69,11 +76,16 @@ final class Blueprint extends MovableBlueprint {
         // Add non-key blocks
         // Output chest
         chest = blueprint.add(new BlockVector(-1, 0, 0), chestMaterial, mainModule);
-        // Head
-        head = blueprint.add(new BlockVector(1, 0, 0), headMaterial, mainModule);
+
         blueprint.add(new BlockVector(0, -1, 1), baseMaterial, mainModule);
         blueprint.add(new BlockVector(0, -1, -1), baseMaterial, mainModule);
-        
+
+        // Iron and diamond heads
+        headNormal = blueprint.newModule();
+        head = blueprint.add(new BlockVector(1, 0, 0), headMaterialNormal, headNormal);
+        headFast = blueprint.newModule();
+        blueprint.add(new BlockVector(1, 0, 0), headMaterialFast, headFast);
+
         // Add drill pattern data 3x3
         drillPatternSize = 9;
         BlockVector[] basePattern = new BlockVector[drillPatternSize];
@@ -93,13 +105,12 @@ final class Blueprint extends MovableBlueprint {
             }
             horizontalDrillPattern.put(i, rotatedPattern);
         }
-        
-        
-        //Vertical module section
+
+        // Vertical module section
         // Add key blocks to the blueprint
         // The lever is always key.
         verticalModule = blueprint.newModule();
-        
+
         blueprint.addKey(new BlockVector(0, 1, 0), Material.LEVER, verticalModule);
         // Anchor
         blueprint.addKey(new BlockVector(0, 0, 0), anchorMaterial, verticalModule);
@@ -109,10 +120,14 @@ final class Blueprint extends MovableBlueprint {
         // Add non-key blocks
         // Output chest
         verticalChest = blueprint.add(new BlockVector(1, 0, 0), chestMaterial, verticalModule);
-        // Head
-        verticalHead = blueprint.add(new BlockVector(0, -1, 0), headMaterial, verticalModule);
         blueprint.add(new BlockVector(0, -1, 1), baseMaterial, verticalModule);
         blueprint.add(new BlockVector(0, -1, -1), baseMaterial, verticalModule);
+
+        // Iron and diamond heads
+        verticalHeadNormal = blueprint.newModule();
+        verticalHead = blueprint.addKey(new BlockVector(0, -1, 0), headMaterialNormal, verticalHeadNormal);
+        verticalHeadFast = blueprint.newModule();
+        blueprint.addKey(new BlockVector(0, -1, 0), headMaterialFast, verticalHeadFast);
 
         verticalDrillPattern = new BlockVector[drillPatternSize];
         verticalDrillPattern[0] = new BlockVector(0, -2, 0);
@@ -145,7 +160,7 @@ final class Blueprint extends MovableBlueprint {
             return null;
 
         BlockLocation centralBase = anchor.getRelative(BlockFace.DOWN);
-        List<Integer> detectedModules = new ArrayList<Integer>(1);
+        List<Integer> detectedModules = new ArrayList<Integer>(2);
         Drill drill = null;
         if (centralBase.checkType(baseMaterial)) {
             // Check if the drill is on solid ground.
@@ -161,21 +176,34 @@ final class Blueprint extends MovableBlueprint {
                 if (!detectOther(anchor, yaw, mainModule))
                     continue;
 
+                detectedModules.add(mainModule);
+                if (detectOther(anchor, yaw, headNormal)) {
+                    detectedModules.add(headNormal);
+                } else if (detectOther(anchor, yaw, headFast)) {
+                    detectedModules.add(headFast);
+                } else {
+                    return null;
+                }
+
                 if (!player.hasPermission("machinadrill.activate")) {
                     player.sendMessage("You do not have permission to activate a drill.");
                     return null;
                 }
-                
+
                 if (!Drill.canActivate(player)) {
                     player.sendMessage("You cannot activate any more drills.");
                     return null;
                 }
-                
+
+                if (anchor.y < activationDepthLimit) {
+                    player.sendMessage("You cannot activate a drill at this depth.");
+                    return null;
+                }
+
                 if (EventSimulator.inventoryProtected(yaw, player, anchor, chest, furnace))
                     return null;
 
                 // Detection was a success.
-                detectedModules.add(mainModule);
                 drill = new Drill(this, detectedModules, yaw, player, anchor, chest, head, furnace);
                 if (drill != null && itemInHand != null && itemInHand.getType() == rotateMaterial) {
                     // Support for rotation on a non-activated drill
@@ -185,7 +213,15 @@ final class Blueprint extends MovableBlueprint {
                 }
                 break;
             }
-        } else if(centralBase.checkType(headMaterial)) {            
+        } else {
+            final int headModule;
+            if (centralBase.checkType(headMaterialNormal)) {
+                headModule = verticalHeadNormal;
+            } else if (centralBase.checkType(headMaterialFast)) {
+                headModule = verticalHeadFast;
+            } else {
+                return null;
+            }
             // Search for a furnace around the anchor.
             for (BlockRotation i : BlockRotation.values()) {
                 if (!anchor.getRelative(i.getYawFace()).checkType(furnaceMaterial))
@@ -195,11 +231,14 @@ final class Blueprint extends MovableBlueprint {
                 if (!detectOther(anchor, yaw, verticalModule))
                     continue;
 
+                detectedModules.add(verticalModule);
+                detectedModules.add(headModule);
+
                 if (!player.hasPermission("machinadrill.activate")) {
                     player.sendMessage("You do not have permission to activate a vertical drill.");
                     return null;
                 }
-                
+
                 if (!Drill.canActivate(player)) {
                     player.sendMessage("You cannot activate any more drills.");
                     return null;
@@ -209,7 +248,6 @@ final class Blueprint extends MovableBlueprint {
                     return null;
 
                 // Detection was a success.
-                detectedModules.add(verticalModule);
                 drill = new Drill(this, detectedModules, yaw, player, anchor, verticalChest, verticalHead, verticalFurnace);
                 break;
             }
@@ -217,5 +255,6 @@ final class Blueprint extends MovableBlueprint {
         if (drill != null)
             drill.increment();
         return drill;
+
     }
 }
