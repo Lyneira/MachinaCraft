@@ -1,5 +1,6 @@
 package me.lyneira.MachinaCore;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -9,6 +10,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 
 /**
  * Class that simulates events.
@@ -105,7 +107,7 @@ public class EventSimulator {
         // Set the new state without physics.
         placedBlock.setTypeIdAndData(typeId, (byte) 0, false);
 
-        pretendEvent = new ArtificialBlockPlaceEvent(placedBlock, replacedBlockState, placedAgainst.getBlock(), null, player, true);
+        pretendEvent = new ArtificialBlockPlaceEvent(placedBlock, replacedBlockState, placedAgainst.getBlock(), new ItemStack(Material.AIR), player, true);
         pretendEventCancelled = true;
         MachinaCore.pluginManager.callEvent(pretendEvent);
 
@@ -149,7 +151,7 @@ public class EventSimulator {
      * @return True if the player may interact with this block
      */
     public static boolean blockRightClick(BlockLocation target, Player player, BlockFace clickedFace) {
-        PlayerInteractEvent event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, null, target.getBlock(), clickedFace);
+        PlayerInteractEvent event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, new ItemStack(Material.AIR), target.getBlock(), clickedFace);
         MachinaCore.pluginManager.callEvent(event);
 
         if (event.isCancelled())
