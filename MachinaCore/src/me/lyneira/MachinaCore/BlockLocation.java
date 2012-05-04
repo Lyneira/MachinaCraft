@@ -96,6 +96,20 @@ public final class BlockLocation {
     }
 
     /**
+     * @return True if the location is safe to move into for a machina.
+     */
+    public final boolean isEmptyForCollision() {
+        switch (world.getBlockAt(x, y, z).getType()) {
+        case AIR:
+        case SNOW:
+        case LONG_GRASS:
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    /**
      * Returns the {@link Material} at this {@link BlockLocation}
      * 
      * @return The {@link Material} at this location

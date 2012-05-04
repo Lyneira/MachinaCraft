@@ -4,7 +4,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -15,7 +14,6 @@ import org.bukkit.inventory.ItemStack;
  * @author Lyneira
  */
 public abstract class Movable implements Machina {
-    private static final Material[] emptyTypes = new Material[] { Material.AIR, Material.SNOW, Material.LONG_GRASS };
     protected final MovableBlueprint blueprint;
     private final List<Integer> modules;
     private final int moduleCount;
@@ -113,7 +111,7 @@ public abstract class Movable implements Machina {
      */
     protected boolean detectCollision(final BlockLocation oldAnchor, final BlockFace face) {
         for (BlockVector i : getDifference(face).plus) {
-            if (!oldAnchor.getRelative(i).checkTypes(emptyTypes)) {
+            if (!oldAnchor.getRelative(i).isEmptyForCollision()) {
                 return true;
             }
         }
@@ -151,7 +149,7 @@ public abstract class Movable implements Machina {
     protected boolean detectCollisionTeleport(final BlockLocation oldAnchor, final BlockVector teleportBy) {
         BlockVector[] teleportDifference = BlueprintDifference.teleportDifference(unifiedVectors, size, teleportBy);
         for (BlockVector i : teleportDifference) {
-            if (!oldAnchor.getRelative(i).checkTypes(emptyTypes)) {
+            if (!oldAnchor.getRelative(i).isEmptyForCollision()) {
                 return true;
             }
         }
@@ -172,7 +170,7 @@ public abstract class Movable implements Machina {
     protected boolean detectCollisionRotate(final BlockLocation anchor, final BlockRotation rotateBy) {
         BlockVector[] rotateDifference = BlueprintDifference.rotateDifference(unifiedVectors, size, rotateBy);
         for (BlockVector i : rotateDifference) {
-            if (!anchor.getRelative(i).checkTypes(emptyTypes)) {
+            if (!anchor.getRelative(i).isEmptyForCollision()) {
                 return true;
             }
         }

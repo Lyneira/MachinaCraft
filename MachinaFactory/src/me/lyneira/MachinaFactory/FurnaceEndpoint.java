@@ -45,9 +45,7 @@ public class FurnaceEndpoint implements PipelineEndpoint {
      * @param inventory
      * @return True if the inventory was changed.
      */
-    public static boolean handle(BlockLocation location, Inventory inventory) {
-        // InventoryManager manager = new InventoryManager(inventory);
-        FurnaceInventory furnaceInventory = ((Furnace) location.getBlock().getState()).getInventory();
+    public static boolean handle(FurnaceInventory furnaceInventory, Inventory inventory) {
         if (furnaceInventory == inventory)
             return false;
 
@@ -95,7 +93,7 @@ public class FurnaceEndpoint implements PipelineEndpoint {
         return false;
     }
 
-    private static final Predicate<ItemStack> isFuelItem = new Predicate<ItemStack>() {
+    public static final Predicate<ItemStack> isFuelItem = new Predicate<ItemStack>() {
         @Override
         public boolean apply(ItemStack item) {
             if (item == null)
@@ -104,7 +102,7 @@ public class FurnaceEndpoint implements PipelineEndpoint {
         }
     };
 
-    private static final Predicate<ItemStack> burnableItem = new Predicate<ItemStack>() {
+    public static final Predicate<ItemStack> burnableItem = new Predicate<ItemStack>() {
         @Override
         public boolean apply(ItemStack item) {
             if (item == null)
@@ -120,7 +118,7 @@ public class FurnaceEndpoint implements PipelineEndpoint {
         @Override
         public boolean handle(PipelineEndpoint endpoint, Inventory payload) {
             FurnaceEndpoint furnace = (FurnaceEndpoint) endpoint;
-            return FurnaceEndpoint.handle(furnace.location, payload);
+            return FurnaceEndpoint.handle((((Furnace) furnace.location.getBlock().getState()).getInventory()), payload);
         }
 
         @Override

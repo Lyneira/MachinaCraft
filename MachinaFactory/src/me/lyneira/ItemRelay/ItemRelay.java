@@ -32,7 +32,7 @@ public abstract class ItemRelay extends Component implements PipelineEndpoint {
     /**
      * Number of ticks to stay active when the item relay cannot do anything.
      */
-    protected static final int maxAge = 11;
+    protected static final int maxAge = 15;
 
     protected final Blueprint blueprint;
     protected final Pipeline pipeline;

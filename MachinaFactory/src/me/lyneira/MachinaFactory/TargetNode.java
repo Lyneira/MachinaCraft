@@ -36,9 +36,9 @@ class TargetNode extends PipelineNode {
             case CHEST:
             case DISPENSER:
                 return new ContainerEndpoint(player, location);
-            case FURNACE:
-            case BURNING_FURNACE:
-                return new FurnaceEndpoint(player, location);
+//            case FURNACE:
+//            case BURNING_FURNACE:
+//                return new FurnaceEndpoint(player, location);
             }
         } catch (PipelineException e) {
             return null;

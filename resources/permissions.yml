@@ -27,4 +27,5 @@ machinacraft:
         machinapump.all: true
         hoverpad: true
         machinafactory.all: true
+        machinaplanter.activate: true
 #        machinapump.lava.all: true

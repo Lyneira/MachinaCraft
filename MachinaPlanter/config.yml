@@ -1,0 +1,9 @@
+# MachinaPlanter configuration file.
+#
+# action-delay: The number of server ticks it takes for the planter to move, plant or harvest.
+# max-length: The maximum length of the rail that the planter moves along. Maximum allowed: 64
+# max-width: The maximum width of the planter. Maximum allowed: 64
+
+action-delay: 20
+max-length: 16
+max-width: 10

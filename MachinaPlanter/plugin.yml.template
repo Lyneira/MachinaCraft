@@ -1,0 +1,21 @@
+name: MachinaPlanter
+version: @VERSION@
+description: A Machina capable of tilling soil, planting seeds and harvesting plants in an area.
+author: Lyneira
+main: me.lyneira.MachinaPlanter.MachinaPlanter
+depend: [MachinaCore]
+permissions:
+    machinaplanter.*:
+        children:
+            machinaplanter.all: true
+    machinaplanter.all:
+        description: Gives full access to using a planter.
+        children:
+            machinaplanter.activate: true
+            machinabuilder.harvest: true
+    machinaplanter.activate:
+        description: Allows activating a planter.
+        default: op
+    machinaplanter.harvest:
+        description: Allows the planter to harvest crops in addition to tilling soil and planting seeds.
+        default: op

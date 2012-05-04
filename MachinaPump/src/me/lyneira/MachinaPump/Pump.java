@@ -230,7 +230,7 @@ final class Pump implements Machina {
 
             BlockLocation target = anchor.getRelative(forward, size + 1);
 
-            if (!target.isEmpty())
+            if (!target.isEmptyForCollision())
                 return stop();
 
             // Try to take a drain block from the furnace.
