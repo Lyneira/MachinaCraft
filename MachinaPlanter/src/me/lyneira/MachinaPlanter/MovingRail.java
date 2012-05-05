@@ -178,7 +178,6 @@ class MovingRail {
         boolean activate() {
             if (active)
                 return true;
-            MachinaPlanter.log("Trying to activate head.");
 
             BlockLocation newBottom = bottom.getRelative(BlockFace.DOWN);
             if (!newBottom.isEmptyForCollision())
@@ -345,14 +344,12 @@ class MovingRail {
         List<BlockVector> rail = new ArrayList<BlockVector>(Planter.maxWidth);
         if (!anchor.checkType(Blueprint.planterMovingRailMaterial))
             return null;
-        MachinaPlanter.log("Moving rail: 1");
 
         int head = -1;
         boolean headActive = false;
         BlockLocation next = anchor.getRelative(direction);
         for (int i = 0; i < Planter.maxWidth; i++) {
             Material material = next.getType();
-            MachinaPlanter.log("Moving rail: " + i + " " + next.getBlock().toString());
             BlockVector vector = next.subtract(anchor);
             if (material == Blueprint.planterMovingRailMaterial) {
                 BlockLocation headBlock = next.getRelative(BlockFace.DOWN);
@@ -361,14 +358,14 @@ class MovingRail {
                     // Head is moved down
                     head = i;
                     headActive = true;
-                    MachinaPlanter.log("Found active head");
                 }
             } else if (material == Blueprint.planterHeadBlockMaterial && next.getRelative(BlockFace.UP).checkType(Blueprint.planterMovingRailMaterial)
                     && next.getRelative(BlockFace.DOWN).checkType(Blueprint.planterHeadMaterial)) {
                 rail.add(vector);
                 head = i;
                 headActive = false;
-                MachinaPlanter.log("Found inactive head");
+            } else {
+                break;
             }
             next = next.getRelative(direction);
         }

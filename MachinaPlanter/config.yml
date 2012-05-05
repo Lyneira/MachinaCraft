@@ -3,7 +3,20 @@
 # action-delay: The number of server ticks it takes for the planter to move, plant or harvest.
 # max-length: The maximum length of the rail that the planter moves along. Maximum allowed: 64
 # max-width: The maximum width of the planter. Maximum allowed: 64
+#
+# *** Note on harvesting options *** 
+# The planter will only harvest if the activating player has permission to harvest!
+# Use these to fine-tune what players with this permission can harvest.
+#
+# harvest-wheat: Harvest wheat and seeds.
+# harvest-pumpkin: Harvest pumpkins.
+# harvest-melon: Harvest melons.
+# harvest-netherwart: Harvest nether wart.
 
 action-delay: 20
 max-length: 16
 max-width: 10
+harvest-wheat: true
+harvest-pumpkin: true
+harvest-melon: true
+harvest-netherwart: true

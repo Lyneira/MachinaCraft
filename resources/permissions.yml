@@ -15,8 +15,10 @@
 #   replace it with this file.
 # * Otherwise, add the contents below to your existing configuration to use the
 #   machinacraft convenience permission.
-# * To allow the pump to work with lava, uncomment the bottom line that reads:
+# * To allow the pump to work with lava, uncomment the following line:
 #   machinapump.lava.all: true
+# * To allow the planter to harvest drops, uncomment the following line:
+#   machinaplanter.harvest: true
 
 machinacraft:
     default: true
@@ -29,3 +31,4 @@ machinacraft:
         machinafactory.all: true
         machinaplanter.activate: true
 #        machinapump.lava.all: true
+#        machinaplanter.harvest: true

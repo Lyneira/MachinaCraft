@@ -42,6 +42,12 @@ class Rail {
         return movingRail.deactivate();
     }
 
+    /**
+     * Returns the current tile for planting below the head.
+     * 
+     * @return The block two spaces below the head. If the head was not active
+     *         this will return null.
+     */
     final BlockLocation currentTile() {
         return movingRail.currentTile();
     }
@@ -124,6 +130,13 @@ class Rail {
             this.material = material;
         }
     }
+    
+    /**
+     * @return True if the rail is currently at a planting row.
+     */
+    final boolean isPlantingRow() {
+        return (rail.peek().material == Blueprint.railPlantMaterial);
+    }
 
     /**
      * Attempts to add an element to the rail length
@@ -149,14 +162,12 @@ class Rail {
         final Deque<RailBlock> rail = new ArrayDeque<RailBlock>(Planter.maxLength);
         if (!add(rail, anchor))
             return null;
-        MachinaPlanter.log("1");
 
         MovingRail movingRail = null;
         BlockLocation lastRailBlock = anchor;
         // Try to extend the rail one block at a time to see if the moving head
         // might be further up
         for (int i = 0; i < Planter.maxLength; i++) {
-            MachinaPlanter.log(Integer.toString(i));
             movingRail = MovingRail.detect(lastRailBlock.getRelative(BlockFace.UP), movingRailDirection);
             if (movingRail != null)
                 break;

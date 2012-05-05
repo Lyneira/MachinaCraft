@@ -1,5 +1,6 @@
 package me.lyneira.util;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.inventory.DoubleChestInventory;
@@ -66,6 +67,23 @@ public class InventoryManager {
         for (index = 0; index < contents.length; index++) {
             final ItemStack c = contents[index];
             if (ItemUtils.itemSafeEqualsTypeAndData(item, c))
+                return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Finds the first slot matching the given material.
+     * @param material The material to look for.
+     * @return True if an item was found.
+     */
+    public final boolean findMaterial(Material material) {
+        final ItemStack[] contents = inventory.getContents();
+        for (index = 0; index < contents.length; index++) {
+            final ItemStack c = contents[index];
+            if (c == null)
+                continue;
+            if (c.getType() == material)
                 return true;
         }
         return false;
