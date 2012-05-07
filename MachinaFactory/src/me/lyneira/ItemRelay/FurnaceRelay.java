@@ -169,7 +169,7 @@ public class FurnaceRelay extends ItemRelay {
 
         if (fuelItem.getAmount() < 2)
             return FurnaceLevel.LOW_FUEL;
-        if (smeltItem.getAmount() < 2)
+        if (smeltItem.getAmount() < 3)
             return FurnaceLevel.LOW_SMELTING;
 
         return FurnaceLevel.OK;

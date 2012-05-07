@@ -27,9 +27,11 @@ public class Blueprint implements MachinaBlueprint {
     final BlueprintBlock chest;
     final BlueprintBlock dispenser;
     final BlueprintBlock furnace = new BlueprintBlock(new BlockVector(-1, 0, 0), Material.FURNACE, true);
+    final BlueprintBlock brewingStand;
     final ComponentBlueprint blueprintChest;
     final ComponentBlueprint blueprintDispenser;
     final ComponentBlueprint blueprintFurnace;
+    final ComponentBlueprint blueprintBrewing;
 
     /**
      * The blueprints for the base, inactive and active states are specified
@@ -46,6 +48,10 @@ public class Blueprint implements MachinaBlueprint {
         BlueprintBlock[] blueprintBaseFurnace = { new BlueprintBlock(new BlockVector(0, 0, 0), anchorMaterial, true), //
         // We leave out the furnace from the blueprint and verify it manually.
         };
+        BlueprintBlock[] blueprintBaseBrewing = { new BlueprintBlock(new BlockVector(0, 0, 0), anchorMaterial, true), //
+                new BlueprintBlock(new BlockVector(-1, 0, 0), ComponentBlueprint.pipelineMaterial(), true), //
+                brewingStand = new BlueprintBlock(new BlockVector(-1, 1, 0), Material.BREWING_STAND, true), //
+        };
         BlueprintBlock[] blueprintInactive = { new BlueprintBlock(new BlockVector(1, 1, 0), Material.IRON_FENCE, false), //
                 new BlueprintBlock(new BlockVector(1, 0, 0), ComponentBlueprint.pipelineMaterial(), false), //
         };
@@ -56,6 +62,7 @@ public class Blueprint implements MachinaBlueprint {
         blueprintChest = new ComponentBlueprint(blueprintBaseChest, blueprintInactive, blueprintActive);
         blueprintDispenser = new ComponentBlueprint(blueprintBaseDispenser, blueprintInactive, blueprintActive);
         blueprintFurnace = new ComponentBlueprint(blueprintBaseFurnace, blueprintInactive, blueprintActive);
+        blueprintBrewing = new ComponentBlueprint(blueprintBaseBrewing, blueprintInactive, blueprintActive);
     }
 
     @Override
@@ -81,6 +88,14 @@ public class Blueprint implements MachinaBlueprint {
             default:
                 break;
             }
+            // Brewing stand breaks the mold so detect it here and set the
+            // container material properly.
+            if (containerMaterial == ComponentBlueprint.pipelineMaterial() && container.getRelative(BlockFace.UP).checkType(Material.BREWING_STAND)) {
+                yaw = i.getOpposite();
+                container = container.getRelative(BlockFace.UP);
+                containerMaterial = Material.BREWING_STAND;
+                break;
+            }
         }
 
         if (yaw == null)
@@ -103,6 +118,8 @@ public class Blueprint implements MachinaBlueprint {
             case FURNACE:
             case BURNING_FURNACE:
                 return new FurnaceRelay(this, anchor, yaw, player);
+            case BREWING_STAND:
+                return new BrewingRelay(this, anchor, yaw, player);
             default:
                 break;
             }

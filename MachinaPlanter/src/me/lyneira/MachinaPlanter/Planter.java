@@ -279,9 +279,14 @@ class Planter implements Machina {
     private final State activate = new State() {
         @Override
         public State run() {
-            if (rail.activate())
-                return plant;
-            else
+            if (rail.activate()) {
+                try {
+                    plant();
+                    return plant;
+                } catch (NoToolException e) {
+                    return deactivate;
+                }
+            } else
                 return parkHead.run();
         }
     };
@@ -300,14 +305,13 @@ class Planter implements Machina {
     private final State plant = new State() {
         @Override
         public State run() {
-            try {
-                plant();
-            } catch (NoToolException e) {
-                return deactivate.run();
-            }
-
             if (rail.nextTile()) {
-                return this;
+                try {
+                    plant();
+                    return this;
+                } catch (NoToolException e) {
+                    return deactivate;
+                }
             } else {
                 return deactivate.run();
             }
