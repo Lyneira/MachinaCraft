@@ -4,7 +4,6 @@ import me.lyneira.MachinaCore.BlockLocation;
 import me.lyneira.MachinaCore.BlockRotation;
 import me.lyneira.MachinaFactory.ComponentActivateException;
 import me.lyneira.MachinaFactory.ComponentDetectException;
-import me.lyneira.MachinaFactory.MachinaFactory;
 import me.lyneira.MachinaFactory.PacketHandler;
 import me.lyneira.MachinaFactory.PacketListener;
 import me.lyneira.MachinaFactory.PacketTypeUnsupportedException;
@@ -54,18 +53,15 @@ public class BrewingRelay extends ItemRelay {
             ItemStack item = brewingInventory.getItem(i);
             if (item == null) {
                 emptySlots++;
-                MachinaFactory.log("Found an empty slot.");
                 continue;
             }
 
             switch (item.getType()) {
             case AIR:
-                MachinaFactory.log("Found an AIR slot.");
                 emptySlots++;
                 break;
             case POTION:
                 PotionTier current = getTier(item);
-                MachinaFactory.log("Found potion of tier " + current.toString());
                 if (current.ordinal() < tier.ordinal())
                     tier = current;
                 break;
@@ -75,8 +71,6 @@ public class BrewingRelay extends ItemRelay {
                 return false;
             }
         }
-
-        MachinaFactory.log("Brewer state: Tier " + tier.toString() + " - empty slots: " + emptySlots);
 
         // Now determine what to do.
         InventoryManager manager = new InventoryManager(inventory);
@@ -230,7 +224,6 @@ public class BrewingRelay extends ItemRelay {
         public State run(ItemRelay relay) {
             BrewingStand brewer = (BrewingStand) ((BrewingRelay) relay).container().getBlock().getState();
             if (brewer.getBrewingTime() > 0) {
-                MachinaFactory.log("Brewing started, moving to active state.");
                 return brewingActive;
             }
             return this;
@@ -249,7 +242,6 @@ public class BrewingRelay extends ItemRelay {
                 brewingRelay.age = 0;
                 return this;
             }
-            MachinaFactory.log("Brewing completed, moving to flush state.");
             return brewingFlush;
         }
     };
@@ -261,7 +253,6 @@ public class BrewingRelay extends ItemRelay {
 
             // If no items remain, the brewer is ready for another cycle.
             if (!manager.findFirst()) {
-                MachinaFactory.log("Brewer flushed, going back to collect.");
                 return brewingCollect;
             }
 

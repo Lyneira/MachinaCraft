@@ -30,5 +30,5 @@ machinacraft:
         hoverpad: true
         machinafactory.all: true
         machinaplanter.activate: true
-#        machinapump.lava.all: true
 #        machinaplanter.harvest: true
+#        machinapump.lava.all: true
