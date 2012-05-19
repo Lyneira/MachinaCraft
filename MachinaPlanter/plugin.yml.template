@@ -12,7 +12,7 @@ permissions:
         description: Gives full access to using a planter.
         children:
             machinaplanter.activate: true
-            machinabuilder.harvest: true
+            machinaplanter.harvest: true
     machinaplanter.activate:
         description: Allows activating a planter.
         default: op

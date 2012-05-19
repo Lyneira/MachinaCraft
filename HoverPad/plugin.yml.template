@@ -5,6 +5,10 @@ author: Lyneira
 main: me.lyneira.HoverPad.HoverPadPlugin
 depend: [MachinaCore]
 permissions:
+    hoverpad.all:
+        description: Allows use of a hoverpad.
+        children:
+            hoverpad: true
     hoverpad:
         description: Allows use of a hoverpad.
         default: op

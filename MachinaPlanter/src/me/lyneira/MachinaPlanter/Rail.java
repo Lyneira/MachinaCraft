@@ -68,6 +68,8 @@ class Rail {
      *         there was a collision or the rail could not be extended further.
      */
     boolean nextTile() {
+        if (getRowType() == RailType.SKIP)
+            return extend();
         switch (movingRail.nextTile()) {
         case OK:
             return true;
@@ -124,18 +126,26 @@ class Rail {
     private static class RailBlock {
         final BlockLocation location;
         final Material material;
+        final RailType type;
 
         private RailBlock(BlockLocation location, Material material) {
             this.location = location;
             this.material = material;
+            if (material == Blueprint.railPlantMaterial) {
+                type = RailType.PLANT;
+            } else if (material == Blueprint.railTillMaterial) {
+                type = RailType.TILL;
+            } else { //Blueprint.railSkipMaterial
+                type = RailType.SKIP;
+            }
         }
     }
     
     /**
      * @return True if the rail is currently at a planting row.
      */
-    final boolean isPlantingRow() {
-        return (rail.peek().material == Blueprint.railPlantMaterial);
+    final RailType getRowType() {
+        return rail.peek().type;
     }
 
     /**
@@ -143,7 +153,7 @@ class Rail {
      */
     private static final boolean add(Deque<RailBlock> rail, BlockLocation location) {
         Material material = location.getType();
-        if (material == Blueprint.railTillMaterial || material == Blueprint.railPlantMaterial) {
+        if (material == Blueprint.railTillMaterial || material == Blueprint.railPlantMaterial || material == Blueprint.railSkipMaterial) {
             rail.push(new RailBlock(location, material));
             return true;
         }

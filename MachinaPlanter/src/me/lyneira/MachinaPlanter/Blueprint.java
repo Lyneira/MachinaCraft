@@ -25,6 +25,7 @@ class Blueprint implements MachinaBlueprint {
     // Planter rail materials
     final static Material railTillMaterial = Material.FENCE;
     final static Material railPlantMaterial = Material.WOOD;
+    final static Material railSkipMaterial = Material.GLASS;
     // Moving head materials
     final static Material planterMovingRailMaterial = Material.FENCE;
     final static Material planterHeadBlockMaterial = Material.WOOD;

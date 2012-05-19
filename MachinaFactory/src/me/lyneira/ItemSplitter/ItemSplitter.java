@@ -75,11 +75,20 @@ public class ItemSplitter extends InventoryProcessor {
     protected class DualPipe implements State {
         @Override
         public boolean run(InventoryManager manager) throws ProcessInventoryException {
-            if (!sender.matchFilterWithPriority(manager, getOpposite())) {
+            switch (sender.matchFilterWithPriority(manager, getOpposite())) {
+            case FOUND:
+                break;
+            case FILTERED_NOMATCH:
                 switchSender();
-                if (!sender.matchFilterWithPriority(manager, getOpposite())) {
+                switch (sender.matchFilterWithPriority(manager, getOpposite())) {
+                case FOUND:
+                    break;
+                default:
                     return false;
                 }
+                break;
+            default:
+                return false;
             }
             // We've found a match in one of the senders. Try to send the item.
             ItemStack item = manager.get();
@@ -183,20 +192,27 @@ public class ItemSplitter extends InventoryProcessor {
          *            The opposite sender to exclude items from.
          * @return True if an item was found, false otherwise.
          */
-        protected boolean matchFilterWithPriority(final InventoryManager manager, Sender opposite) {
+        protected SenderSearchResult matchFilterWithPriority(final InventoryManager manager, Sender opposite) {
             if (filterChest.getType() == Material.CHEST) {
                 // Both sides have a chest, so find anything that matches this
                 // chest
                 Inventory inventory = ((InventoryHolder) filterChest.getState()).getInventory();
-                return match(inventory, manager);
+                if (match(inventory, manager))
+                    return SenderSearchResult.FOUND;
+                return SenderSearchResult.FILTERED_NOMATCH;
             } else {
                 // No chest here.
                 if (opposite.filterChest.getType() == Material.CHEST) {
-                    // The other side has a chest, so we have to find an item that's not in the opposite's chest.
-                    return manager.find(new NotInContents(((InventoryHolder) opposite.filterChest.getState()).getInventory().getContents()));
+                    // The other side has a chest, so we have to find an item
+                    // that's not in the opposite's chest.
+                    if (manager.find(new NotInContents(((InventoryHolder) opposite.filterChest.getState()).getInventory().getContents())))
+                        return SenderSearchResult.FOUND;
+                    return SenderSearchResult.FILTERED_NOMATCH;
                 } else {
                     // No chest there either, send anything.
-                    return manager.findFirst();
+                    if (manager.findFirst())
+                        return SenderSearchResult.FOUND;
+                    return SenderSearchResult.EMPTY;
                 }
             }
         }
@@ -226,7 +242,8 @@ public class ItemSplitter extends InventoryProcessor {
     }
 
     /**
-     * Returns true for an {@link ItemStack} which is not in the given array of inventory contents.
+     * Returns true for an {@link ItemStack} which is not in the given array of
+     * inventory contents.
      */
     private class NotInContents implements Predicate<ItemStack> {
         private final ItemStack[] contents;
@@ -246,4 +263,24 @@ public class ItemSplitter extends InventoryProcessor {
             return true;
         }
     };
+
+    /**
+     * Possible search results when searching the sender inventory with a
+     * potential filter.
+     */
+    private enum SenderSearchResult {
+        /**
+         * The sending inventory was empty. Should not switch senders or to
+         * single pipe state.
+         */
+        EMPTY,
+        /**
+         * This side contains a filter and no matching item was found.
+         */
+        FILTERED_NOMATCH,
+        /**
+         * An item to send was found.
+         */
+        FOUND
+    }
 }

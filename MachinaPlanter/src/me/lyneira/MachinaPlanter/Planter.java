@@ -91,6 +91,8 @@ class Planter implements Machina {
     }
 
     private void plant() throws NoToolException {
+        if (rail.getRowType() == RailType.SKIP)
+            return;
         BlockLocation tile = rail.currentTile();
         BlockLocation crop = tile.getRelative(BlockFace.UP);
 
@@ -104,7 +106,7 @@ class Planter implements Machina {
                 break;
             case MELON_BLOCK:
                 if (harvest && harvestMelon)
-                    harvestBlock(crop);
+                    harvestMelon(crop);
                 break;
             }
             // Fall through to tilling.
@@ -153,7 +155,7 @@ class Planter implements Machina {
     }
 
     private void plantFarmland(BlockLocation crop) throws NoToolException {
-        if (!rail.isPlantingRow())
+        if (rail.getRowType() != RailType.PLANT)
             return;
         InventoryManager manager = new InventoryManager(chestInventory());
         if (!manager.find(seeds))
@@ -175,7 +177,7 @@ class Planter implements Machina {
     }
 
     private void plantNetherWart(BlockLocation crop) throws NoToolException {
-        if (!rail.isPlantingRow())
+        if (rail.getRowType() == RailType.PLANT)
             return;
         InventoryManager manager = new InventoryManager(chestInventory());
         if (!manager.findMaterial(Material.NETHER_STALK))
@@ -197,12 +199,7 @@ class Planter implements Machina {
         // players have to harvest manually if they want more seeds.
         transaction.add(new ItemStack(Material.WHEAT));
         transaction.add(new ItemStack(Material.SEEDS));
-        if (!transaction.verify())
-            return false;
-        useTool();
-        transaction.execute();
-        crop.setEmpty();
-        return true;
+        return doHarvest(crop, transaction);
     }
 
     private boolean harvestNetherWart(BlockLocation crop) throws NoToolException {
@@ -215,13 +212,15 @@ class Planter implements Machina {
         // stacks.
         InventoryTransaction transaction = new InventoryTransaction(chestInventory());
         transaction.add(new ItemStack(Material.NETHER_STALK, 2 + random.nextInt() % 4));
-        if (!transaction.verify())
-            return false;
-        useTool();
-        transaction.execute();
-        crop.setEmpty();
+        return doHarvest(crop, transaction);
+    }
 
-        return true;
+    private boolean harvestMelon(BlockLocation crop) throws NoToolException {
+        // Hardcoded drop as Block.getDrops() returns 3-7 melons rather than
+        // melon slices.
+        InventoryTransaction transaction = new InventoryTransaction(chestInventory());
+        transaction.add(new ItemStack(Material.MELON, 3 + random.nextInt() % 5));
+        return doHarvest(crop, transaction);
     }
 
     /**
@@ -236,11 +235,16 @@ class Planter implements Machina {
         Collection<ItemStack> drops = crop.getBlock().getDrops();
         InventoryTransaction transaction = new InventoryTransaction(chestInventory());
         transaction.add(drops);
+        return doHarvest(crop, transaction);
+    }
+
+    private boolean doHarvest(BlockLocation crop, InventoryTransaction transaction) throws NoToolException {
         if (!transaction.verify())
             return false;
         useTool();
         transaction.execute();
         crop.setEmpty();
+
         return true;
     }
 
