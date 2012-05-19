@@ -20,3 +20,5 @@ harvest-wheat: true
 harvest-pumpkin: true
 harvest-melon: true
 harvest-netherwart: true
+use-energy: false
+use-tool: true

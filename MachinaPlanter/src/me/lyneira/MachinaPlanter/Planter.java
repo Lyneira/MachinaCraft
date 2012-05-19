@@ -28,12 +28,16 @@ import com.google.common.base.Predicate;
 class Planter implements Machina {
     private final static Random random = new Random();
     private static int delay = 20;
+    private final static int harvestCost = 20;
+    private final static int plantingCost = 10;
     static int maxLength = 16;
     static int maxWidth = 10;
     private static boolean harvestWheat = true;
     private static boolean harvestPumpkin = true;
     private static boolean harvestMelon = true;
     private static boolean harvestNetherWart = true;
+    private static boolean useEnergy = false;
+    private static boolean useTool = true;
 
     private final Rail rail;
     private final BlockLocation lever;
@@ -43,6 +47,7 @@ class Planter implements Machina {
     private final BlockRotation furnaceYaw;
     private final boolean harvest;
     private State state;
+    private int currentEnergy = 0;
 
     Planter(Rail rail, BlockLocation lever, BlockLocation base, BlockLocation chest, BlockLocation furnace, BlockRotation furnaceYaw, boolean harvest) {
         this.rail = rail;
@@ -90,7 +95,7 @@ class Planter implements Machina {
         Fuel.setFurnace(furnace.getBlock(), furnaceYaw, false);
     }
 
-    private void plant() throws NoToolException {
+    private void plant() throws PlantingFailedException {
         if (rail.getRowType() == RailType.SKIP)
             return;
         BlockLocation tile = rail.currentTile();
@@ -117,6 +122,7 @@ class Planter implements Machina {
             case LONG_GRASS:
                 crop.setEmpty();
             case AIR:
+                useEnergy(plantingCost);
                 useTool();
                 tile.setType(Material.SOIL);
                 plantFarmland(crop);
@@ -154,12 +160,13 @@ class Planter implements Machina {
         }
     }
 
-    private void plantFarmland(BlockLocation crop) throws NoToolException {
+    private void plantFarmland(BlockLocation crop) throws PlantingFailedException {
         if (rail.getRowType() != RailType.PLANT)
             return;
         InventoryManager manager = new InventoryManager(chestInventory());
         if (!manager.find(seeds))
             return;
+        useEnergy(plantingCost);
         useTool();
         ItemStack item = manager.get();
         switch (item.getType()) {
@@ -176,18 +183,19 @@ class Planter implements Machina {
         manager.decrement();
     }
 
-    private void plantNetherWart(BlockLocation crop) throws NoToolException {
+    private void plantNetherWart(BlockLocation crop) throws PlantingFailedException {
         if (rail.getRowType() == RailType.PLANT)
             return;
         InventoryManager manager = new InventoryManager(chestInventory());
         if (!manager.findMaterial(Material.NETHER_STALK))
             return;
+        useEnergy(plantingCost);
         useTool();
         crop.setType(Material.NETHER_WARTS);
         manager.decrement();
     }
 
-    private boolean harvestCrops(BlockLocation crop) throws NoToolException {
+    private boolean harvestCrops(BlockLocation crop) throws PlantingFailedException {
         if (((Crops) crop.getBlock().getState().getData()).getState() != CropState.RIPE)
             return false;
 
@@ -202,7 +210,7 @@ class Planter implements Machina {
         return doHarvest(crop, transaction);
     }
 
-    private boolean harvestNetherWart(BlockLocation crop) throws NoToolException {
+    private boolean harvestNetherWart(BlockLocation crop) throws PlantingFailedException {
         byte data = crop.getBlock().getData();
         // Fully grown stage
         if (data != 3)
@@ -215,7 +223,7 @@ class Planter implements Machina {
         return doHarvest(crop, transaction);
     }
 
-    private boolean harvestMelon(BlockLocation crop) throws NoToolException {
+    private boolean harvestMelon(BlockLocation crop) throws PlantingFailedException {
         // Hardcoded drop as Block.getDrops() returns 3-7 melons rather than
         // melon slices.
         InventoryTransaction transaction = new InventoryTransaction(chestInventory());
@@ -229,18 +237,19 @@ class Planter implements Machina {
      * @param crop
      *            The block to harvest.
      * @return True if the results were collected.
-     * @throws NoToolException
+     * @throws PlantingFailedException
      */
-    private boolean harvestBlock(BlockLocation crop) throws NoToolException {
+    private boolean harvestBlock(BlockLocation crop) throws PlantingFailedException {
         Collection<ItemStack> drops = crop.getBlock().getDrops();
         InventoryTransaction transaction = new InventoryTransaction(chestInventory());
         transaction.add(drops);
         return doHarvest(crop, transaction);
     }
 
-    private boolean doHarvest(BlockLocation crop, InventoryTransaction transaction) throws NoToolException {
+    private boolean doHarvest(BlockLocation crop, InventoryTransaction transaction) throws PlantingFailedException {
         if (!transaction.verify())
             return false;
+        useEnergy(harvestCost);
         useTool();
         transaction.execute();
         crop.setEmpty();
@@ -248,20 +257,22 @@ class Planter implements Machina {
         return true;
     }
 
-    private void useTool() throws NoToolException {
+    private void useTool() throws PlantingFailedException {
+        if (!useTool)
+            return;
         FurnaceInventory furnaceInventory = ((Furnace) furnace.getBlock().getState()).getInventory();
         ItemStack tool = furnaceInventory.getSmelting();
         if (tool == null || tool.getType() == Material.AIR) {
             // Try and find a tool in the chest.
             InventoryManager manager = new InventoryManager(chestInventory());
             if (!manager.find(planterTool))
-                throw new NoToolException();
+                throw new PlantingFailedException();
             tool = manager.get();
             furnaceInventory.setSmelting(tool);
             manager.decrement();
             tool = furnaceInventory.getSmelting();
         } else if (!planterTool.apply(tool))
-            throw new NoToolException();
+            throw new PlantingFailedException();
 
         // Use up durability.
         short newDurability = (short) (tool.getDurability() + 1);
@@ -270,6 +281,28 @@ class Planter implements Machina {
         } else {
             tool.setDurability(newDurability);
         }
+    }
+    
+    /**
+     * Uses the given amount of energy and returns true if successful.
+     *
+     * @param energy
+     *            The amount of energy needed for the next action
+     * @return True if enough energy could be used up
+     */
+    protected void useEnergy(final int energy) throws PlantingFailedException {
+        if (!useEnergy)
+            return;
+
+        while (currentEnergy < energy) {
+            int newFuel = Fuel.consume((Furnace) furnace.getBlock().getState());
+            if (newFuel > 0) {
+                currentEnergy += newFuel;
+            } else {
+                throw new PlantingFailedException();
+            }
+        }
+        currentEnergy -= energy;
     }
 
     private final Inventory chestInventory() {
@@ -287,7 +320,7 @@ class Planter implements Machina {
                 try {
                     plant();
                     return plant;
-                } catch (NoToolException e) {
+                } catch (PlantingFailedException e) {
                     return deactivate;
                 }
             } else
@@ -313,7 +346,7 @@ class Planter implements Machina {
                 try {
                     plant();
                     return this;
-                } catch (NoToolException e) {
+                } catch (PlantingFailedException e) {
                     return deactivate;
                 }
             } else {
@@ -416,5 +449,7 @@ class Planter implements Machina {
         harvestPumpkin = configuration.getBoolean("harvest-pumpkin", harvestPumpkin);
         harvestMelon = configuration.getBoolean("harvest-melon", harvestMelon);
         harvestNetherWart = configuration.getBoolean("harvest-netherwart", harvestNetherWart);
+        useEnergy = configuration.getBoolean("use-energy", useEnergy);
+        useTool = configuration.getBoolean("use-tool", useTool);
     }
 }
