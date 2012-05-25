@@ -13,6 +13,7 @@ import me.lyneira.MachinaCore.EventSimulator;
 import me.lyneira.MachinaCore.Fuel;
 import me.lyneira.MachinaCore.HeartBeatEvent;
 import me.lyneira.MachinaCore.Movable;
+import me.lyneira.MachinaCore.Tool;
 import me.lyneira.util.InventoryManager;
 import me.lyneira.util.InventoryTransaction;
 
@@ -23,7 +24,10 @@ import org.bukkit.block.Furnace;
 import org.bukkit.block.Sign;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+
+import com.google.common.base.Predicate;
 
 /**
  * A Machina that moves forward, drilling up blocks in its path.
@@ -41,6 +45,11 @@ final class Drill extends Movable {
      * Whether the drill should use energy.
      */
     private static boolean useEnergy = true;
+
+    /**
+     * Whether the drill should use a pickaxe while drilling.
+     */
+    private static boolean useTool = false;
 
     /**
      * How many drills a player can have active at any one time. 0 means no
@@ -69,15 +78,17 @@ final class Drill extends Movable {
      * The next target location for the drill.
      */
     private BlockLocation queuedTarget = null;
-    
+
     private int queuedDrillTime = 1;
 
     /**
      * The typeId of the next target location.
      */
     private int nextTypeId;
-    
+
     private final boolean fastMode;
+
+    private final Predicate<ItemStack> toolType;
 
     private BlockFace direction;
     private final BlueprintBlock chest;
@@ -95,7 +106,7 @@ final class Drill extends Movable {
      *            The direction of the drill
      * @param moduleIndices
      *            The active modules for the drill
-     * @throws Exception 
+     * @throws Exception
      */
     Drill(final Blueprint blueprint, final List<Integer> moduleIndices, final BlockRotation yaw, Player player, BlockLocation anchor, BlueprintBlock chest, BlueprintBlock head, BlueprintBlock furnace) {
         super(blueprint, moduleIndices, yaw, player);
@@ -107,16 +118,20 @@ final class Drill extends Movable {
             drillPattern = Blueprint.horizontalDrillPattern.get(yaw);
             direction = yaw.getYawFace();
             if (hasModule(Blueprint.headFast)) {
+                toolType = diamondToolType;
                 fastMode = true;
             } else {
+                toolType = ironToolType;
                 fastMode = false;
             }
         } else {
             drillPattern = Blueprint.verticalDrillPattern;
             direction = BlockFace.DOWN;
             if (hasModule(Blueprint.verticalHeadFast)) {
+                toolType = diamondToolType;
                 fastMode = true;
             } else {
+                toolType = ironToolType;
                 fastMode = false;
             }
         }
@@ -162,14 +177,18 @@ final class Drill extends Movable {
             Block chestBlock = anchor.getRelative(chest.vector(yaw)).getBlock();
 
             List<ItemStack> results = BlockData.breakBlock(queuedTarget);
-            InventoryTransaction transaction = new InventoryTransaction(InventoryManager.getSafeInventory(chestBlock));
 
             if (!useEnergy(anchor, queuedDrillTime))
+                return false;
+            
+            if (!useTool(anchor))
                 return false;
 
             if (!EventSimulator.blockBreak(queuedTarget, player))
                 return false;
-
+            
+            // Initiate the transaction after useTool since the inventory may change because of it.
+            InventoryTransaction transaction = new InventoryTransaction(InventoryManager.getSafeInventory(chestBlock));
             transaction.add(results);
 
             // Put results in the container
@@ -323,6 +342,21 @@ final class Drill extends Movable {
     }
 
     /**
+     * Uses the appropriate tool for this drill type and returns true if
+     * successful.
+     * 
+     * @param anchor
+     *            The anchor of the Drill
+     * @return True if a use of the pickaxe was expended.
+     */
+    private boolean useTool(final BlockLocation anchor) {
+        if (!useTool)
+            return true;
+        return Tool.useInFurnace(((Furnace) anchor.getRelative(furnace.vector(yaw)).getBlock().getState()).getInventory(), toolType, ((InventoryHolder) anchor.getRelative(chest.vector(yaw))
+                .getBlock().getState()).getInventory());
+    }
+
+    /**
      * If the player has permission to deactivate the drill, deactivate it. Or
      * rotate it instead if the player rightclicked with the appropriate item.
      */
@@ -393,8 +427,11 @@ final class Drill extends Movable {
 
     private BlockRotation readRotationSign(BlockLocation anchor) {
         BlockLocation signLocation = anchor.getRelative(Blueprint.centralBase.vector(yaw).add(yaw.getYawVector(), 3));
-        if (!signLocation.checkTypes(Material.SIGN_POST, Material.SIGN))
-            return null;
+        if (!signLocation.checkTypes(Material.SIGN_POST, Material.SIGN)) {
+            signLocation = signLocation.getRelative(BlockFace.UP);
+            if (!signLocation.checkTypes(Material.SIGN_POST, Material.SIGN))
+                return null;
+        }
         String[] lines = ((Sign) signLocation.getBlock().getState()).getLines();
         for (String s : lines) {
             if (s == null)
@@ -425,6 +462,20 @@ final class Drill extends Movable {
         return false;
     }
 
+    private final static Predicate<ItemStack> ironToolType = new Predicate<ItemStack>() {
+        @Override
+        public boolean apply(ItemStack item) {
+            return item != null && item.getType() == Material.IRON_PICKAXE;
+        }
+    };
+
+    private final static Predicate<ItemStack> diamondToolType = new Predicate<ItemStack>() {
+        @Override
+        public boolean apply(ItemStack item) {
+            return item != null && item.getType() == Material.DIAMOND_PICKAXE;
+        }
+    };
+
     /**
      * Loads the given configuration.
      * 
@@ -433,6 +484,7 @@ final class Drill extends Movable {
     static void loadConfiguration(ConfigurationSection configuration) {
         moveDelay = Math.max(configuration.getInt("move-delay", moveDelay), 1);
         useEnergy = configuration.getBoolean("use-energy", useEnergy);
+        useTool = configuration.getBoolean("use-tool", useTool);
         activeLimit = Math.max(configuration.getInt("active-limit", activeLimit), 0);
         Blueprint.activationDepthLimit = configuration.getInt("depth-limit", Blueprint.activationDepthLimit);
     }

@@ -4,6 +4,7 @@ import me.lyneira.MachinaCore.BlockLocation;
 import me.lyneira.MachinaCore.Fuel;
 import me.lyneira.util.InventoryManager;
 
+import org.bukkit.Material;
 import org.bukkit.block.Furnace;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.FurnaceInventory;
@@ -17,12 +18,37 @@ import com.google.common.base.Predicate;
  * 
  * @author Lyneira
  */
-public class FurnaceEndpoint implements PipelineEndpoint {
+public class FurnaceEndpoint implements PipelineEndpoint, Comparable<FurnaceEndpoint> {
 
-    private final BlockLocation location;
+    public final BlockLocation location;
+    private int fuelAmount = 0;
+    private int smeltingAmount = 0;
 
-    FurnaceEndpoint(Player player, BlockLocation location) throws PipelineException {
+    public FurnaceEndpoint(Player player, BlockLocation location) {
         this.location = location;
+    }
+    
+    @Override
+    public int compareTo(FurnaceEndpoint other) {
+        updateLevels();
+        other.updateLevels();
+        if (fuelAmount < 2) {
+            if (fuelAmount == other.fuelAmount)
+                return smeltingAmount - other.smeltingAmount;
+            return fuelAmount - other.fuelAmount;
+        } else {
+            if (smeltingAmount == other.smeltingAmount)
+                return fuelAmount - other.fuelAmount;
+            return smeltingAmount - other.smeltingAmount;
+        }
+    }
+    
+    @Override
+    public boolean equals(Object other) {
+        if (! (other instanceof FurnaceEndpoint))
+            return false;
+
+        return compareTo((FurnaceEndpoint) other) == 0;
     }
 
     @Override
@@ -45,14 +71,49 @@ public class FurnaceEndpoint implements PipelineEndpoint {
      * @param inventory
      * @return True if the inventory was changed.
      */
-    public static boolean handle(FurnaceInventory furnaceInventory, Inventory inventory) {
-        if (furnaceInventory == inventory)
+    public boolean handle(Inventory inventory) {
+        FurnaceInventory furnaceInventory = ((Furnace) location.getBlock().getState()).getInventory();
+        if (furnaceInventory == inventory) {
             return false;
+        }
+        updateLevels();
 
-        // If the furnace has no fuel, add one first.
+        if (fuelAmount < 2) {
+            if (restockFuel(furnaceInventory, inventory))
+                return true;
+            return restockSmelting(furnaceInventory, inventory);
+        } else {
+            if (restockSmelting(furnaceInventory, inventory))
+                return true;
+            return restockFuel(furnaceInventory, inventory);
+        }
+    }
+
+    /**
+     * Updates the status of the furnace to the current amount of fuel and
+     * smelting items.
+     */
+    private final void updateLevels() {
+        FurnaceInventory inventory = (((Furnace) location.getBlock().getState()).getInventory());
+        final ItemStack fuelItem = inventory.getFuel();
+        if (fuelItem == null || fuelItem.getType() == Material.AIR) {
+            fuelAmount = 0;
+        } else {
+            fuelAmount = fuelItem.getAmount();
+        }
+
+        final ItemStack smeltItem = inventory.getSmelting();
+        if (smeltItem == null || smeltItem.getType() == Material.AIR) {
+            smeltingAmount = 0;
+        } else {
+            smeltingAmount = smeltItem.getAmount();
+        }
+    }
+
+    private static boolean restockFuel(FurnaceInventory furnaceInventory, Inventory inventory) {
         InventoryManager manager = new InventoryManager(inventory);
         ItemStack fuelItem = furnaceInventory.getFuel();
-        if (fuelItem == null) {
+        if (fuelItem == null || fuelItem.getType() == Material.AIR) {
             if (!manager.find(isFuelItem))
                 return false;
             fuelItem = new ItemStack(manager.get());
@@ -60,11 +121,22 @@ public class FurnaceEndpoint implements PipelineEndpoint {
             furnaceInventory.setFuel(fuelItem);
             manager.decrement();
             return true;
+        } else if (manager.findItemType(fuelItem)) {
+            int amount = fuelItem.getAmount();
+            if (amount < fuelItem.getMaxStackSize()) {
+                fuelItem.setAmount(amount + 1);
+                furnaceInventory.setFuel(fuelItem);
+                manager.decrement();
+                return true;
+            }
         }
+        return false;
+    }
 
-        // The furnace has fuel, so add a burnable item.
+    private static boolean restockSmelting(FurnaceInventory furnaceInventory, Inventory inventory) {
+        InventoryManager manager = new InventoryManager(inventory);
         ItemStack smeltItem = furnaceInventory.getSmelting();
-        if (smeltItem == null) {
+        if (smeltItem == null || smeltItem.getType() == Material.AIR) {
             if (!manager.find(burnableItem))
                 return false;
             smeltItem = new ItemStack(manager.get());
@@ -72,23 +144,14 @@ public class FurnaceEndpoint implements PipelineEndpoint {
             furnaceInventory.setSmelting(smeltItem);
             manager.decrement();
             return true;
-        }
-        // Fuel and smelting are filled, so try to keep them stocked.
-        // Restock fuel slot
-        int amount = fuelItem.getAmount();
-        if (manager.findItemType(fuelItem) && amount < fuelItem.getMaxStackSize()) {
-            fuelItem.setAmount(amount + 1);
-            furnaceInventory.setFuel(fuelItem);
-            manager.decrement();
-            return true;
-        }
-        // Restock smelting slot
-        amount = smeltItem.getAmount();
-        if (manager.findItemType(smeltItem) && amount < smeltItem.getMaxStackSize()) {
-            smeltItem.setAmount(amount + 1);
-            furnaceInventory.setSmelting(smeltItem);
-            manager.decrement();
-            return true;
+        } else if (manager.findItemType(smeltItem)) {
+            int amount = smeltItem.getAmount();
+            if (amount < smeltItem.getMaxStackSize()) {
+                smeltItem.setAmount(amount + 1);
+                furnaceInventory.setSmelting(smeltItem);
+                manager.decrement();
+                return true;
+            }
         }
         return false;
     }
@@ -117,8 +180,8 @@ public class FurnaceEndpoint implements PipelineEndpoint {
     private static final PacketListener<Inventory> inventoryListener = new PacketListener<Inventory>() {
         @Override
         public boolean handle(PipelineEndpoint endpoint, Inventory payload) {
-            FurnaceEndpoint furnace = (FurnaceEndpoint) endpoint;
-            return FurnaceEndpoint.handle((((Furnace) furnace.location.getBlock().getState()).getInventory()), payload);
+            FurnaceEndpoint furnaceEndpoint = (FurnaceEndpoint) endpoint;
+            return furnaceEndpoint.handle(payload);
         }
 
         @Override

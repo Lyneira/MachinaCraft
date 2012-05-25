@@ -44,6 +44,11 @@ public abstract class Builder extends Movable {
      * Whether the builder should use energy.
      */
     private static boolean useEnergy = true;
+    
+    /**
+     * Whether the builder should use a pickaxe when removing blocks to replace them.
+     */
+    protected static boolean useTool = false;
 
     /**
      * How many builders a player can have active at any one time. 0 means no
@@ -70,7 +75,7 @@ public abstract class Builder extends Movable {
     /**
      * {@link BlueprintBlock} pointing to this builder's furnace.
      */
-    private final BlueprintBlock furnace;
+    protected final BlueprintBlock furnace;
 
     /**
      * Central base of the builder for ground checks.
@@ -484,6 +489,7 @@ public abstract class Builder extends Movable {
         buildDelay = Math.max(configuration.getInt("build-delay", buildDelay), 1);
         BlockDropperBuilder.maxDepth = Math.min(Math.max(configuration.getInt("max-depth", BlockDropperBuilder.maxDepth), 1), 256);
         useEnergy = configuration.getBoolean("use-energy", useEnergy);
+        useTool = configuration.getBoolean("use-tool", useTool);
         activeLimit = Math.max(configuration.getInt("active-limit", activeLimit), 0);
     }
 }

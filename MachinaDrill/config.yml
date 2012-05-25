@@ -3,11 +3,13 @@
 # move-delay: The number of server ticks it takes for the drill to move.
 #             20 ticks = 1 second.
 # use-energy: Whether the drill needs fuel to run.
+# use-tool: Whether the drill needs a pickaxe to drill blocks.
 # active-limit: How many drills a player can have active at any one time. 0 means no limit.
 # depth-limit: Prevents a horizontal drill from being activated if its anchor at a Y coordinate less than this. 0 means it can activate anywhere.
 #   Example: A value of 20 would prevent players from mining with a drill at a depth where diamonds appear.
 
 move-delay: 20
 use-energy: true
+use-tool: false
 active-limit: 0
 depth-limit: 0

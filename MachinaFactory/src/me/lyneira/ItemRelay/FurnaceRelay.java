@@ -1,9 +1,8 @@
 package me.lyneira.ItemRelay;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import me.lyneira.MachinaCore.BlockLocation;
 import me.lyneira.MachinaCore.BlockRotation;
@@ -25,13 +24,14 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public class FurnaceRelay extends ItemRelay {
-    private List<BlockLocation> extensionFurnaces = null;
+    private final List<FurnaceEndpoint> furnaces = new ArrayList<FurnaceEndpoint>(7);
 
     FurnaceRelay(Blueprint blueprint, BlockLocation anchor, BlockRotation yaw, Player player) throws ComponentActivateException, ComponentDetectException {
         super(blueprint, blueprint.blueprintFurnace, anchor, yaw, player);
         state = furnaceSendItem;
         // Detect additional furnaces here.
         BlockLocation container = container();
+        furnaces.add(new FurnaceEndpoint(player, container));
         BlockLocation left = container.getRelative(yaw.getLeft().getYawVector());
         BlockLocation right = container.getRelative(yaw.getRight().getYawVector());
         addExtensionFurnace(container.getRelative(BlockFace.UP));
@@ -42,9 +42,6 @@ public class FurnaceRelay extends ItemRelay {
         addExtensionFurnace(right);
         addExtensionFurnace(right.getRelative(BlockFace.UP));
         addExtensionFurnace(right.getRelative(BlockFace.DOWN));
-
-        if (extensionFurnaces == null)
-            extensionFurnaces = new ArrayList<BlockLocation>(0);
     }
 
     private boolean isFurnace(BlockLocation location) {
@@ -65,10 +62,7 @@ public class FurnaceRelay extends ItemRelay {
         if (!verifyExtensionFurnace(location))
             return;
 
-        if (extensionFurnaces == null) {
-            extensionFurnaces = new ArrayList<BlockLocation>(7);
-        }
-        extensionFurnaces.add(location);
+        furnaces.add(new FurnaceEndpoint(player, location));
     }
 
     /**
@@ -83,8 +77,9 @@ public class FurnaceRelay extends ItemRelay {
         if (!isFurnace(container()))
             return false;
 
-        for (BlockLocation i : extensionFurnaces) {
-            if (!verifyExtensionFurnace(i))
+        // Skip the first since it is always the primary furnace.
+        for (int i = 1; i < furnaces.size(); i++) {
+            if (!verifyExtensionFurnace(furnaces.get(i).location))
                 return false;
         }
 
@@ -92,11 +87,8 @@ public class FurnaceRelay extends ItemRelay {
     }
 
     private void sendItem() throws PipelineException, PacketTypeUnsupportedException {
-        if (doSend(container()))
-            return;
-
-        for (BlockLocation i : extensionFurnaces) {
-            if (doSend(i))
+        for (FurnaceEndpoint i : furnaces) {
+            if (doSend(i.location))
                 return;
         }
     }
@@ -124,55 +116,15 @@ public class FurnaceRelay extends ItemRelay {
     }
 
     protected boolean handle(Inventory inventory) {
-        Map<FurnaceLevel, List<FurnaceInventory>> furnacePriority = new EnumMap<FurnaceLevel, List<FurnaceInventory>>(FurnaceLevel.class);
-        determinePriority(furnacePriority, (((Furnace) container().getBlock().getState()).getInventory()));
-
-        for (BlockLocation l : extensionFurnaces) {
-            determinePriority(furnacePriority, (((Furnace) l.getBlock().getState()).getInventory()));
-        }
-        
-        for (FurnaceLevel level : FurnaceLevel.values()) {
-            List<FurnaceInventory> list = furnacePriority.get(level);
-            if (list == null)
-                continue;
-            for (FurnaceInventory i : list) {
-                if (FurnaceEndpoint.handle(i, inventory)) {
-                    age = 0;
-                    return true;
-                }
-            }
+        FurnaceEndpoint[] sorted = furnaces.toArray(new FurnaceEndpoint [0]);
+        Arrays.sort(sorted);
+        for (FurnaceEndpoint i : sorted) {
+            if (i.handle(inventory)) {
+                age = 0;
+                return true;
+            }    
         }
         return false;
-    }
-
-    private void determinePriority(Map<FurnaceLevel, List<FurnaceInventory>> furnacePriority, FurnaceInventory inventory) {
-        final FurnaceLevel level = furnaceLevel(inventory);
-        List<FurnaceInventory> list = furnacePriority.get(level);
-        if (list == null) {
-            list = new ArrayList<FurnaceInventory>(7);
-            furnacePriority.put(level, list);
-        }
-        list.add(inventory);
-    }
-
-    private enum FurnaceLevel {
-        EMPTY_FUEL, EMPTY_SMELTING, LOW_FUEL, LOW_SMELTING, OK
-    }
-
-    private FurnaceLevel furnaceLevel(FurnaceInventory inventory) {
-        final ItemStack fuelItem = inventory.getFuel();
-        if (fuelItem == null || fuelItem.getType() == Material.AIR)
-            return FurnaceLevel.EMPTY_FUEL;
-        final ItemStack smeltItem = inventory.getSmelting();
-        if (smeltItem == null || smeltItem.getType() == Material.AIR)
-            return FurnaceLevel.EMPTY_SMELTING;
-
-        if (fuelItem.getAmount() < 2)
-            return FurnaceLevel.LOW_FUEL;
-        if (smeltItem.getAmount() < 3)
-            return FurnaceLevel.LOW_SMELTING;
-
-        return FurnaceLevel.OK;
     }
 
     protected static final State furnaceSendItem = new State() {

@@ -8,6 +8,7 @@ import me.lyneira.MachinaCore.BlockRotation;
 import me.lyneira.MachinaCore.Fuel;
 import me.lyneira.MachinaCore.HeartBeatEvent;
 import me.lyneira.MachinaCore.Machina;
+import me.lyneira.MachinaCore.Tool;
 import me.lyneira.util.InventoryManager;
 import me.lyneira.util.InventoryTransaction;
 
@@ -169,18 +170,26 @@ class Planter implements Machina {
         useEnergy(plantingCost);
         useTool();
         ItemStack item = manager.get();
-        switch (item.getType()) {
+        Material seedType = item.getType();
+        manager.decrement();
+        byte cropData = 0;
+        if (manager.findItemTypeAndData(Material.INK_SACK.getId(), (byte) 15)) {
+            // Bonemeal sets the seeds to fully grown.
+            cropData = 7;
+            manager.decrement();
+        }
+
+        switch (seedType) {
         case SEEDS:
-            crop.setType(Material.CROPS);
+            crop.setTypeIdAndData(Material.CROPS.getId(), cropData, true);
             break;
         case PUMPKIN_SEEDS:
-            crop.setType(Material.PUMPKIN_STEM);
+            crop.setTypeIdAndData(Material.PUMPKIN_STEM.getId(), cropData, true);
             break;
         case MELON_SEEDS:
-            crop.setType(Material.MELON_STEM);
+            crop.setTypeIdAndData(Material.MELON_STEM.getId(), cropData, true);
             break;
         }
-        manager.decrement();
     }
 
     private void plantNetherWart(BlockLocation crop) throws PlantingFailedException {
@@ -261,31 +270,14 @@ class Planter implements Machina {
         if (!useTool)
             return;
         FurnaceInventory furnaceInventory = ((Furnace) furnace.getBlock().getState()).getInventory();
-        ItemStack tool = furnaceInventory.getSmelting();
-        if (tool == null || tool.getType() == Material.AIR) {
-            // Try and find a tool in the chest.
-            InventoryManager manager = new InventoryManager(chestInventory());
-            if (!manager.find(planterTool))
-                throw new PlantingFailedException();
-            tool = manager.get();
-            furnaceInventory.setSmelting(tool);
-            manager.decrement();
-            tool = furnaceInventory.getSmelting();
-        } else if (!planterTool.apply(tool))
+        if (!Tool.useInFurnace(furnaceInventory, planterTool, chestInventory())) {
             throw new PlantingFailedException();
-
-        // Use up durability.
-        short newDurability = (short) (tool.getDurability() + 1);
-        if (newDurability >= tool.getType().getMaxDurability()) {
-            furnaceInventory.setSmelting(null);
-        } else {
-            tool.setDurability(newDurability);
         }
     }
-    
+
     /**
      * Uses the given amount of energy and returns true if successful.
-     *
+     * 
      * @param energy
      *            The amount of energy needed for the next action
      * @return True if enough energy could be used up
