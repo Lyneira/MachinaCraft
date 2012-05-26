@@ -98,7 +98,9 @@ public class BrewingRelay extends ItemRelay {
         switch (tier) {
         case WATER:
             found = manager.find(waterBottle);
-            break;
+            if (found)
+                break;
+            return fillWaterBottle(brewingInventory, manager);
         case AWKWARD:
             found = manager.find(awkwardPotion);
             break;
@@ -107,10 +109,12 @@ public class BrewingRelay extends ItemRelay {
             break;
         case EMPTY:
             // Completely empty brewer: Search for water bottles first, then
-            // awkward, then others.
+            // empty glass bottles, then awkward, then others.
             found = manager.find(waterBottle);
             if (found)
                 break;
+            if (fillWaterBottle(brewingInventory, manager))
+                return true;
             found = manager.find(awkwardPotion);
             if (found)
                 break;
@@ -133,6 +137,26 @@ public class BrewingRelay extends ItemRelay {
                 }
             }
         }
+        return false;
+    }
+
+    private boolean fillWaterBottle(BrewerInventory brewingInventory, InventoryManager manager) {
+        if (!(manager.findMaterial(Material.WATER_BUCKET) && manager.findMaterial(Material.GLASS_BOTTLE)))
+            return false;
+        
+        for (int i = 0; i < 3; i++) {
+            ItemStack item = brewingInventory.getItem(i);
+            if (item == null || item.getType() == Material.AIR) {
+                // Add potion to the first empty potion slot in the brewing
+                // stand.
+                item = new ItemStack(Material.POTION);
+                brewingInventory.setItem(i, item);
+                manager.decrement();
+                age = 0;
+                return true;
+            }
+        }
+
         return false;
     }
 

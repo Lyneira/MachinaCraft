@@ -1,11 +1,8 @@
 package me.lyneira.InventoryProcessor;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
+import java.util.List;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
@@ -33,30 +30,29 @@ import me.lyneira.MachinaFactory.PipelineEndpoint;
  */
 public abstract class InventoryProcessor extends Component implements PipelineEndpoint {
 
-    private final Set<InventoryHolder> transactions;
-    private final Map<InventoryHolder, Boolean> responses;
+    private final List<InventoryHolder> transactions;
+    private boolean response = false;
 
     protected InventoryProcessor(ComponentBlueprint blueprint, BlockLocation anchor, BlockRotation yaw) throws ComponentActivateException, ComponentDetectException {
         super(blueprint, anchor, yaw);
-        transactions = new LinkedHashSet<InventoryHolder>(8);
-        responses = new HashMap<InventoryHolder, Boolean>(8);
+        transactions = new ArrayList<InventoryHolder>(8);
     }
 
     @Override
     public final HeartBeatEvent heartBeat(BlockLocation anchor) {
-
+        response = false;
         for (Iterator<InventoryHolder> it = transactions.iterator(); it.hasNext();) {
             InventoryHolder holder = it.next();
             it.remove();
             Inventory inventory = holder.getInventory();
             if (inventory == null) {
                 // Null inventory, respond with false
-                responses.put(holder, false);
                 continue;
             }
 
             try {
-                responses.put(holder, process(inventory));
+                if (process(inventory))
+                    response = true;
             } catch (ProcessInventoryException e) {
                 return null;
             }
@@ -101,12 +97,7 @@ public abstract class InventoryProcessor extends Component implements PipelineEn
             return false;
         transactions.add(holder);
 
-        Boolean response = responses.get(holder);
-        if (response == null) {
-            return true;
-        } else {
-            return response;
-        }
+        return response;
     }
 
     /**

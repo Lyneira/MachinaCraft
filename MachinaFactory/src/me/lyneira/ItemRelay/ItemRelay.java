@@ -76,7 +76,7 @@ public abstract class ItemRelay extends Component implements PipelineEndpoint {
     }
 
     protected boolean handle(ItemStack item) {
-        if (ContainerEndpoint.handle(container(), item)) {
+        if (ContainerEndpoint.store(container(), item)) {
             age = 0;
             return true;
         }
