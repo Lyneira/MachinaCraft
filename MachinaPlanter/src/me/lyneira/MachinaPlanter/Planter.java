@@ -193,7 +193,7 @@ class Planter implements Machina {
     }
 
     private void plantNetherWart(BlockLocation crop) throws PlantingFailedException {
-        if (rail.getRowType() == RailType.PLANT)
+        if (rail.getRowType() != RailType.PLANT)
             return;
         InventoryManager manager = new InventoryManager(chestInventory());
         if (!manager.findMaterial(Material.NETHER_STALK))
