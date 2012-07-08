@@ -3,6 +3,9 @@
 # This plugin allows a redstone signal to activate a machina.
 # A machina activated by redstone will be owned by a fake player.
 # This configuration file specifies the permissions for the fake player.
+# 
+# Note: Use of .* permissions as wildcards won't work unless the plugin
+# in question registers a permission that ends with .*
 
 permissions:
     - machinadrill.all

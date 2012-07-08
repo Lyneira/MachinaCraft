@@ -138,9 +138,17 @@ class Planter implements Machina {
                 plantFarmland(crop);
                 break;
             case CROPS:
-                if (harvest && harvestWheat)
+                // Use bonemeal if necessary to complete the harvest.
+                InventoryManager manager = new InventoryManager(chestInventory());
+                if (manager.findItemTypeAndData(Material.INK_SACK.getId(), (byte) 15)) {
+                    // Bonemeal sets the seeds to fully grown.
+                    crop.setTypeIdAndData(Material.CROPS.getId(), (byte) 7, false);
+                    manager.decrement();
+                }
+                if (harvest && harvestWheat) {
                     if (harvestCrops(crop))
                         plantFarmland(crop);
+                }
                 break;
             }
             break;
@@ -172,23 +180,33 @@ class Planter implements Machina {
         ItemStack item = manager.get();
         Material seedType = item.getType();
         manager.decrement();
-        byte cropData = 0;
-        if (manager.findItemTypeAndData(Material.INK_SACK.getId(), (byte) 15)) {
-            // Bonemeal sets the seeds to fully grown.
-            cropData = 7;
-            manager.decrement();
-        }
 
         switch (seedType) {
         case SEEDS:
-            crop.setTypeIdAndData(Material.CROPS.getId(), cropData, true);
+            crop.setTypeId(Material.CROPS.getId());
             break;
-        case PUMPKIN_SEEDS:
+        case PUMPKIN_SEEDS: {
+            byte cropData = 0;
+            if (manager.findItemTypeAndData(Material.INK_SACK.getId(), (byte) 15)) {
+                // Bonemeal sets the seeds to fully grown.
+                cropData = 7;
+                manager.decrement();
+            }
             crop.setTypeIdAndData(Material.PUMPKIN_STEM.getId(), cropData, true);
+        }
             break;
-        case MELON_SEEDS:
+
+        case MELON_SEEDS: {
+            byte cropData = 0;
+            if (manager.findItemTypeAndData(Material.INK_SACK.getId(), (byte) 15)) {
+                // Bonemeal sets the seeds to fully grown.
+                cropData = 7;
+                manager.decrement();
+            }
             crop.setTypeIdAndData(Material.MELON_STEM.getId(), cropData, true);
+        }
             break;
+
         }
     }
 

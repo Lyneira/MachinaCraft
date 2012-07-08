@@ -51,6 +51,13 @@ public class MachinaRedstoneBridge extends JavaPlugin implements Runnable {
     @Override
     public void onEnable() {
         PluginDescriptionFile pdf = getDescription();
+        PluginManager pluginManager = getServer().getPluginManager();
+        if (pluginManager.getPlugin("Spout") != null) {
+            log.warning(pdf.getName() + " version " + pdf.getVersion() + " can not run on Spout servers!");
+            pluginManager.disablePlugin(this);
+            return;
+        }
+
         log.info(pdf.getName() + " version " + pdf.getVersion() + " is now enabled.");
 
         machinaCore = (MachinaCore) getServer().getPluginManager().getPlugin("MachinaCore");
