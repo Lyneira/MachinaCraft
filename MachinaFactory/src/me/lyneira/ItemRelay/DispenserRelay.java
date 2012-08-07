@@ -36,7 +36,7 @@ public class DispenserRelay extends ItemRelay {
         BlockLocation container = container();
         Location location = container.getLocation();
         for (Entity i : container.getWorld().getEntitiesByClass(Item.class)) {
-            if (i.getLocation().distance(location) < suctionDistance) {
+            if (! i.isDead() && i.getLocation().distance(location) < suctionDistance) {
                 ItemStack item = ((Item) i).getItemStack();
                 Inventory myInventory = (((InventoryHolder) container().getBlock().getState()).getInventory());
                 InventoryTransaction transaction = new InventoryTransaction(myInventory);
