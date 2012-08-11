@@ -145,30 +145,20 @@ class RecipeVerifier {
 
     boolean verify(ShapedRecipe recipe) {
         String[] shape = recipe.getShape();
-        if (shape.length != columns)
+        if (shape.length != rows)
             return false;
-        if (shape[0].length() != rows)
+        if (shape[0].length() != columns)
             return false;
 
-        // Shape string arrays are inconsistent with the positioning of the
-        // characters within them, so they are serialized here.
-        String shapeSerialized = shape[0];
         Map<Character, ItemStack> map = recipe.getIngredientMap();
-        for (int i = 1; i < columns; i++) {
-            shapeSerialized = shapeSerialized.concat(shape[i]);
-        }
 
-        if (verifyShape(map, shapeSerialized, false) || verifyShape(map, shapeSerialized, true))
-            return true;
-        return false;
+        return verifyShape(map, shape, false) || verifyShape(map, shape, true);
     }
 
-    private boolean verifyShape(Map<Character, ItemStack> map, String shapeSerialized, boolean mirrored) {
-        int index = 0;
+    private boolean verifyShape(Map<Character, ItemStack> map, String[] shape, boolean mirrored) {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
-                char c = shapeSerialized.charAt(index++);
-                ItemStack ingredient = map.get(c);
+                ItemStack ingredient = map.get(shape[i].charAt(j));
                 ItemStack item;
                 if (mirrored)
                     item = matrix[i][(columns - 1) - j];

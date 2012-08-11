@@ -393,6 +393,24 @@ public final class BlockData {
         set(Material.REDSTONE_LAMP_OFF.getId()).solid(true).drillable(true).drillTime(breakTimeFast);
 
         set(Material.REDSTONE_LAMP_ON.getId()).solid(true).drillable(true).drillTime(breakTimeFast);
+        
+        set(Material.WOOD_DOUBLE_STEP.getId()).solid(true).drillable(true).copyData(true).drillTime(breakTimeMedium);
+        
+        set(Material.WOOD_STEP.getId()).solid(true).drillable(true).copyData(true).drillTime(breakTimeMedium);
+        
+        set(Material.COCOA.getId()).solid(true).drillable(true).drillTime(breakTimeFast);
+        
+        set(Material.SANDSTONE_STAIRS.getId()).solid(true).drillable(true).copyData(true).drillTime(breakTimeMedium);
+        
+        set(Material.EMERALD_ORE.getId()).solid(true).drillable(true).drillTime(breakTimeMedium);
+        
+        set(Material.EMERALD_BLOCK.getId()).solid(true).drillable(true).drillTime(breakTimeMedium);
+        
+        set(Material.SPRUCE_WOOD_STAIRS.getId()).solid(true).drillable(true).copyData(true).drillTime(breakTimeMedium);
+        
+        set(Material.BIRCH_WOOD_STAIRS.getId()).solid(true).drillable(true).copyData(true).drillTime(breakTimeMedium);
+        
+        set(Material.JUNGLE_WOOD_STAIRS.getId()).solid(true).drillable(true).copyData(true).drillTime(breakTimeMedium);
     }
 
     // Private setters to make the initialization look better.

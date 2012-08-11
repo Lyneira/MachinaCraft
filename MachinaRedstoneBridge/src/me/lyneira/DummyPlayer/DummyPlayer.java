@@ -829,4 +829,19 @@ public class DummyPlayer extends PermissibleBase implements Player {
     public void updateInventory() {
     }
 
+    @Override
+    public int getExpToLevel() {
+        return 0;
+    }
+
+    @Override
+    public boolean hasLineOfSight(Entity entity) {
+        return false;
+    }
+
+    @Override
+    public boolean isValid() {
+        return true;
+    }
+
 }
