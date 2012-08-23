@@ -274,11 +274,10 @@ class Planter implements Machina {
     }
 
     private boolean doHarvest(BlockLocation crop, InventoryTransaction transaction) throws PlantingFailedException {
-        if (!transaction.verify())
-            return false;
         useEnergy(harvestCost);
         useTool();
-        transaction.execute();
+        if (!transaction.execute())
+            return false;
         crop.setEmpty();
 
         return true;
