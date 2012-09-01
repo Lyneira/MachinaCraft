@@ -27,7 +27,7 @@ public class FurnaceEndpoint implements PipelineEndpoint, Comparable<FurnaceEndp
     public FurnaceEndpoint(Player player, BlockLocation location) {
         this.location = location;
     }
-    
+
     @Override
     public int compareTo(FurnaceEndpoint other) {
         updateLevels();
@@ -42,10 +42,10 @@ public class FurnaceEndpoint implements PipelineEndpoint, Comparable<FurnaceEndp
             return smeltingAmount - other.smeltingAmount;
         }
     }
-    
+
     @Override
     public boolean equals(Object other) {
-        if (! (other instanceof FurnaceEndpoint))
+        if (!(other instanceof FurnaceEndpoint))
             return false;
 
         return compareTo((FurnaceEndpoint) other) == 0;
@@ -57,8 +57,9 @@ public class FurnaceEndpoint implements PipelineEndpoint, Comparable<FurnaceEndp
         case FURNACE:
         case BURNING_FURNACE:
             return true;
+        default:
+            return false;
         }
-        return false;
     }
 
     /**

@@ -39,6 +39,8 @@ class TargetNode extends PipelineNode {
             case FURNACE:
             case BURNING_FURNACE:
                 return new FurnaceEndpoint(player, location);
+            default:
+                break;
             }
         } catch (PipelineException e) {
             return null;

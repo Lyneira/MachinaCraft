@@ -54,8 +54,9 @@ public class ContainerEndpoint implements PipelineEndpoint {
         case CHEST:
         case DISPENSER:
             return true;
+        default:
+            return false;
         }
-        return false;
     }
 
     private boolean handle(ItemStack item) {

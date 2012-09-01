@@ -114,6 +114,8 @@ class Planter implements Machina {
                 if (harvest && harvestMelon)
                     harvestMelon(crop);
                 break;
+            default:
+                break;
             }
             // Fall through to tilling.
         case GRASS:
@@ -127,6 +129,8 @@ class Planter implements Machina {
                 useTool();
                 tile.setType(Material.SOIL);
                 plantFarmland(crop);
+                break;
+            default:
                 break;
             }
             break;
@@ -150,6 +154,8 @@ class Planter implements Machina {
                         plantFarmland(crop);
                 }
                 break;
+            default:
+                break;
             }
             break;
         case SOUL_SAND:
@@ -164,7 +170,11 @@ class Planter implements Machina {
                     if (harvestNetherWart(crop))
                         plantNetherWart(crop);
                 break;
+            default:
+                break;
             }
+            break;
+        default:
             break;
         }
     }
@@ -206,7 +216,8 @@ class Planter implements Machina {
             crop.setTypeIdAndData(Material.MELON_STEM.getId(), cropData, true);
         }
             break;
-
+        default:
+            break;
         }
     }
 
@@ -423,8 +434,9 @@ class Planter implements Machina {
             case PUMPKIN_SEEDS:
             case MELON_SEEDS:
                 return true;
+            default:
+                return false;
             }
-            return false;
         }
     };
 
@@ -440,8 +452,9 @@ class Planter implements Machina {
             case STONE_HOE:
             case WOOD_HOE:
                 return true;
+            default:
+                return false;
             }
-            return false;
         }
     };
 

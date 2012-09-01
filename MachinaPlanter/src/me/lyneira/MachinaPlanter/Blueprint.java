@@ -57,6 +57,7 @@ class Blueprint implements MachinaBlueprint {
                 chest = base.getRelative(i.getYawFace());
                 railYaw = i.getOpposite();
                 break;
+            default:
             }
         }
 
