@@ -12,8 +12,8 @@ import me.lyneira.MachinaCore.BlockVector;
 import me.lyneira.MachinaCore.BlueprintBlock;
 import me.lyneira.MachinaCore.BlueprintFactory;
 import me.lyneira.MachinaCore.EventSimulator;
-import me.lyneira.MachinaCore.Machina;
 import me.lyneira.MachinaCore.MovableBlueprint;
+import me.lyneira.MachinaCore.machina.Machina;
 
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;

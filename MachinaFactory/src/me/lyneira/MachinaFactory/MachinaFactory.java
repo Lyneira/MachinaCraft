@@ -7,9 +7,9 @@ import java.util.logging.Logger;
 
 import me.lyneira.MachinaCore.BlockLocation;
 import me.lyneira.MachinaCore.ConfigurationManager;
-import me.lyneira.MachinaCore.Machina;
-import me.lyneira.MachinaCore.MachinaBlueprint;
 import me.lyneira.MachinaCore.MachinaCore;
+import me.lyneira.MachinaCore.machina.Machina;
+import me.lyneira.MachinaCore.machina.MachinaBlueprint;
 
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;

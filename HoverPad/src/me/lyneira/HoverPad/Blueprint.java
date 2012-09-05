@@ -14,8 +14,8 @@ import me.lyneira.MachinaCore.BlockLocation;
 import me.lyneira.MachinaCore.BlockRotation;
 import me.lyneira.MachinaCore.BlockVector;
 import me.lyneira.MachinaCore.BlueprintFactory;
-import me.lyneira.MachinaCore.Machina;
 import me.lyneira.MachinaCore.MovableBlueprint;
+import me.lyneira.MachinaCore.machina.Machina;
 
 /**
  * MachinaBlueprint representing a HoverPad blueprint

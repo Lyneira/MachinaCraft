@@ -9,7 +9,7 @@ import java.util.Set;
 import org.bukkit.entity.Player;
 
 import me.lyneira.MachinaCore.BlockLocation;
-import me.lyneira.MachinaCore.Machina;
+import me.lyneira.MachinaCore.machina.Machina;
 
 /**
  * A pipeline from a {@link Machina} to a {@link PipelineEndpoint}. Allows the

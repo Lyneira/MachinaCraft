@@ -22,7 +22,7 @@ import me.lyneira.MachinaCore.BlockVector;
 import me.lyneira.MachinaCore.EventSimulator;
 import me.lyneira.MachinaCore.Fuel;
 import me.lyneira.MachinaCore.HeartBeatEvent;
-import me.lyneira.MachinaCore.Machina;
+import me.lyneira.MachinaCore.machina.Machina;
 
 /**
  * A machina that drains or fills an area with water.

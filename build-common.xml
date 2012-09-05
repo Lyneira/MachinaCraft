@@ -4,24 +4,27 @@
 	<property name="binDir" value="bin" />
 	<property name="jarDir" value="jar" />
 	<property name="VERSION" value="4.1.5" />
-	
-	<target name="all" depends="copyResources, makeJar" description="Create a plugin jar for the project">
+
+	<target name="all" depends="copyResources, customActions, makeJar" description="Create a plugin jar for the project">
 	</target>
 
 	<target name="copyResources" description="Copies needed files to the build location">
 		<copy todir="${binDir}">
-			<fileset dir="." includes="*.yml"/>
+			<fileset dir="." includes="*.yml" />
 		</copy>
-		
+
 		<copy file="./plugin.yml.template" tofile="${binDir}/plugin.yml" filtering="yes" overwrite="yes">
 			<filterset>
-				<filter token="VERSION" value="${VERSION}"/>
+				<filter token="VERSION" value="${VERSION}" />
 			</filterset>
 		</copy>
 	</target>
 
 	<target name="makeJar" description="Create the jar">
 		<jar jarfile="../${jarDir}/${ant.project.name}.jar" basedir="${binDir}" />
+	</target>
+
+	<target name="customActions" description="Overridable target for plugin to customize its jar">
 	</target>
 
 </project>

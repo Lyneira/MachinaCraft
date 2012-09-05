@@ -1,7 +1,7 @@
 package me.lyneira.MachinaFactory;
 
-import me.lyneira.MachinaCore.Machina;
-import me.lyneira.MachinaCore.MachinaBlueprint;
+import me.lyneira.MachinaCore.machina.Machina;
+import me.lyneira.MachinaCore.machina.MachinaBlueprint;
 
 class MachinaFactoryBlueprint {
     final MachinaBlueprint blueprint;

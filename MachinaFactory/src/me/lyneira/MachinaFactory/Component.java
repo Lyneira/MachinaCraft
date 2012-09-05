@@ -9,7 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import me.lyneira.MachinaCore.BlockLocation;
 import me.lyneira.MachinaCore.BlockRotation;
 import me.lyneira.MachinaCore.BlueprintBlock;
-import me.lyneira.MachinaCore.Machina;
+import me.lyneira.MachinaCore.machina.Machina;
 
 /**
  * Base class representing any factory component. Inside the heartBeat function,
