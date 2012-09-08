@@ -1,9 +1,11 @@
 # MachinaCore configuration file for customizing fuel burn times and block properties.
-#
+# 
 # The values specified here can override built-in defaults, specify new fuels or additional block properties.
 # For an overview of all ids in minecraft, see:
 # http://www.minecraftwiki.net/wiki/Data_values
-#
+# 
+# machina-tool: Specifies the tool used to activate a machina.
+# 
 # fuels section: Specifies the burn time for an id in ticks (20 ticks = 1 second)
 # blocks section: Specifies the following block properties per id.
 #  Built-in defaults will sometimes differ from the global defaults given below.
@@ -20,7 +22,7 @@
 #     copyData: <boolean> - default: false - (ADVANCED) Whether to preserve the block's data value when moving as part of a machina.
 #     hasInventory: <boolean> - default: false - (ADVANCED) Whether the block has an inventory that should be preserved when moving as part of a machina.
 #     attached: <boolean> - default: false - (ADVANCED) Whether the block can only exist attached to another block. (levers, ladders, rails, doors, etc)
-#
+# 
 # break-times section: Specifies the time required to break various block types, in server ticks.
 #     netherrack: Netherrack.
 #     fast: Soft blocks like dirt, grass, sand, gravel.
@@ -28,17 +30,20 @@
 #     slow: Ore blocks.
 #     tough: Iron and Diamond blocks.
 #     obsidian: Obsidian.
-#
+# 
 # To provide a shorthand way to make many blocks non-breakable by drills, a list of ids can be given to the drill-block list.
-#
+# 
 # Example configuration that changes some properties for wooden planks, and blocks some man-made objects from being drilled:
-#fuels:
-#    5: 800
-#blocks:
-#    drill-block: [4, 5, 43, 44, 53]
-#    5:
-#        solid: false
-#        drillable: false
+# fuels:
+#     5: 800
+# blocks:
+#     drill-block: [4, 5, 43, 44, 53]
+#     5:
+#         solid: false
+#         drillable: false
+
+machina-tool: Wood_Axe
+
 break-times:
     netherrack: 4
     fast: 7

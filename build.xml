@@ -5,6 +5,7 @@
 
 	<target name="all" description="Build all jars for the project">
 		<ant dir="MachinaCore" />
+		<!--
 		<ant dir="MachinaBuilder" />
 		<ant dir="MachinaDrill" />
 		<ant dir="MachinaPump" />
@@ -12,6 +13,7 @@
 		<ant dir="MachinaFactory" />
 		<ant dir="MachinaRedstoneBridge" />
 		<ant dir="MachinaPlanter" />
+		-->
 
 		<copy todir="${jarDir}">
 			<fileset dir="resources" includes="*" />
