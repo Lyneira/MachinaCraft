@@ -3,8 +3,9 @@ package me.lyneira.MachinaCore.machina;
 /**
  * Represents the blueprint of a machina. The blueprint is used to detect and
  * create a new machina when the player rightclicks the appropriate tool on a
- * specified trigger block. It can be supplied with extension blueprints and a
- * detector class that locates
+ * specified trigger block. It can be supplied with optional extensions and a
+ * detector class that identifies these extensions and performs other
+ * detect-time configuration.
  * 
  * @author Lyneira
  */
