@@ -1,5 +1,7 @@
 package me.lyneira.MachinaCore;
 
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 
 import me.lyneira.MachinaCore.plugin.MachinaCraftPlugin;
@@ -28,4 +30,7 @@ public final class MachinaCore extends MachinaCraftPlugin {
         super.onDisable();
     }
 
+    public boolean onMachinaTool(Player player, Block block) {
+        return false;
+    }
 }

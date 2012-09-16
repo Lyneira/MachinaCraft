@@ -1,10 +1,12 @@
 package me.lyneira.MachinaCore;
 
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 
 /**
  * Listener for Bukkit events.
@@ -21,12 +23,22 @@ public class MachinaCoreListener implements Listener {
         toolId = plugin.mpGetConfig().getMaterialId("machina-tool", Material.WOOD_AXE.getId());
         plugin.logInfo("Using id " + toolId + " as activation tool.");
     }
-    
+
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         // Take action if player right clicked a block with the tool.
-        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getItem().getTypeId() == toolId) {
-            
+        ItemStack item = event.getItem();
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && item.getTypeId() == toolId) {
+            Player player = event.getPlayer();
+            if (plugin.onMachinaTool(player, event.getClickedBlock())) {
+                // The tool was used for something, decrease durability.
+                short newDurability = (short) (item.getDurability() + 1);
+                if (newDurability >= item.getType().getMaxDurability()) {
+                    player.setItemInHand(null);
+                } else {
+                    item.setDurability(newDurability);
+                }
+            }
         }
     }
 }
