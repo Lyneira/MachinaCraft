@@ -3,7 +3,7 @@ package me.lyneira.MachinaBuilder;
 import java.util.List;
 
 import me.lyneira.MachinaCore.BlockLocation;
-import me.lyneira.MachinaCore.BlockRotation;
+import me.lyneira.MachinaCore.block.BlockRotation;
 
 import org.bukkit.entity.Player;
 

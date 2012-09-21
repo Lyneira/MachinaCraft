@@ -17,11 +17,11 @@ import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.ItemStack;
 
 import me.lyneira.MachinaCore.BlockLocation;
-import me.lyneira.MachinaCore.BlockRotation;
-import me.lyneira.MachinaCore.BlockVector;
 import me.lyneira.MachinaCore.EventSimulator;
 import me.lyneira.MachinaCore.Fuel;
 import me.lyneira.MachinaCore.HeartBeatEvent;
+import me.lyneira.MachinaCore.block.BlockRotation;
+import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.machina.Machina;
 
 /**

@@ -12,10 +12,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Lever;
 
 import me.lyneira.MachinaCore.BlockLocation;
-import me.lyneira.MachinaCore.BlockRotation;
 import me.lyneira.MachinaCore.HeartBeatEvent;
 import me.lyneira.MachinaCore.Movable;
 import me.lyneira.MachinaCore.MovableBlueprint;
+import me.lyneira.MachinaCore.block.BlockRotation;
 
 /**
  * HoverPad operation class

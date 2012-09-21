@@ -32,8 +32,11 @@ public class MachinaCoreListener implements Listener {
             Player player = event.getPlayer();
             if (plugin.onMachinaTool(player, event.getClickedBlock())) {
                 // The tool was used for something, decrease durability.
+                short maxDurability = item.getType().getMaxDurability();
+                if (maxDurability == 0)
+                    return;
                 short newDurability = (short) (item.getDurability() + 1);
-                if (newDurability >= item.getType().getMaxDurability()) {
+                if (newDurability >= maxDurability) {
                     player.setItemInHand(null);
                 } else {
                     item.setDurability(newDurability);

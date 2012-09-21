@@ -1,4 +1,5 @@
-package me.lyneira.MachinaCore;
+package me.lyneira.MachinaCore.block;
+
 
 import org.bukkit.block.BlockFace;
 

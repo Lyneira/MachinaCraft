@@ -8,7 +8,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 
 import me.lyneira.MachinaCore.BlockLocation;
-import me.lyneira.MachinaCore.BlockRotation;
+import me.lyneira.MachinaCore.block.BlockRotation;
 
 /**
  * A node in a {@link Pipeline}.

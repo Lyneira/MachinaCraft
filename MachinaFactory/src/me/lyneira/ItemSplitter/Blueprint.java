@@ -1,9 +1,9 @@
 package me.lyneira.ItemSplitter;
 
 import me.lyneira.MachinaCore.BlockLocation;
-import me.lyneira.MachinaCore.BlockRotation;
-import me.lyneira.MachinaCore.BlockVector;
 import me.lyneira.MachinaCore.BlueprintBlock;
+import me.lyneira.MachinaCore.block.BlockRotation;
+import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.machina.Machina;
 import me.lyneira.MachinaCore.machina.MachinaBlueprint;
 import me.lyneira.MachinaFactory.ComponentActivateException;

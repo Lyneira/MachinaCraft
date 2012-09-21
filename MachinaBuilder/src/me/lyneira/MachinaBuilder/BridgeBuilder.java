@@ -3,11 +3,11 @@ package me.lyneira.MachinaBuilder;
 import java.util.List;
 
 import me.lyneira.MachinaCore.BlockLocation;
-import me.lyneira.MachinaCore.BlockRotation;
 import me.lyneira.MachinaCore.BlueprintBlock;
 import me.lyneira.MachinaCore.HeartBeatEvent;
 import me.lyneira.MachinaCore.Movable;
 import me.lyneira.MachinaCore.MovableBlueprint;
+import me.lyneira.MachinaCore.block.BlockRotation;
 import me.lyneira.util.InventoryManager;
 
 import org.bukkit.block.BlockFace;

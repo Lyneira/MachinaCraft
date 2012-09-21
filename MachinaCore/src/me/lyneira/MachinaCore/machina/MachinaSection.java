@@ -5,8 +5,7 @@ package me.lyneira.MachinaCore.machina;
  * of multiple sections that form a tree structure, with the machina itself
  * being the root. A section can move in relation to its parent, enabling a
  * machina to change shape. A section can be enabled (active in the world) or
- * disabled (not active). While it is disabled, any inventories belonging to
- * blocks in it are stored.
+ * disabled (not active, its blocks are not present but they would appear when activated).
  * 
  * @author Lyneira
  */

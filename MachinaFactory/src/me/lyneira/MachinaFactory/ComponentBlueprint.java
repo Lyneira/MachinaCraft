@@ -9,8 +9,8 @@ import org.bukkit.configuration.ConfigurationSection;
 
 import me.lyneira.MachinaCore.BlockData;
 import me.lyneira.MachinaCore.BlockLocation;
-import me.lyneira.MachinaCore.BlockRotation;
 import me.lyneira.MachinaCore.BlueprintBlock;
+import me.lyneira.MachinaCore.block.BlockRotation;
 
 /**
  * Class representing the blueprint of any factory component.

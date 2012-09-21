@@ -4,10 +4,10 @@ import java.util.Collection;
 import java.util.Random;
 
 import me.lyneira.MachinaCore.BlockLocation;
-import me.lyneira.MachinaCore.BlockRotation;
 import me.lyneira.MachinaCore.Fuel;
 import me.lyneira.MachinaCore.HeartBeatEvent;
 import me.lyneira.MachinaCore.Tool;
+import me.lyneira.MachinaCore.block.BlockRotation;
 import me.lyneira.MachinaCore.machina.Machina;
 import me.lyneira.util.InventoryManager;
 import me.lyneira.util.InventoryTransaction;

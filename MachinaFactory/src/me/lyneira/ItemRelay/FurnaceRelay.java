@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import me.lyneira.MachinaCore.BlockLocation;
-import me.lyneira.MachinaCore.BlockRotation;
+import me.lyneira.MachinaCore.block.BlockRotation;
 import me.lyneira.MachinaFactory.ComponentActivateException;
 import me.lyneira.MachinaFactory.ComponentDetectException;
 import me.lyneira.MachinaFactory.FurnaceEndpoint;

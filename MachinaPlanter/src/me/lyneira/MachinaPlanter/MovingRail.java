@@ -7,7 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 
 import me.lyneira.MachinaCore.BlockLocation;
-import me.lyneira.MachinaCore.BlockVector;
+import me.lyneira.MachinaCore.block.BlockVector;
 
 /**
  * Represents the moving rail of the planter.

@@ -10,12 +10,12 @@ import org.bukkit.inventory.ItemStack;
 
 import me.lyneira.MachinaCore.BlockData;
 import me.lyneira.MachinaCore.BlockLocation;
-import me.lyneira.MachinaCore.BlockRotation;
-import me.lyneira.MachinaCore.BlockVector;
 import me.lyneira.MachinaCore.BlueprintBlock;
 import me.lyneira.MachinaCore.BlueprintFactory;
 import me.lyneira.MachinaCore.EventSimulator;
 import me.lyneira.MachinaCore.MovableBlueprint;
+import me.lyneira.MachinaCore.block.BlockRotation;
+import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.machina.Machina;
 
 /**

@@ -5,9 +5,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import me.lyneira.MachinaCore.BlockLocation;
-import me.lyneira.MachinaCore.BlockRotation;
-import me.lyneira.MachinaCore.BlockVector;
 import me.lyneira.MachinaCore.BlueprintBlock;
+import me.lyneira.MachinaCore.block.BlockRotation;
+import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.util.InventoryManager;
 
 import org.bukkit.block.Block;

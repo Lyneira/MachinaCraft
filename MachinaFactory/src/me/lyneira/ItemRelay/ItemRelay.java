@@ -1,8 +1,8 @@
 package me.lyneira.ItemRelay;
 
 import me.lyneira.MachinaCore.BlockLocation;
-import me.lyneira.MachinaCore.BlockRotation;
 import me.lyneira.MachinaCore.HeartBeatEvent;
+import me.lyneira.MachinaCore.block.BlockRotation;
 import me.lyneira.MachinaFactory.Component;
 import me.lyneira.MachinaFactory.ComponentActivateException;
 import me.lyneira.MachinaFactory.ComponentBlueprint;

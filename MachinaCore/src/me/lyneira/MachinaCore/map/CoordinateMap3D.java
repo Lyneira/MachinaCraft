@@ -2,7 +2,7 @@ package me.lyneira.MachinaCore.map;
 
 import java.util.Map;
 
-import me.lyneira.MachinaCore.BlockVector;
+import me.lyneira.MachinaCore.block.BlockVector;
 
 import gnu.trove.map.hash.THashMap;
 
