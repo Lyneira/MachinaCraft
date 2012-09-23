@@ -1,5 +1,8 @@
 package me.lyneira.MachinaCore;
 
+import org.bukkit.World;
+
+import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.machina.Machina;
 
 /**
@@ -12,7 +15,29 @@ import me.lyneira.MachinaCore.machina.Machina;
  * @author Lyneira
  */
 public class Universe {
-    // The world belonging to this universe.
+    private final World world;
+
+    Universe(World world) {
+        this.world = world;
+    }
+
+    /**
+     * Returns the machina that owns the block at this location. If no machina
+     * owns this block, returns null.
+     * 
+     * @param location
+     *            The location to get the machina for.
+     * @return The machina owning this location, or null.
+     */
+    public Machina get(BlockVector location) {
+        // TODO
+        return null;
+    }
+    
+    boolean add(Machina machina) {
+        // TODO
+        return false;
+    }
 
     // A list of all machinae in the world.
 

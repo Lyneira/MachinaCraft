@@ -1,9 +1,14 @@
 package me.lyneira.MachinaCore;
 
+import java.util.Iterator;
+import java.util.List;
+
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 
+import me.lyneira.MachinaCore.block.BlockVector;
+import me.lyneira.MachinaCore.machina.Machina;
 import me.lyneira.MachinaCore.machina.MachinaBlueprint;
 import me.lyneira.MachinaCore.plugin.MachinaCraftPlugin;
 import me.lyneira.MachinaCore.plugin.MachinaPlugin;
@@ -18,6 +23,7 @@ public final class MachinaCore extends MachinaCraftPlugin {
     // private static PluginManager pluginManager;
 
     private final BlueprintStore blueprints = new BlueprintStore();
+    private final Multiverse multiverse = new Multiverse();
 
     @Override
     public void onEnable() {
@@ -32,23 +38,36 @@ public final class MachinaCore extends MachinaCraftPlugin {
 
     @Override
     public void onDisable() {
-        blueprints.clearAll();
+        blueprints.clear();
         HandlerList.unregisterAll(this);
 
         // Call super.onDisable last.
         super.onDisable();
     }
 
-    public boolean onMachinaTool(Player player, Block block) {
+    boolean onMachinaTool(Player player, Block block) {
+        BlockVector location = new BlockVector(block);
+        Universe universe = multiverse.get(block.getWorld());
+        Machina machina = universe.get(location);
+        if (machina != null) {
+            // TODO let the machina respond to being clicked
+        } else {
+            for (Iterator<MachinaBlueprint> it = blueprints.blueprints(); it.hasNext();) {
+                machina = it.next().detect(universe, player, block);
+                if (machina != null) {
+                    return universe.add(machina);
+                }
+            }
+        }
         return false;
     }
-    
-    public void registerBlueprint(MachinaPlugin plugin, MachinaBlueprint blueprint) {
-        blueprints.add(plugin, blueprint);
+
+    public void registerBlueprints(MachinaPlugin plugin, List<MachinaBlueprint> blueprintList) {
+        blueprints.put(plugin, blueprintList);
     }
-    
+
     public void unregisterBlueprints(MachinaPlugin plugin) {
-        blueprints.clear(plugin);
+        blueprints.remove(plugin);
     }
 
     /* **************

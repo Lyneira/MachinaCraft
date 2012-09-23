@@ -1,5 +1,10 @@
 package me.lyneira.MachinaCore.machina;
 
+import me.lyneira.MachinaCore.Universe;
+
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+
 /**
  * Represents the blueprint of a machina. The blueprint is used to detect and
  * create a new machina when the player rightclicks the appropriate tool on a
@@ -43,4 +48,13 @@ public class MachinaBlueprint {
      * symmetric machina) this may not be the correct direction. It may
      * therefore correct the machina's direction if required.
      */
+    
+    /**
+     * 
+     * @return
+     */
+    public Machina detect(Universe universe, Player player, Block block) {
+        // TODO
+        return null;
+    }
 }

@@ -1,6 +1,6 @@
 package me.lyneira.MachinaCore.block;
 
-
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
 /**
@@ -40,6 +40,18 @@ public class BlockVector {
         x = face.getModX();
         y = face.getModY();
         z = face.getModZ();
+    }
+
+    /**
+     * Constructs a BlockVector from the given Block
+     * 
+     * @param face
+     *            The BlockFace to copy
+     */
+    public BlockVector(final Block block) {
+        x = block.getX();
+        y = block.getY();
+        z = block.getZ();
     }
 
     /**
@@ -96,7 +108,7 @@ public class BlockVector {
      * @param other
      * @return True if the vectors are equal.
      */
-    public boolean equalsOther(BlockVector other) {
+    public boolean equalsOther(final BlockVector other) {
         if (other == null)
             return false;
         return this.x == other.x && this.y == other.y && this.z == other.z;
@@ -109,10 +121,10 @@ public class BlockVector {
      * @param other
      * @return True if the vectors are equal.
      */
-    public boolean equalsOtherNotNull(BlockVector other) {
+    public boolean equalsOtherNotNull(final BlockVector other) {
         return this.x == other.x && this.y == other.y && this.z == other.z;
     }
-    
+
     /**
      * Returns a BlockVector rotated by the given BlockRotation around the Y
      * axis.
