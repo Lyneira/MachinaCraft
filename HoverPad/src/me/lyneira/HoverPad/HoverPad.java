@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Lever;
@@ -27,8 +28,8 @@ class HoverPad extends Movable {
     /**
      * The number of server ticks to wait for a move action.
      */
-    private static final int baseMoveDelay = 8;
-    private static final int halfMoveDelay = baseMoveDelay / 2;
+    private static int baseMoveDelay = 8;
+    private static int halfMoveDelay = baseMoveDelay / 2;
     private int moveDelay = baseMoveDelay;
 
     // Constructor
@@ -218,6 +219,11 @@ class HoverPad extends Movable {
         teleport(anchor, newAnchor);
 
         return true;
+    }
+    
+    static void loadConfiguration(ConfigurationSection configuration) {
+        baseMoveDelay = Math.max(configuration.getInt("move-delay", baseMoveDelay), 1);
+        halfMoveDelay = Math.max(baseMoveDelay/2, 1);
     }
 
 }

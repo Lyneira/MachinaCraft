@@ -20,6 +20,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Note;
 import org.bukkit.Server;
+import org.bukkit.Sound;
 import org.bukkit.Statistic;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -860,6 +861,15 @@ public class DummyPlayer extends PermissibleBase implements Player {
 
     @Override
     public void setWalkSpeed(float arg0) throws IllegalArgumentException {
+    }
+
+    @Override
+    public Inventory getEnderChest() {
+        return new DummyEnderChestInventory(this);
+    }
+
+    @Override
+    public void playSound(Location arg0, Sound arg1, float arg2, float arg3) {
     }
 
 }

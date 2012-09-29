@@ -21,6 +21,7 @@ max-width: 10
 use-energy: false
 use-tool: true
 harvest-wheat: true
+harvest-wheat-seeds: true
 harvest-pumpkin: true
 harvest-melon: true
 harvest-netherwart: true

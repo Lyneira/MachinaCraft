@@ -12,4 +12,4 @@ permissions:
     - machinabuilder.all
     - machinapump.all
     - machinafactory.all
-    - machinaplanter.activate
+    - machinaplanter.all

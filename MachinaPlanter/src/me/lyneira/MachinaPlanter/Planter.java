@@ -34,6 +34,7 @@ class Planter implements Machina {
     static int maxLength = 16;
     static int maxWidth = 10;
     private static boolean harvestWheat = true;
+    private static boolean harvestWheatSeeds = true;
     private static boolean harvestPumpkin = true;
     private static boolean harvestMelon = true;
     private static boolean harvestNetherWart = true;
@@ -96,7 +97,7 @@ class Planter implements Machina {
         Fuel.setFurnace(furnace.getBlock(), furnaceYaw, false);
     }
 
-    private void plant() throws PlantingFailedException {
+    private void plant() throws NoEnergyException {
         if (rail.getRowType() == RailType.SKIP)
             return;
         BlockLocation tile = rail.currentTile();
@@ -126,9 +127,12 @@ class Planter implements Machina {
                 crop.setEmpty();
             case AIR:
                 useEnergy(plantingCost);
-                useTool();
-                tile.setType(Material.SOIL);
-                plantFarmland(crop);
+                try {
+                    useTool();
+                    tile.setType(Material.SOIL);
+                    plantFarmland(crop);
+                } catch (NoToolException e) {
+                }
                 break;
             default:
                 break;
@@ -142,13 +146,6 @@ class Planter implements Machina {
                 plantFarmland(crop);
                 break;
             case CROPS:
-                // Use bonemeal if necessary to complete the harvest.
-                InventoryManager manager = new InventoryManager(chestInventory());
-                if (manager.findItemTypeAndData(Material.INK_SACK.getId(), (byte) 15)) {
-                    // Bonemeal sets the seeds to fully grown.
-                    crop.setTypeIdAndData(Material.CROPS.getId(), (byte) 7, false);
-                    manager.decrement();
-                }
                 if (harvest && harvestWheat) {
                     if (harvestCrops(crop))
                         plantFarmland(crop);
@@ -179,14 +176,13 @@ class Planter implements Machina {
         }
     }
 
-    private void plantFarmland(BlockLocation crop) throws PlantingFailedException {
+    private void plantFarmland(BlockLocation crop) throws NoEnergyException {
         if (rail.getRowType() != RailType.PLANT)
             return;
         InventoryManager manager = new InventoryManager(chestInventory());
         if (!manager.find(seeds))
             return;
         useEnergy(plantingCost);
-        useTool();
         ItemStack item = manager.get();
         Material seedType = item.getType();
         manager.decrement();
@@ -221,21 +217,29 @@ class Planter implements Machina {
         }
     }
 
-    private void plantNetherWart(BlockLocation crop) throws PlantingFailedException {
+    private void plantNetherWart(BlockLocation crop) throws NoEnergyException {
         if (rail.getRowType() != RailType.PLANT)
             return;
         InventoryManager manager = new InventoryManager(chestInventory());
         if (!manager.findMaterial(Material.NETHER_STALK))
             return;
         useEnergy(plantingCost);
-        useTool();
         crop.setType(Material.NETHER_WARTS);
         manager.decrement();
     }
 
-    private boolean harvestCrops(BlockLocation crop) throws PlantingFailedException {
-        if (((Crops) crop.getBlock().getState().getData()).getState() != CropState.RIPE)
-            return false;
+    private boolean harvestCrops(BlockLocation crop) throws NoEnergyException {
+        if (((Crops) crop.getBlock().getState().getData()).getState() != CropState.RIPE) {
+            // Use bonemeal if necessary to complete the harvest.
+            InventoryManager manager = new InventoryManager(chestInventory());
+            if (manager.findItemTypeAndData(Material.INK_SACK.getId(), (byte) 15)) {
+                // Bonemeal sets the seeds to fully grown.
+                crop.setTypeIdAndData(Material.CROPS.getId(), (byte) 7, false);
+                manager.decrement();
+            } else {
+                return false;
+            }
+        }
 
         InventoryTransaction transaction = new InventoryTransaction(chestInventory());
         // Hardcoded drops for now, as Block.getDrops() does not return the
@@ -244,11 +248,13 @@ class Planter implements Machina {
         // Added bonus: Seed supply from automatic harvesting will stay stable,
         // players have to harvest manually if they want more seeds.
         transaction.add(new ItemStack(Material.WHEAT));
-        transaction.add(new ItemStack(Material.SEEDS));
+        if (harvestWheatSeeds) {
+            transaction.add(new ItemStack(Material.SEEDS));
+        }
         return doHarvest(crop, transaction);
     }
 
-    private boolean harvestNetherWart(BlockLocation crop) throws PlantingFailedException {
+    private boolean harvestNetherWart(BlockLocation crop) throws NoEnergyException {
         byte data = crop.getBlock().getData();
         // Fully grown stage
         if (data != 3)
@@ -261,7 +267,7 @@ class Planter implements Machina {
         return doHarvest(crop, transaction);
     }
 
-    private boolean harvestMelon(BlockLocation crop) throws PlantingFailedException {
+    private boolean harvestMelon(BlockLocation crop) throws NoEnergyException {
         // Hardcoded drop as Block.getDrops() returns 3-7 melons rather than
         // melon slices.
         InventoryTransaction transaction = new InventoryTransaction(chestInventory());
@@ -275,18 +281,23 @@ class Planter implements Machina {
      * @param crop
      *            The block to harvest.
      * @return True if the results were collected.
-     * @throws PlantingFailedException
+     * @throws NoEnergyException
      */
-    private boolean harvestBlock(BlockLocation crop) throws PlantingFailedException {
+    private boolean harvestBlock(BlockLocation crop) throws NoEnergyException {
         Collection<ItemStack> drops = crop.getBlock().getDrops();
         InventoryTransaction transaction = new InventoryTransaction(chestInventory());
         transaction.add(drops);
         return doHarvest(crop, transaction);
     }
 
-    private boolean doHarvest(BlockLocation crop, InventoryTransaction transaction) throws PlantingFailedException {
+    private boolean doHarvest(BlockLocation crop, InventoryTransaction transaction) throws NoEnergyException {
         useEnergy(harvestCost);
-        useTool();
+        try {
+            useTool();
+        } catch (NoToolException e) {
+            return false;
+        }
+        
         if (!transaction.execute())
             return false;
         crop.setEmpty();
@@ -294,12 +305,12 @@ class Planter implements Machina {
         return true;
     }
 
-    private void useTool() throws PlantingFailedException {
+    private void useTool() throws NoToolException {
         if (!useTool)
             return;
         FurnaceInventory furnaceInventory = ((Furnace) furnace.getBlock().getState()).getInventory();
         if (!Tool.useInFurnace(furnaceInventory, planterTool, chestInventory())) {
-            throw new PlantingFailedException();
+            throw new NoToolException();
         }
     }
 
@@ -310,7 +321,7 @@ class Planter implements Machina {
      *            The amount of energy needed for the next action
      * @return True if enough energy could be used up
      */
-    protected void useEnergy(final int energy) throws PlantingFailedException {
+    protected void useEnergy(final int energy) throws NoEnergyException {
         if (!useEnergy)
             return;
 
@@ -319,7 +330,7 @@ class Planter implements Machina {
             if (newFuel > 0) {
                 currentEnergy += newFuel;
             } else {
-                throw new PlantingFailedException();
+                throw new NoEnergyException();
             }
         }
         currentEnergy -= energy;
@@ -340,7 +351,7 @@ class Planter implements Machina {
                 try {
                     plant();
                     return plant;
-                } catch (PlantingFailedException e) {
+                } catch (NoEnergyException e) {
                     return deactivate;
                 }
             } else
@@ -366,7 +377,7 @@ class Planter implements Machina {
                 try {
                     plant();
                     return this;
-                } catch (PlantingFailedException e) {
+                } catch (NoEnergyException e) {
                     return deactivate;
                 }
             } else {
@@ -468,6 +479,7 @@ class Planter implements Machina {
         maxLength = Math.min(Math.max(configuration.getInt("max-length", maxLength), 1), 64);
         maxWidth = Math.min(Math.max(configuration.getInt("max-width", maxWidth), 1), 64);
         harvestWheat = configuration.getBoolean("harvest-wheat", harvestWheat);
+        harvestWheatSeeds = configuration.getBoolean("harvest-wheat-seeds", harvestWheatSeeds);
         harvestPumpkin = configuration.getBoolean("harvest-pumpkin", harvestPumpkin);
         harvestMelon = configuration.getBoolean("harvest-melon", harvestMelon);
         harvestNetherWart = configuration.getBoolean("harvest-netherwart", harvestNetherWart);

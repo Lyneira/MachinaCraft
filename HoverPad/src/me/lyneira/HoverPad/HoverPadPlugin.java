@@ -25,6 +25,7 @@ public class HoverPadPlugin extends JavaPlugin {
 
         ConfigurationManager config = new ConfigurationManager(this);
         Blueprint.loadConfiguration(config.getAll());
+        HoverPad.loadConfiguration(config.getAll());
         
         // Create the new blueprint after configuration has been loaded.
         blueprint = Blueprint.blueprint();
