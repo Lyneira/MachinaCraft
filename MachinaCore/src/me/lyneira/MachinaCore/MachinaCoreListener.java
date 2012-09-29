@@ -1,11 +1,17 @@
 package me.lyneira.MachinaCore;
 
+import me.lyneira.MachinaCore.plugin.MPConfig;
+import me.lyneira.MachinaCore.tool.ToolInteractResult;
+
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.world.WorldLoadEvent;
+import org.bukkit.event.world.WorldSaveEvent;
+import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -16,32 +22,63 @@ import org.bukkit.inventory.ItemStack;
 public class MachinaCoreListener implements Listener {
 
     private final MachinaCore plugin;
-    private final int toolId;
+    private final int wrenchId;
+    private final int tinkerToolId;
 
     MachinaCoreListener(MachinaCore plugin) {
         this.plugin = plugin;
-        toolId = plugin.mpGetConfig().getMaterialId("machina-tool", Material.WOOD_AXE.getId());
-        plugin.logInfo("Using id " + toolId + " as activation tool.");
+        MPConfig config = plugin.mpGetConfig();
+        wrenchId = config.getMaterialId("machina-wrench", Material.WOOD_AXE.getId());
+        tinkerToolId = config.getMaterialId("machina-tinkertool", Material.WOOD_HOE.getId());
+        plugin.logInfo("Using id " + wrenchId + " as wrench tool.");
+        plugin.logInfo("Using id " + tinkerToolId + " as tinkering tool.");
     }
 
-    @EventHandler
+    @EventHandler(priority=EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event) {
-        // Take action if player right clicked a block with the tool.
         ItemStack item = event.getItem();
-        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && item.getTypeId() == toolId) {
-            Player player = event.getPlayer();
-            if (plugin.onMachinaTool(player, event.getClickedBlock())) {
-                // The tool was used for something, decrease durability.
-                short maxDurability = item.getType().getMaxDurability();
-                if (maxDurability == 0)
-                    return;
-                short newDurability = (short) (item.getDurability() + 1);
-                if (newDurability >= maxDurability) {
-                    player.setItemInHand(null);
-                } else {
-                    item.setDurability(newDurability);
-                }
+        int typeId = item.getTypeId();
+        Action action = event.getAction();
+        ToolInteractResult result = ToolInteractResult.NODAMAGE;
+        if (typeId == wrenchId) {
+            // Call the wrench method
+            if (action == Action.RIGHT_CLICK_BLOCK) {
+                result = plugin.wrenchClick(event.getPlayer(), event.getClickedBlock(), true);
+            } else if (action == Action.LEFT_CLICK_BLOCK) {
+                result = plugin.wrenchClick(event.getPlayer(), event.getClickedBlock(), false);
+            }
+        } else if (typeId == tinkerToolId) {
+            // TODO Call the tinker tool method
+        } else {
+            // TODO Allow machina to react to the item used on click
+        }
+
+        if (result == ToolInteractResult.DAMAGE) {
+            // The tool was used for something, decrease durability.
+            short maxDurability = item.getType().getMaxDurability();
+            if (maxDurability == 0)
+                return;
+            short newDurability = (short) (item.getDurability() + 1);
+            if (newDurability >= maxDurability) {
+                // player.setItemInHand(null);
+                item.setTypeId(0);
+            } else {
+                item.setDurability(newDurability);
             }
         }
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onWorldLoad(WorldLoadEvent event) {
+        plugin.multiverse.load(event.getWorld());
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onWorldUnload(WorldUnloadEvent event) {
+        plugin.multiverse.unload(event.getWorld());
+    }
+    
+    public void onWorldSave(WorldSaveEvent event) {
+        plugin.multiverse.save(event.getWorld());
     }
 }

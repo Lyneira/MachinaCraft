@@ -46,7 +46,40 @@ class Multiverse {
      *            The location to get the machina for.
      * @return The machina owning this location, or null.
      */
-    Machina get(Block location) {
+    Machina getMachina(Block location) {
         return get(location.getWorld()).get(new BlockVector(location));
+    }
+
+    /**
+     * Loads the universe for a world.
+     * 
+     * @param world
+     *            The world to be loaded
+     */
+    void load(World world) {
+        get(world).load();
+    }
+
+    /**
+     * Unloads the universe for a world.
+     * 
+     * @param world
+     *            The world being unloaded
+     */
+    void unload(World world) {
+        Universe universe = universes.remove(world);
+        if (universe != null) {
+            universe.unload();
+        }
+    }
+
+    /**
+     * Saves the universe for a world.
+     * 
+     * @param world
+     *            The world being saved
+     */
+    void save(World world) {
+        get(world).save();
     }
 }

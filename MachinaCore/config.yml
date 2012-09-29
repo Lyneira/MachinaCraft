@@ -42,7 +42,8 @@
 #         solid: false
 #         drillable: false
 
-machina-tool: Wood_Axe
+machina-wrench: Wood_Axe
+machina-tinkertool: Wood_Hoe
 
 break-times:
     netherrack: 4

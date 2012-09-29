@@ -4,6 +4,7 @@ import org.bukkit.World;
 
 import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.machina.Machina;
+import me.lyneira.MachinaCore.map.CoordinateMap3D;
 
 /**
  * Represents all machinae in a world. This universal block store keeps track of
@@ -16,6 +17,7 @@ import me.lyneira.MachinaCore.machina.Machina;
  */
 public class Universe {
     private final World world;
+    private final CoordinateMap3D<Machina> machinaMap = new CoordinateMap3D<Machina>();
 
     Universe(World world) {
         this.world = world;
@@ -30,13 +32,42 @@ public class Universe {
      * @return The machina owning this location, or null.
      */
     public Machina get(BlockVector location) {
-        // TODO
-        return null;
+        return machinaMap.get(location);
     }
-    
+
+    /**
+     * Adds a machina to the universe.
+     * 
+     * @param machina
+     *            The machina to add
+     * @return True if the machina was successfully added, false if there was a
+     *         collision with another machina.
+     */
     boolean add(Machina machina) {
         // TODO
         return false;
+    }
+
+    /**
+     * Removes a machina from the universe.
+     * 
+     * @param machina
+     *            The machina to remove
+     */
+    void remove(Machina machina) {
+        // TODO
+    }
+    
+    void load() {
+        // TODO
+    }
+    
+    void unload() {
+        // TODO
+    }
+    
+    void save() {
+        // TODO
     }
 
     // A list of all machinae in the world.
