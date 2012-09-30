@@ -60,6 +60,7 @@ public class MachinaCoreListener implements Listener {
                 return;
             short newDurability = (short) (item.getDurability() + 1);
             if (newDurability >= maxDurability) {
+                // TODO Check if this works
                 // player.setItemInHand(null);
                 item.setTypeId(0);
             } else {

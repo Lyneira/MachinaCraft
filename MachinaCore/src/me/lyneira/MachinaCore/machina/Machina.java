@@ -1,5 +1,9 @@
 package me.lyneira.MachinaCore.machina;
 
+import java.util.Iterator;
+
+import me.lyneira.MachinaCore.block.BlockVector;
+
 /**
  * 
  * Class representing any machina. A Machina is a collection of blocks that
@@ -14,7 +18,7 @@ package me.lyneira.MachinaCore.machina;
  * 
  * @author Lyneira
  */
-public class Machina implements MachinaSection {
+public class Machina {
     // The Universe this Machina belongs to.
 
     /*
@@ -33,4 +37,16 @@ public class Machina implements MachinaSection {
      * These are generated from the active model by translating their
      * coordinates into the game world.
      */
+
+    /**
+     * Returns an iterator over all the blocks of this machina. Guaranteed to
+     * have no duplicate blocks. If the list that this method returns changes,
+     * it is guaranteed that an update to the machina's universe is performed.
+     * 
+     * @return An iterator over all BlockVectors in the machina.
+     */
+    public Iterator<BlockVector> instance() {
+        // TODO
+        return null;
+    }
 }
