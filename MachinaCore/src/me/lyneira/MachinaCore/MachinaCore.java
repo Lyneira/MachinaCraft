@@ -70,8 +70,8 @@ public final class MachinaCore extends MachinaCraftPlugin {
             if (machina != null) {
                 // TODO Show status information
             } else {
-                for (Iterator<MachinaBlueprint> it = blueprints.blueprints(); it.hasNext();) {
-                    machina = it.next().detect(universe, player, block);
+                for (MachinaBlueprint blueprint : blueprints.blueprints()) {
+                    machina = blueprint.detect(universe, player, block);
                     if (machina != null) {
                         if (universe.add(machina)) {
                             // TODO Send creation event

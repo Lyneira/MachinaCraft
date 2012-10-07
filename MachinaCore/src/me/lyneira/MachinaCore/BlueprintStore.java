@@ -3,7 +3,6 @@ package me.lyneira.MachinaCore;
 import gnu.trove.map.hash.THashMap;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -17,9 +16,9 @@ import me.lyneira.MachinaCore.plugin.MachinaPlugin;
  * @author Lyneira
  */
 class BlueprintStore {
-    private final Map<MachinaPlugin, List<MachinaBlueprint>> blueprints = new THashMap<MachinaPlugin, List<MachinaBlueprint>>();
-    private List<MachinaBlueprint> bakedBlueprints = new ArrayList<MachinaBlueprint>(0);
-    private boolean modified = false;
+    private final Map<MachinaPlugin, List<MachinaBlueprint>> blueprints = new THashMap<MachinaPlugin, List<MachinaBlueprint>>(8);
+    private MachinaBlueprint[] bakedBlueprints;
+    private boolean modified = true;
 
     /**
      * Adds the given list of blueprints for the given plugin to the store. If
@@ -60,24 +59,9 @@ class BlueprintStore {
      * 
      * @return An iterator over all blueprints
      */
-    Iterator<MachinaBlueprint> blueprints() {
+    MachinaBlueprint[] blueprints() {
         bake();
-        return bakedBlueprints.iterator();
-    }
-
-    /**
-     * Returns an iterator over all blueprints for the given plugin.
-     * 
-     * @param plugin
-     *            The plugin for which to return an iterator
-     * @return An iterator over all blueprints for this plugin
-     */
-    Iterator<MachinaBlueprint> pluginBlueprints(MachinaPlugin plugin) {
-        List<MachinaBlueprint> blueprintList = blueprints.get(plugin);
-        if (blueprintList == null) {
-            return null;
-        }
-        return blueprintList.iterator();
+        return bakedBlueprints;
     }
 
     /**
@@ -89,14 +73,15 @@ class BlueprintStore {
             return;
 
         if (blueprints.size() == 0) {
-            bakedBlueprints = new ArrayList<MachinaBlueprint>(0);
+            bakedBlueprints = new MachinaBlueprint[0];
             return;
         }
 
-        bakedBlueprints = new ArrayList<MachinaBlueprint>(8);
+        List<MachinaBlueprint> blueprintsFlat = new ArrayList<MachinaBlueprint>(8);
         for (List<MachinaBlueprint> blueprintList : blueprints.values()) {
-            bakedBlueprints.addAll(blueprintList);
+            blueprintsFlat.addAll(blueprintList);
         }
+        bakedBlueprints = (MachinaBlueprint[]) blueprintsFlat.toArray();
         modified = false;
     }
 }

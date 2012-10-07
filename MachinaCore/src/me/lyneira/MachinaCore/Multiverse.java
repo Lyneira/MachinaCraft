@@ -2,8 +2,6 @@ package me.lyneira.MachinaCore;
 
 import gnu.trove.map.hash.THashMap;
 
-import java.util.Map;
-
 import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.machina.Machina;
 
@@ -19,7 +17,7 @@ import org.bukkit.block.Block;
  * 
  */
 class Multiverse {
-    private final Map<World, Universe> universes = new THashMap<World, Universe>();
+    private final THashMap<World, Universe> universes = new THashMap<World, Universe>();
 
     /**
      * Returns the universe for the given world. If it doesn't exist yet, a new
@@ -71,6 +69,7 @@ class Multiverse {
         if (universe != null) {
             universe.unload();
         }
+        universes.compact();
     }
 
     /**

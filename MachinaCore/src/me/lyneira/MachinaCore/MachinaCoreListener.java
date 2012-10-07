@@ -34,19 +34,14 @@ public class MachinaCoreListener implements Listener {
         plugin.logInfo("Using id " + tinkerToolId + " as tinkering tool.");
     }
 
-    @EventHandler(priority=EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
         int typeId = item.getTypeId();
-        Action action = event.getAction();
         ToolInteractResult result = ToolInteractResult.NODAMAGE;
         if (typeId == wrenchId) {
             // Call the wrench method
-            if (action == Action.RIGHT_CLICK_BLOCK) {
-                result = plugin.wrenchClick(event.getPlayer(), event.getClickedBlock(), true);
-            } else if (action == Action.LEFT_CLICK_BLOCK) {
-                result = plugin.wrenchClick(event.getPlayer(), event.getClickedBlock(), false);
-            }
+            result = plugin.wrenchClick(event.getPlayer(), event.getClickedBlock(), event.getAction() == Action.RIGHT_CLICK_BLOCK);
         } else if (typeId == tinkerToolId) {
             // TODO Call the tinker tool method
         } else {
@@ -68,17 +63,17 @@ public class MachinaCoreListener implements Listener {
             }
         }
     }
-    
+
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onWorldLoad(WorldLoadEvent event) {
         plugin.multiverse.load(event.getWorld());
     }
-    
+
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onWorldUnload(WorldUnloadEvent event) {
         plugin.multiverse.unload(event.getWorld());
     }
-    
+
     public void onWorldSave(WorldSaveEvent event) {
         plugin.multiverse.save(event.getWorld());
     }

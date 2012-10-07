@@ -1,8 +1,6 @@
 package me.lyneira.MachinaCore.machina;
 
-import java.util.Iterator;
-
-import me.lyneira.MachinaCore.block.BlockVector;
+import me.lyneira.MachinaCore.Universe;
 
 /**
  * 
@@ -11,14 +9,21 @@ import me.lyneira.MachinaCore.block.BlockVector;
  * or take other actions controlled by its plugin.
  * <p/>
  * 
- * A Machina keeps track of the blocks that it is made up of in two ways: The
+ * A Machina consists of two models with a tree structure. The active model
+ * represents the machina as it exists in the game world right now and cannot be
+ * modified. The editable model can be changed by its controller. keeps track of the blocks that it is made up of in two ways: The
  * machina-centric model and the world-centric instance. The model can be set
  * and modified by the plugin controlling this machina, while the instance is
  * managed by this class.
  * 
  * @author Lyneira
  */
-public class Machina {
+public final class Machina {
+    public final Universe universe;
+
+    Machina(Universe universe) {
+        this.universe = universe;
+    }
     // The Universe this Machina belongs to.
 
     /*
@@ -33,20 +38,9 @@ public class Machina {
      */
 
     /*
-     * Instance - A compiled list of the actual in-game blocks of the machina.
-     * These are generated from the active model by translating their
-     * coordinates into the game world.
-     */
-
-    /**
-     * Returns an iterator over all the blocks of this machina. Guaranteed to
-     * have no duplicate blocks. If the list that this method returns changes,
-     * it is guaranteed that an update to the machina's universe is performed.
+     *  **** Methods ****
      * 
-     * @return An iterator over all BlockVectors in the machina.
+     * Method that returns an iterator over all the blocks resulting from the
+     * current editable model.
      */
-    public Iterator<BlockVector> instance() {
-        // TODO
-        return null;
-    }
 }
