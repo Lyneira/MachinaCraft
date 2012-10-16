@@ -1,5 +1,6 @@
 package me.lyneira.MachinaCore.block;
 
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
@@ -10,9 +11,9 @@ import org.bukkit.block.BlockFace;
  * @author Lyneira
  */
 public class BlockVector {
-    public final int x;
-    public final int y;
-    public final int z;
+    private final int x;
+    private final int y;
+    private final int z;
 
     /**
      * Constructs a BlockVector from the given x, y and z values.
@@ -28,6 +29,17 @@ public class BlockVector {
         this.x = x;
         this.y = y;
         this.z = z;
+    }
+    
+    /**
+     * Constructs a new BlockVector identical to the given vector.
+     * 
+     * @param vector The vector to copy
+     */
+    public BlockVector(BlockVector vector) {
+        this.x = vector.x;
+        this.y = vector.y;
+        this.z = vector.z;
     }
 
     /**
@@ -52,6 +64,18 @@ public class BlockVector {
         x = block.getX();
         y = block.getY();
         z = block.getZ();
+    }
+
+    /**
+     * Returns the {@link Block} that this BlockVector represents in the given
+     * World.
+     * 
+     * @param world
+     *            The world to get the block in
+     * @return The block equivalent to this BlockVector.
+     */
+    public final Block getBlock(World world) {
+        return world.getBlockAt(x, y, z);
     }
 
     /**
@@ -87,6 +111,21 @@ public class BlockVector {
      */
     public final BlockVector add(final BlockVector vector, int n) {
         return new BlockVector(x + vector.x * n, y + vector.y * n, z + vector.z * n);
+    }
+
+    /**
+     * Adds the given coordinates x, y, z to this {@link BlockVector}
+     * 
+     * @param x
+     *            The x coordinate
+     * @param y
+     *            The y coordinate
+     * @param z
+     *            The z coordinate
+     * @return A new {@link BlockVector} with the given coordinates added
+     */
+    public final BlockVector add(final int x, final int y, final int z) {
+        return new BlockVector(x + this.x, y + this.y, z + this.z);
     }
 
     /**
@@ -149,7 +188,26 @@ public class BlockVector {
 
     @Override
     public int hashCode() {
-        return y << 24 ^ x ^ z;
+        /*
+         * Squeeze the coordinates into a long, keeping only 28 bits of x and z.
+         * Masking y is unnecessary because it's completely shifted to the
+         * right)
+         * 
+         * 28 bits still gives a range of ~158 million in both positive and
+         * negative directions, and the CraftBukkit world is limited to 30
+         * million in either direction.
+         */
+        long hashCode = x & 0xFFFFFFFL | ((z & 0xFFFFFFFL) << 28) | (y << 56);
+        /*
+         * Apply a hash method from MurmurHash3
+         * http://code.google.com/p/smhasher/wiki/MurmurHash3
+         */
+        hashCode ^= hashCode >>> 33;
+        hashCode *= 0xff51afd7ed558ccdL;
+        hashCode ^= hashCode >>> 33;
+        hashCode *= 0xc4ceb9fe1a85ec53L;
+        hashCode ^= hashCode >>> 33;
+        return (int) hashCode;
     }
 
     @Override

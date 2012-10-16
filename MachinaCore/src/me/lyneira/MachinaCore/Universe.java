@@ -1,15 +1,21 @@
 package me.lyneira.MachinaCore;
 
-import java.util.Iterator;
-
 import gnu.trove.map.hash.THashMap;
+import gnu.trove.procedure.TObjectProcedure;
 import gnu.trove.set.hash.THashSet;
 
+import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
 import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.machina.Machina;
+import me.lyneira.MachinaCore.machina.MachinaBlock;
+import me.lyneira.MachinaCore.machina.MachinaUpdate;
 
 /**
  * Represents all machinae in a world. This universal block store keeps track of
@@ -21,16 +27,11 @@ import me.lyneira.MachinaCore.machina.Machina;
  * @author Lyneira
  */
 public class Universe {
-    private final World world;
+    public final World world;
     private final THashMap<BlockVector, Machina> globalMap = new THashMap<BlockVector, Machina>();
-    private final THashMap<Machina, BlockVector[]> instances = new THashMap<Machina, BlockVector[]>();
+    private final THashMap<Machina, MachinaBlock[]> instances = new THashMap<Machina, MachinaBlock[]>();
 
-    // Static fields used during a machina update
-    private static int[] updateTypes;
-    private static byte[] updateData;
-    private static ItemStack[] updateInventoryContents;
-    
-    private static THashSet<BlockVector> updateClearSet = new THashSet<BlockVector>();
+    private static final int chestId = Material.CHEST.getId();
 
     Universe(World world) {
         this.world = world;
@@ -57,20 +58,20 @@ public class Universe {
      *         a collision or it is already in the universe.
      */
     boolean add(Machina machina) {
-        BlockVector[] instance = instances.get(machina);
+        MachinaBlock[] instance = instances.get(machina);
         if (instance != null)
             return false;
 
-        instance = createInstance(machina);
+        instance = machina.instance();
 
-        for (BlockVector v : instance) {
-            if (globalMap.get(v) != null)
+        for (MachinaBlock b : instance) {
+            if (globalMap.get(b) != null)
                 return false;
         }
 
         // Machina has no collisions, OK to add.
-        for (BlockVector v : instance) {
-            globalMap.put(v, machina);
+        for (MachinaBlock b : instance) {
+            globalMap.put(b, machina);
         }
 
         instances.put(machina, instance);
@@ -87,46 +88,73 @@ public class Universe {
      *         a collision or it was not in this universe.
      */
     public boolean update(Machina machina) {
-        BlockVector[] instance = instances.get(machina);
-        if (instance == null)
+        if (instances.get(machina) == null)
             return false;
 
-        BlockVector[] newInstance = createUpdateInstance(machina);
+        MachinaUpdate update = machina.createUpdate();
+        BlockVector[] oldBlocks = update.oldBlocks;
+        MachinaBlock[] newBlocks = update.newBlocks;
+        ItemStack[][] inventories = update.inventories;
+        MachinaBlock[] newInstance = update.newInstance;
 
-        for (BlockVector v : newInstance) {
-            Machina m = globalMap.get(v);
+        for (MachinaBlock b : newBlocks) {
+            Machina m = globalMap.get(b);
 
-            if (m == null) {
-                // TODO Do collision detection
-            } else if (m != machina) {
+            if (m != machina) {
                 // Block belongs to another machina, definitely a collision.
                 return false;
+            } else if (m == null) {
+                // Do collision detection here.
+                // TODO Expand collision detection to allow grass/snow as empty
+                if (!b.getBlock(world).isEmpty()) {
+                    return false;
+                }
             }
-            // Block belongs to this machina's existing instance, that's never a
-            // collision
+            /*
+             * If neither of the above is true, the block belongs to this
+             * machina's existing instance, that's never a collision
+             */
         }
 
         // Machina has no collisions, OK to update.
-        for (BlockVector v : instance) {
+        THashSet<BlockVector> updateClearSet = new THashSet<BlockVector>(oldBlocks.length);
+        for (BlockVector v : oldBlocks) {
             globalMap.remove(v);
             updateClearSet.add(v);
         }
-        for (BlockVector v : newInstance) {
-            globalMap.put(v, machina);
-            updateClearSet.remove(v);
-            // TODO Write out new machina instance
+        // Write out updated machina instance
+        for (int i = 0; i < newBlocks.length; i++) {
+            final MachinaBlock b = newBlocks[i];
+            globalMap.put(b, machina);
+            updateClearSet.remove(b);
+
+            final Block block = b.getBlock(world);
+            final int typeId = block.getTypeId();
+            final byte data = block.getData();
+            if (b.typeId != typeId || b.data != data) {
+                block.setTypeIdAndData(typeId, data, false);
+            }
+            ItemStack[] contents = inventories[i];
+            if (contents != null) {
+                Inventory inventory;
+                try {
+                    if (typeId == chestId) {
+                        inventory = ((Chest) block.getState()).getBlockInventory();
+                    } else {
+                        inventory = ((InventoryHolder) block.getState()).getInventory();
+                    }
+                    inventory.setContents(contents);
+                } catch (Exception e) {
+                    MachinaCore.warning("While updating a machina, attempted to write inventory to a block that does not seem to support it! - block: " + block.toString() + ", inventory size: "
+                            + contents.length);
+                }
+            }
         }
+        // Clear blocks that the machina left empty
+        updateClearSet.forEach(new ClearRemovedVectors());
+ 
         instances.put(machina, newInstance);
-        for (Iterator<BlockVector> it = updateClearSet.iterator(); it.hasNext();) {
-            BlockVector v = it.next();
-            it.remove();
-            // TODO Clear vectors left empty by the machina.
-        }
-        
-        // Release arrays used for writing out the new instance
-        updateTypes = null;
-        updateData = null;
-        updateInventoryContents = null;
+
         return true;
     }
 
@@ -159,27 +187,11 @@ public class Universe {
         // TODO
     }
 
-    /**
-     * Creates an array containing all the machina's blocks. The array has no
-     * null elements, and each element is unique.
-     * 
-     * @return An array of the machina's blocks
-     */
-    private final BlockVector[] createInstance(Machina machina) {
-        // TODO
-        return null;
-    }
-
-    /**
-     * Creates an array containing all the machina's blocks. The array has no
-     * null elements, and each element is unique. It also initializes the static
-     * update* fields to enable the updater to write out the new instance to the
-     * world.
-     * 
-     * @return An array of the machina's blocks
-     */
-    private final BlockVector[] createUpdateInstance(Machina machina) {
-        // TODO
-        return null;
+    private class ClearRemovedVectors implements TObjectProcedure<BlockVector> {
+        @Override
+        public boolean execute(BlockVector v) {
+            v.getBlock(world).setTypeIdAndData(0, (byte) 0, false);
+            return true;
+        }
     }
 }

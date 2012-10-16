@@ -17,5 +17,11 @@ public class MachinaBlock extends BlockVector {
         this.typeId = typeId;
         this.data = data;
     }
+    
+    public MachinaBlock(BlockVector vector, int typeId, byte data) {
+        super(vector);
+        this.typeId = typeId;
+        this.data = data;
+    }
 
 }

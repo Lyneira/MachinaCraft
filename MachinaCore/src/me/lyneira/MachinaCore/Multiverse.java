@@ -69,7 +69,6 @@ class Multiverse {
         if (universe != null) {
             universe.unload();
         }
-        universes.compact();
     }
 
     /**

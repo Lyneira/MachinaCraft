@@ -1,6 +1,5 @@
 package me.lyneira.MachinaCore.machina;
 
-
 import me.lyneira.MachinaCore.Universe;
 
 import org.bukkit.block.Block;
@@ -16,6 +15,16 @@ import org.bukkit.entity.Player;
  * @author Lyneira
  */
 public class MachinaBlueprint {
+
+    public int addSection() {
+        return addSection(1);
+    }
+
+    public int addSection(int parent) {
+        // TODO
+        return 0;
+    }
+
     /*
      * Base model - The model that should be scanned for when detection is
      * triggered. The base model is the part of the machina that remains present
@@ -49,7 +58,7 @@ public class MachinaBlueprint {
      * symmetric machina) this may not be the correct direction. It may
      * therefore correct the machina's direction if required.
      */
-    
+
     /**
      * 
      * @return
@@ -57,5 +66,11 @@ public class MachinaBlueprint {
     public Machina detect(Universe universe, Player player, Block block) {
         // TODO
         return null;
+    }
+
+    private int idCounter = 1;
+
+    int nextNodeId() {
+        return idCounter++;
     }
 }
