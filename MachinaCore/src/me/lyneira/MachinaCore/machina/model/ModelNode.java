@@ -1,6 +1,9 @@
 package me.lyneira.MachinaCore.machina.model;
 
-import me.lyneira.MachinaCore.machina.MachinaBlock;
+import java.util.List;
+
+import me.lyneira.MachinaCore.block.MachinaBlock;
+import me.lyneira.util.collection.IdHolder;
 
 /**
  * Represents a part (or all) of the blocks of a machina. A machina can consist
@@ -16,16 +19,23 @@ import me.lyneira.MachinaCore.machina.MachinaBlock;
  * 
  * @author Lyneira
  */
-class ModelNode {
+class ModelNode implements IdHolder {
 
     // *** State ***
-    // Offset
-    private int x;
-    private int y;
-    private int z;
-    private boolean active = true;
-    private MachinaBlock[] blocks;
-    private ModelNode[] children;
+    int id;
+    boolean active = true;
+    int[] blocks;
+    ModelNode parent;
+    List<ModelNode> children;
+    
+    @Override
+    public void setId(int id) {
+        this.id = id;
+    }
+    
+    public int getId() {
+        return id;
+    }
 
     /*
      * **** Tree methods **** Method to get the root.

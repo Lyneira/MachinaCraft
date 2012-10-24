@@ -1,6 +1,7 @@
 package me.lyneira.MachinaCore.machina;
 
 import me.lyneira.MachinaCore.block.BlockVector;
+import me.lyneira.MachinaCore.block.MachinaBlock;
 
 import org.bukkit.inventory.ItemStack;
 
@@ -14,12 +15,10 @@ public class MachinaUpdate {
     public final BlockVector[] oldBlocks;
     public final MachinaBlock[] newBlocks;
     public final ItemStack[][] inventories;
-    public final MachinaBlock[] newInstance;
 
-    MachinaUpdate(BlockVector[] oldBlocks, MachinaBlock[] newBlocks, ItemStack[][] inventories, MachinaBlock[] newInstance) {
+    MachinaUpdate(BlockVector[] oldBlocks, MachinaBlock[] newBlocks, ItemStack[][] inventories) {
         this.newBlocks = newBlocks;
         this.inventories = inventories;
         this.oldBlocks = oldBlocks;
-        this.newInstance = newInstance;
     }
 }

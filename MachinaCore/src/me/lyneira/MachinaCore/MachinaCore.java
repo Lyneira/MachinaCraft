@@ -1,6 +1,5 @@
 package me.lyneira.MachinaCore;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.bukkit.World;
@@ -11,6 +10,7 @@ import org.bukkit.event.HandlerList;
 import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.machina.Machina;
 import me.lyneira.MachinaCore.machina.MachinaBlueprint;
+import me.lyneira.MachinaCore.machina.Universe;
 import me.lyneira.MachinaCore.plugin.MachinaCraftPlugin;
 import me.lyneira.MachinaCore.plugin.MachinaPlugin;
 import me.lyneira.MachinaCore.tool.ToolInteractResult;
@@ -36,7 +36,7 @@ public final class MachinaCore extends MachinaCraftPlugin {
         // Set listener
         // pluginManager = this.getServer().getPluginManager();
         getServer().getPluginManager().registerEvents(new MachinaCoreListener(this), this);
-        
+
         // Initialize the currently loaded worlds
         for (World world : getServer().getWorlds()) {
             multiverse.load(world);
@@ -63,28 +63,27 @@ public final class MachinaCore extends MachinaCraftPlugin {
      * @return DAMAGE if the wrench should be damaged
      */
     public ToolInteractResult wrenchClick(Player player, Block block, boolean rightClick) {
-        BlockVector location = new BlockVector(block);
-        Universe universe = multiverse.get(block.getWorld());
+        final BlockVector location = new BlockVector(block);
+        final Universe universe = multiverse.get(block.getWorld());
         Machina machina = universe.get(location);
         if (rightClick) {
             if (machina != null) {
                 // TODO Show status information
             } else {
                 for (MachinaBlueprint blueprint : blueprints.blueprints()) {
-                    machina = blueprint.detect(universe, player, block);
-                    if (machina != null) {
-                        if (universe.add(machina)) {
-                            // TODO Send creation event
-                            return ToolInteractResult.DAMAGE;
-                        } else {
-                            return ToolInteractResult.NODAMAGE;
-                        }
+
+                    switch (blueprint.detect(universe, block, player)) {
+                    case SUCCESS:
+                        return ToolInteractResult.DAMAGE;
+                    case COLLISION:
+                        return ToolInteractResult.NODAMAGE;
+                    case FAILURE:
                     }
                 }
             }
         } else {
             if (machina != null) {
-                // TODO check permissions, send removal event
+                // TODO check permissions
                 universe.remove(machina);
             }
         }

@@ -1,7 +1,7 @@
 package me.lyneira.MachinaCore.machina;
 
-import me.lyneira.MachinaCore.Universe;
-import me.lyneira.MachinaCore.machina.model.ModelTree;
+import me.lyneira.MachinaCore.block.MachinaBlock;
+import me.lyneira.MachinaCore.machina.model.MachinaModelTree;
 
 /**
  * 
@@ -12,8 +12,8 @@ import me.lyneira.MachinaCore.machina.model.ModelTree;
  * 
  * A Machina consists of a model with a tree structure. The model represents the
  * machina as it exists in the game world right now and cannot be modified
- * directly. When a request for modification is made, a shadow copy of
- * that node and all the ones below it is made, which the controller can edit.
+ * directly. Modifications will be held When a modification is made, ta shadow copy of
+ * the relevant portion of the model is made  all the ones below it is made, which the controller can edit.
  * One or more shadow copies existing for (parts of) the model can be manifested
  * by updating the machina.
  * <p/>
@@ -27,32 +27,15 @@ import me.lyneira.MachinaCore.machina.model.ModelTree;
  */
 public final class Machina {
     public final Universe universe;
+    public final MachinaController controller;
     
-    private ModelTree model;
+    private final MachinaModelTree model;
 
-    Machina(Universe universe) {
+    Machina(Universe universe, MachinaModelTree model, MachinaController controller) {
         this.universe = universe;
+        this.model = model;
+        this.controller = controller;
     }
-
-    // The Universe this Machina belongs to.
-
-    /*
-     * Active model - A model of the machina as it exists in the world right
-     * now. Coordinates are machina-centric.
-     */
-
-    /*
-     * Editable model - Normally the same as the active model, but can be
-     * modified by the controller and updated to move or change the machina in
-     * the world.
-     */
-
-    /*
-     * **** Methods ****
-     * 
-     * Method that returns an iterator over all the blocks resulting from the
-     * current editable model.
-     */
 
     /**
      * Returns a new array containing all the machina's blocks in absolute
@@ -87,12 +70,6 @@ public final class Machina {
      */
     public MachinaUpdate createUpdate() {
         // TODO
-        return new MachinaUpdate(null, null, null, null);
-    }
-    
-    private int idCounter = 0;
-
-    int nextNodeId() {
-        return idCounter++;
+        return new MachinaUpdate(null, null, null);
     }
 }

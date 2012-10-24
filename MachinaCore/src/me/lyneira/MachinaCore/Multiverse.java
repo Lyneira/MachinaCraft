@@ -4,6 +4,7 @@ import gnu.trove.map.hash.THashMap;
 
 import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.machina.Machina;
+import me.lyneira.MachinaCore.machina.Universe;
 
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -16,7 +17,7 @@ import org.bukkit.block.Block;
  * @author Lyneira
  * 
  */
-class Multiverse {
+public class Multiverse {
     private final THashMap<World, Universe> universes = new THashMap<World, Universe>();
 
     /**
@@ -30,7 +31,7 @@ class Multiverse {
     Universe get(World world) {
         Universe universe = universes.get(world);
         if (universe == null) {
-            universe = new Universe(world);
+            universe = Universe.friend.create(world);
             universes.put(world, universe);
         }
         return universe;
@@ -55,7 +56,7 @@ class Multiverse {
      *            The world to be loaded
      */
     void load(World world) {
-        get(world).load();
+        Universe.friend.load(get(world));
     }
 
     /**
@@ -67,7 +68,7 @@ class Multiverse {
     void unload(World world) {
         Universe universe = universes.remove(world);
         if (universe != null) {
-            universe.unload();
+            Universe.friend.unload(universe);
         }
     }
 
@@ -78,6 +79,13 @@ class Multiverse {
      *            The world being saved
      */
     void save(World world) {
-        get(world).save();
+        Universe.friend.save(get(world));
+    }
+    
+    public static abstract class UniverseFriend {
+        protected abstract Universe create(World world);
+        protected abstract void load(Universe universe);
+        protected abstract void unload(Universe universe);
+        protected abstract void save(Universe universe);
     }
 }

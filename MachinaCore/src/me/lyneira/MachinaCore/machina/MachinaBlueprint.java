@@ -1,28 +1,40 @@
 package me.lyneira.MachinaCore.machina;
 
-import me.lyneira.MachinaCore.Universe;
+import me.lyneira.MachinaCore.block.BlockRotation;
+import me.lyneira.MachinaCore.block.BlockVector;
+import me.lyneira.MachinaCore.block.MachinaBlock;
+import me.lyneira.MachinaCore.machina.model.ConstructionModelTree;
+import me.lyneira.MachinaCore.machina.model.ModelTree;
 
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 /**
  * Represents the blueprint of a machina. The blueprint is used to detect and
- * create a new machina when the player rightclicks the appropriate tool on a
- * specified trigger block. It can be supplied with optional extensions and a
- * detector class that identifies these extensions and performs other
+ * create a new machina when the player rightclicks the appropriate tool on the
+ * specified trigger block. It can be supplied with a
+ * detector class that identifies additional portions of the machina and performs other
  * detect-time configuration.
+ * 
+ * The trigger block
  * 
  * @author Lyneira
  */
 public class MachinaBlueprint {
 
-    public int addSection() {
-        return addSection(1);
-    }
+    private final ConstructionModelTree baseModel;
+    private final MachinaDetector detector;
+    private final MachinaBlock triggerBlock;
 
-    public int addSection(int parent) {
-        // TODO
-        return 0;
+    public MachinaBlueprint(MachinaDetector detector, MachinaBlock triggerBlock, ModelTree baseModel) {
+        this.baseModel = new ConstructionModelTree(baseModel);
+        if (detector == null)
+            throw new NullPointerException("Cannot construct a MachinaBlueprint without a MachinaDetector!");
+        this.detector = detector;
+        if (triggerBlock == null)
+            throw new NullPointerException("Cannot construct a MachinaBlueprint without a trigger block!");
+        this.triggerBlock = triggerBlock;
     }
 
     /*
@@ -55,22 +67,43 @@ public class MachinaBlueprint {
      * detected. It may detect extensions on the base model and add them to the
      * machina being constructed. The detector will receive the direction used
      * by MachinaCore to detect the base model, but in some cases (like a
-     * symmetric machina) this may not be the correct direction. It may
-     * therefore correct the machina's direction if required.
+     * symmetric machina) this may not be the correct direction.
      */
 
     /**
+     * Detects whether a machina conforming to this blueprint is present at the
+     * given block and adds it to the given universe.
      * 
+     * @param universe The universe (and its corresponding world) to detect in
+     * @param block
+     *            The block to detect at
+     * @param player
+     *            The player that initiated this detection or null if not a
+     *            player
      * @return
      */
-    public Machina detect(Universe universe, Player player, Block block) {
-        // TODO
-        return null;
-    }
+    public DetectResult detect(Universe universe, Block block, Player player) {
+        if (!triggerBlock.matchTypeOnly(block))
+            return DetectResult.FAILURE;
 
-    private int idCounter = 1;
-
-    int nextNodeId() {
-        return idCounter++;
+        ConstructionModelTree machinaModel = null;
+        for (BlockRotation r : BlockRotation.values()) {
+            final MachinaBlock rotatedTrigger = triggerBlock.rotateYaw(r);
+            final BlockVector origin = new BlockVector(block.getX() - rotatedTrigger.x, block.getY() - rotatedTrigger.y, block.getZ() - rotatedTrigger.z);
+            final World world = block.getWorld();
+            machinaModel = baseModel.construct(block.getWorld(), r, origin);
+            if (machinaModel != null) {
+                // Machina base model was constructed, now hand it to the detector
+                final MachinaController controller = detector.detect(machinaModel, player, world, r, origin);
+                if (controller == null) {
+                    return DetectResult.FAILURE;
+                } else if (universe.add(new Machina(universe, machinaModel.machinaModel(), controller))) {
+                    return DetectResult.SUCCESS;
+                } else {
+                    return DetectResult.COLLISION;
+                }
+            }
+        }
+        return DetectResult.FAILURE;
     }
 }

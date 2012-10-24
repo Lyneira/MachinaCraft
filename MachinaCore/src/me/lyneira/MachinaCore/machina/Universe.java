@@ -1,4 +1,4 @@
-package me.lyneira.MachinaCore;
+package me.lyneira.MachinaCore.machina;
 
 import gnu.trove.map.hash.THashMap;
 import gnu.trove.procedure.TObjectProcedure;
@@ -12,10 +12,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
+import me.lyneira.MachinaCore.MachinaCore;
+import me.lyneira.MachinaCore.Multiverse;
 import me.lyneira.MachinaCore.block.BlockVector;
-import me.lyneira.MachinaCore.machina.Machina;
-import me.lyneira.MachinaCore.machina.MachinaBlock;
-import me.lyneira.MachinaCore.machina.MachinaUpdate;
+import me.lyneira.MachinaCore.block.MachinaBlock;
 
 /**
  * Represents all machinae in a world. This universal block store keeps track of
@@ -29,7 +29,7 @@ import me.lyneira.MachinaCore.machina.MachinaUpdate;
 public class Universe {
     public final World world;
     private final THashMap<BlockVector, Machina> globalMap = new THashMap<BlockVector, Machina>();
-    private final THashMap<Machina, MachinaBlock[]> instances = new THashMap<Machina, MachinaBlock[]>();
+    private final THashSet<Machina> machinae = new THashSet<Machina>();
 
     private static final int chestId = Material.CHEST.getId();
 
@@ -58,11 +58,10 @@ public class Universe {
      *         a collision or it is already in the universe.
      */
     boolean add(Machina machina) {
-        MachinaBlock[] instance = instances.get(machina);
-        if (instance != null)
+        if (machinae.contains(machina))
             return false;
 
-        instance = machina.instance();
+        MachinaBlock[] instance = machina.instance();
 
         for (MachinaBlock b : instance) {
             if (globalMap.get(b) != null)
@@ -74,8 +73,10 @@ public class Universe {
             globalMap.put(b, machina);
         }
 
-        instances.put(machina, instance);
+        machinae.add(machina);
 
+        // Send initialize event
+        machina.controller.initialize(machina);
         return true;
     }
 
@@ -88,14 +89,13 @@ public class Universe {
      *         a collision or it was not in this universe.
      */
     public boolean update(Machina machina) {
-        if (instances.get(machina) == null)
+        if (!machinae.contains(machina))
             return false;
 
         MachinaUpdate update = machina.createUpdate();
         BlockVector[] oldBlocks = update.oldBlocks;
         MachinaBlock[] newBlocks = update.newBlocks;
         ItemStack[][] inventories = update.inventories;
-        MachinaBlock[] newInstance = update.newInstance;
 
         for (MachinaBlock b : newBlocks) {
             Machina m = globalMap.get(b);
@@ -152,8 +152,6 @@ public class Universe {
         }
         // Clear blocks that the machina left empty
         updateClearSet.forEach(new ClearRemovedVectors());
- 
-        instances.put(machina, newInstance);
 
         return true;
     }
@@ -164,15 +162,14 @@ public class Universe {
      * @param machina
      *            The machina to remove
      */
-    void remove(Machina machina) {
-        BlockVector[] instance = instances.get(machina);
-        if (instance == null)
+    public void remove(Machina machina) {
+        if (!machinae.contains(machina))
             return;
 
-        for (BlockVector v : instance) {
+        for (BlockVector v : machina.instance()) {
             globalMap.remove(v);
         }
-        instances.remove(machina);
+        machinae.remove(machina);
     }
 
     void load() {
@@ -194,4 +191,23 @@ public class Universe {
             return true;
         }
     }
+    
+    public final static Multiverse.UniverseFriend friend = new Multiverse.UniverseFriend() {
+        @Override
+        protected Universe create(World world) {
+            return new Universe(world);
+        }
+        @Override
+        protected void load(Universe universe) {
+            universe.load();
+        }
+        @Override
+        protected void unload(Universe universe) {
+            universe.unload();
+        }
+        @Override
+        protected void save(Universe universe) {
+            universe.save();
+        }
+    };
 }

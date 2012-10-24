@@ -11,9 +11,9 @@ import org.bukkit.block.BlockFace;
  * @author Lyneira
  */
 public class BlockVector {
-    private final int x;
-    private final int y;
-    private final int z;
+    public final int x;
+    public final int y;
+    public final int z;
 
     /**
      * Constructs a BlockVector from the given x, y and z values.
@@ -30,11 +30,12 @@ public class BlockVector {
         this.y = y;
         this.z = z;
     }
-    
+
     /**
      * Constructs a new BlockVector identical to the given vector.
      * 
-     * @param vector The vector to copy
+     * @param vector
+     *            The vector to copy
      */
     public BlockVector(BlockVector vector) {
         this.x = vector.x;
@@ -48,7 +49,7 @@ public class BlockVector {
      * @param face
      *            The BlockFace to copy
      */
-    public BlockVector(final BlockFace face) {
+    public BlockVector(BlockFace face) {
         x = face.getModX();
         y = face.getModY();
         z = face.getModZ();
@@ -60,7 +61,7 @@ public class BlockVector {
      * @param face
      *            The BlockFace to copy
      */
-    public BlockVector(final Block block) {
+    public BlockVector(Block block) {
         x = block.getX();
         y = block.getY();
         z = block.getZ();
@@ -85,7 +86,7 @@ public class BlockVector {
      *            The BlockFace to add
      * @return A new BlockVector with the BlockFace added
      */
-    public final BlockVector add(final BlockFace face) {
+    public BlockVector add(BlockFace face) {
         return new BlockVector(x + face.getModX(), y + face.getModY(), z + face.getModZ());
     }
 
@@ -96,7 +97,7 @@ public class BlockVector {
      *            The vector to add
      * @return A new {@link BlockVector} with the given vector added
      */
-    public final BlockVector add(final BlockVector vector) {
+    public BlockVector add(BlockVector vector) {
         return new BlockVector(x + vector.x, y + vector.y, z + vector.z);
     }
 
@@ -109,7 +110,7 @@ public class BlockVector {
      *            The number of times to apply this vector.
      * @return A new {@link BlockVector} with the given vector added
      */
-    public final BlockVector add(final BlockVector vector, int n) {
+    public BlockVector add(BlockVector vector, int n) {
         return new BlockVector(x + vector.x * n, y + vector.y * n, z + vector.z * n);
     }
 
@@ -124,7 +125,7 @@ public class BlockVector {
      *            The z coordinate
      * @return A new {@link BlockVector} with the given coordinates added
      */
-    public final BlockVector add(final int x, final int y, final int z) {
+    public BlockVector add(int x, int y, int z) {
         return new BlockVector(x + this.x, y + this.y, z + this.z);
     }
 
@@ -137,7 +138,7 @@ public class BlockVector {
      *            The {@link BlockVector} to subtract
      * @return A new {@link BlockVector} with the given vector subtracted
      */
-    public final BlockVector subtract(final BlockVector other) {
+    public BlockVector subtract(BlockVector other) {
         return new BlockVector(this.x - other.x, this.y - other.y, this.z - other.z);
     }
 
@@ -147,7 +148,7 @@ public class BlockVector {
      * @param other
      * @return True if the vectors are equal.
      */
-    public boolean equalsOther(final BlockVector other) {
+    public boolean equalsOther(BlockVector other) {
         if (other == null)
             return false;
         return this.x == other.x && this.y == other.y && this.z == other.z;
@@ -160,7 +161,7 @@ public class BlockVector {
      * @param other
      * @return True if the vectors are equal.
      */
-    public boolean equalsOtherNotNull(final BlockVector other) {
+    public boolean equalsOtherNotNull(BlockVector other) {
         return this.x == other.x && this.y == other.y && this.z == other.z;
     }
 
@@ -172,10 +173,10 @@ public class BlockVector {
      *            The amount to rotate by
      * @return A new rotated BlockVector
      */
-    public final BlockVector rotateYaw(final BlockRotation rotate) {
+    public BlockVector rotateYaw(BlockRotation rotate) {
         switch (rotate) {
         case ROTATE_0:
-            return new BlockVector(x, y, z);
+            return this;
         case ROTATE_90:
             return new BlockVector(z, y, -x);
         case ROTATE_180:
@@ -225,6 +226,6 @@ public class BlockVector {
 
     @Override
     public String toString() {
-        return Integer.toString(x) + "," + Integer.toString(y) + "," + Integer.toString(z);
+        return Integer.toString(x) + ", " + Integer.toString(y) + ", " + Integer.toString(z);
     }
 }

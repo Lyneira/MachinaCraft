@@ -2,15 +2,11 @@ package me.lyneira.MachinaCore.machina.model;
 
 import java.util.Iterator;
 
-import org.bukkit.World;
-
-import me.lyneira.MachinaCore.block.BlockRotation;
-import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.block.MachinaBlock;
 
-public class ConstructionModelTree implements ModelTree {
+public class MachinaModelTree implements ModelTree {
     
-    public ConstructionModelTree(ModelTree other) {
+    MachinaModelTree() {
         
     }
 
@@ -97,30 +93,5 @@ public class ConstructionModelTree implements ModelTree {
         // TODO Auto-generated method stub
         
     }
-    
-    /* *************
-     * Other methods
-     */
-    /**
-     * Detects whether this model is present for the given world, rotation and origin and returns a properly rotated copy of this model if successful. Returns null on failure.   
-     * @param world
-     * @param rotation
-     * @param originX
-     * @param originY
-     * @param originZ
-     * @return
-     */
-    public ConstructionModelTree construct(World world, BlockRotation rotation, BlockVector origin) {
-        // TODO
-        return null;
-    }
-    
-    /**
-     * Converts this model into a MachinaModelTree and returns it.
-     * @return The MachinaModeltree that was created.
-     */
-    public MachinaModelTree machinaModel() {
-        // TODO
-        return null;
-    }
+
 }
