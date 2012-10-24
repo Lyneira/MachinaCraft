@@ -2,6 +2,8 @@ name: HoverPad
 version: @VERSION@
 description: A Machina that hovers beneath the player's feet, providing a platform to stand on.
 author: Lyneira
+website: http://dev.bukkit.org/server-mods/machinacraft/
+dev-url: http://dev.bukkit.org/server-mods/machinacraft/
 main: me.lyneira.HoverPad.HoverPadPlugin
 depend: [MachinaCore]
 permissions:

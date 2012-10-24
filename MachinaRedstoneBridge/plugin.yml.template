@@ -2,5 +2,7 @@ name: MachinaRedstoneBridge
 version: @VERSION@
 description: Allows a machina to be activated through a redstone signal.
 author: Lyneira
+website: http://dev.bukkit.org/server-mods/machinacraft/
+dev-url: http://dev.bukkit.org/server-mods/machinacraft/
 main: me.lyneira.MachinaRedstoneBridge.MachinaRedstoneBridge
 depend: [MachinaCore]

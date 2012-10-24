@@ -2,6 +2,8 @@ name: MachinaFactory
 version: @VERSION@
 description: A MachinaCraft framework that allows machina to send each other objects through a pipeline.
 author: Lyneira
+website: http://dev.bukkit.org/server-mods/machinacraft/
+dev-url: http://dev.bukkit.org/server-mods/machinacraft/
 main: me.lyneira.MachinaFactory.MachinaFactory
 depend: [MachinaCore]
 permissions:

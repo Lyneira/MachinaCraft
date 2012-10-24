@@ -2,5 +2,7 @@ name: MachinaAtmosphere
 version: @VERSION@
 description: A Machina capable of changing the atmospheric environment around it.
 author: Lyneira
+website: http://dev.bukkit.org/server-mods/machinacraft/
+dev-url: http://dev.bukkit.org/server-mods/machinacraft/
 main: me.lyneira.MachinaAtmosphere.MachinaAtmosphere
 depend: [MachinaCore]
