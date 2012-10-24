@@ -70,12 +70,6 @@ public class DummyPlayerInventory extends DummyInventory implements PlayerInvent
     }
 
     @Override
-    public ItemStack[] getContents() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public int getSize() {
         return 36;
     }

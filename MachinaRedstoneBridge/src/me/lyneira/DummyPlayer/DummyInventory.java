@@ -98,7 +98,9 @@ public abstract class DummyInventory implements Inventory {
     }
 
     @Override
-    public abstract ItemStack[] getContents();
+    public ItemStack[] getContents() {
+        return new ItemStack[getSize()];
+    }
 
     @Override
     public HumanEntity getHolder() {

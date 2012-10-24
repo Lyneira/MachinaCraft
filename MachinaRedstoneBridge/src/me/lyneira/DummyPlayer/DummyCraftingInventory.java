@@ -35,11 +35,6 @@ public class DummyCraftingInventory extends DummyInventory implements CraftingIn
     }
 
     @Override
-    public ItemStack[] getContents() {
-        return new ItemStack[getSize()];
-    }
-
-    @Override
     public int getSize() {
         return 5;
     }

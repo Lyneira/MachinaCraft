@@ -4,6 +4,11 @@
 #
 # inner-material: id of the inner blocks (wooden planks by default)
 # outer-material: id of the outer blocks (wool by default)
+# move-delay: Number of server ticks to wait between updates. Default is 8, minimum is 1. While
+#             sprinting or sneaking (descending), this delay is halved, but can never be less
+#             than 1. Setting this to a very low value may cause high CPU usage due to all the
+#             world updates the hoverpad generates!
 
 inner-material: 5
 outer-material: 35
+move-delay: 8
