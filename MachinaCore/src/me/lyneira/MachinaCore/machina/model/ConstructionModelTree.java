@@ -7,11 +7,18 @@ import org.bukkit.World;
 import me.lyneira.MachinaCore.block.BlockRotation;
 import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.block.MachinaBlock;
+import me.lyneira.util.collection.IntWeakObjectMap;
 
 public class ConstructionModelTree implements ModelTree {
+    private final IntWeakObjectMap<ModelNode> nodes;
+    
+    public ConstructionModelTree(int initialCapacity) {
+        nodes = new IntWeakObjectMap<ModelNode>(initialCapacity);
+    }
     
     public ConstructionModelTree(ModelTree other) {
-        
+        nodes = new IntWeakObjectMap<ModelNode>(other.nodeCount());
+        // TODO
     }
 
     @Override
@@ -98,6 +105,12 @@ public class ConstructionModelTree implements ModelTree {
         
     }
     
+    @Override
+    public int nodeCount() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+    
     /* *************
      * Other methods
      */
@@ -123,4 +136,5 @@ public class ConstructionModelTree implements ModelTree {
         // TODO
         return null;
     }
+
 }

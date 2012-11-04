@@ -31,7 +31,7 @@ public class Multiverse {
     Universe get(World world) {
         Universe universe = universes.get(world);
         if (universe == null) {
-            universe = Universe.friend.create(world);
+            universe = Universe.multiverseFriend.create(world);
             universes.put(world, universe);
         }
         return universe;
@@ -56,7 +56,7 @@ public class Multiverse {
      *            The world to be loaded
      */
     void load(World world) {
-        Universe.friend.load(get(world));
+        Universe.multiverseFriend.load(get(world));
     }
 
     /**
@@ -68,7 +68,7 @@ public class Multiverse {
     void unload(World world) {
         Universe universe = universes.remove(world);
         if (universe != null) {
-            Universe.friend.unload(universe);
+            Universe.multiverseFriend.unload(universe);
         }
     }
 
@@ -79,7 +79,7 @@ public class Multiverse {
      *            The world being saved
      */
     void save(World world) {
-        Universe.friend.save(get(world));
+        Universe.multiverseFriend.save(get(world));
     }
     
     public static abstract class UniverseFriend {

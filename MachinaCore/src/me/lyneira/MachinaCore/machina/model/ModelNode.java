@@ -2,7 +2,6 @@ package me.lyneira.MachinaCore.machina.model;
 
 import java.util.List;
 
-import me.lyneira.MachinaCore.block.MachinaBlock;
 import me.lyneira.util.collection.IdHolder;
 
 /**

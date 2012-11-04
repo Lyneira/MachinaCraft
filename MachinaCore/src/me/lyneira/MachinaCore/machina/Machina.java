@@ -38,12 +38,12 @@ public final class Machina {
     }
 
     /**
-     * Returns a new array containing all the machina's blocks in absolute
+     * Returns the array containing all the machina's blocks in absolute
      * positions. The array has no null elements, and each element is unique.
      * 
-     * @return An array of the machina's blocks
+     * @return Array of the machina's blocks
      */
-    public MachinaBlock[] instance() {
+    MachinaBlock[] instance() {
         // TODO
         return null;
     }

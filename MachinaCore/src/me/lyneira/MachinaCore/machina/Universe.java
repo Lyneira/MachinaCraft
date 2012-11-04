@@ -192,7 +192,7 @@ public class Universe {
         }
     }
     
-    public final static Multiverse.UniverseFriend friend = new Multiverse.UniverseFriend() {
+    public final static Multiverse.UniverseFriend multiverseFriend = new Multiverse.UniverseFriend() {
         @Override
         protected Universe create(World world) {
             return new Universe(world);

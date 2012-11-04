@@ -94,4 +94,10 @@ public class MachinaModelTree implements ModelTree {
         
     }
 
+    @Override
+    public int nodeCount() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
 }
