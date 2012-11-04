@@ -411,6 +411,18 @@ public final class BlockData {
         set(Material.BIRCH_WOOD_STAIRS.getId()).solid(true).drillable(true).copyData(true).drillTime(breakTimeMedium);
         
         set(Material.JUNGLE_WOOD_STAIRS.getId()).solid(true).drillable(true).copyData(true).drillTime(breakTimeMedium);
+        
+        set(Material.COBBLE_WALL.getId()).drillable(true).copyData(true).drillTime(breakTimeMedium);
+        
+        set(Material.FLOWER_POT.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeFast);
+        
+        set(Material.CARROT.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeFast);
+        
+        set(Material.POTATO.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeFast);
+        
+        set(Material.WOOD_BUTTON.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeFast);
+        
+        set(Material.ANVIL.getId()).drillable(true).copyData(true).drillTime(breakTimeTough);
     }
 
     // Private setters to make the initialization look better.

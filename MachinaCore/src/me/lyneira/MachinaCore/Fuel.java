@@ -54,6 +54,11 @@ public class Fuel {
         burnTimes.put(Material.NOTE_BLOCK.getId(), woodTime);
         burnTimes.put(Material.LOCKED_CHEST.getId(), woodTime);
         burnTimes.put(Material.FENCE_GATE.getId(), woodTime);
+        burnTimes.put(Material.WOOD_DOUBLE_STEP.getId(), woodTime);
+        burnTimes.put(Material.WOOD_STEP.getId(), woodTime / 2);
+        burnTimes.put(Material.SPRUCE_WOOD_STAIRS.getId(), woodTime);
+        burnTimes.put(Material.BIRCH_WOOD_STAIRS.getId(), woodTime);
+        burnTimes.put(Material.JUNGLE_WOOD_STAIRS.getId(), woodTime);
 
         burnTimes.put(Material.SAPLING.getId(), saplingTime);
         burnTimes.put(Material.STICK.getId(), saplingTime);

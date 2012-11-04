@@ -38,6 +38,8 @@ class Planter implements Machina {
     private static boolean harvestPumpkin = true;
     private static boolean harvestMelon = true;
     private static boolean harvestNetherWart = true;
+    private static boolean harvestCarrot = true;
+    private static boolean harvestPotato = true;
     private static boolean useEnergy = false;
     private static boolean useTool = true;
 
@@ -147,7 +149,19 @@ class Planter implements Machina {
                 break;
             case CROPS:
                 if (harvest && harvestWheat) {
-                    if (harvestCrops(crop))
+                    if (harvestCrops(crop, Material.WHEAT))
+                        plantFarmland(crop);
+                }
+                break;
+            case CARROT:
+                if (harvest && harvestCarrot) {
+                    if (harvestCrops(crop, Material.CARROT))
+                        plantFarmland(crop);
+                }
+                break;
+            case POTATO:
+                if (harvest && harvestPotato) {
+                    if (harvestCrops(crop, Material.POTATO))
                         plantFarmland(crop);
                 }
                 break;
@@ -212,6 +226,12 @@ class Planter implements Machina {
             crop.setTypeIdAndData(Material.MELON_STEM.getId(), cropData, true);
         }
             break;
+        case CARROT_ITEM:
+            crop.setTypeId(Material.CARROT.getId());
+            break;
+        case POTATO_ITEM:
+            crop.setTypeId(Material.POTATO.getId());
+            break;
         default:
             break;
         }
@@ -228,13 +248,15 @@ class Planter implements Machina {
         manager.decrement();
     }
 
-    private boolean harvestCrops(BlockLocation crop) throws NoEnergyException {
-        if (((Crops) crop.getBlock().getState().getData()).getState() != CropState.RIPE) {
+    private boolean harvestCrops(BlockLocation crop, Material material) throws NoEnergyException {
+        Crops crops = new Crops(material);
+        crops.setData(crop.getBlock().getData());
+        if (crops.getState() != CropState.RIPE) {
             // Use bonemeal if necessary to complete the harvest.
             InventoryManager manager = new InventoryManager(chestInventory());
             if (manager.findItemTypeAndData(Material.INK_SACK.getId(), (byte) 15)) {
-                // Bonemeal sets the seeds to fully grown.
-                crop.setTypeIdAndData(Material.CROPS.getId(), (byte) 7, false);
+                // Crop is now fully grown.
+                crop.setTypeIdAndData(material.getId(), (byte) 7, false);
                 manager.decrement();
             } else {
                 return false;
@@ -242,15 +264,33 @@ class Planter implements Machina {
         }
 
         InventoryTransaction transaction = new InventoryTransaction(chestInventory());
-        // Hardcoded drops for now, as Block.getDrops() does not return the
-        // seeds properly.
 
-        // Added bonus: Seed supply from automatic harvesting will stay stable,
-        // players have to harvest manually if they want more seeds.
-        transaction.add(new ItemStack(Material.WHEAT));
-        if (harvestWheatSeeds) {
-            transaction.add(new ItemStack(Material.SEEDS));
+        switch (material) {
+        case WHEAT:
+            // Hardcoded drops for now, as Block.getDrops() does not return the
+            // seeds properly.
+
+            // Added bonus: Seed supply from automatic harvesting will stay
+            // stable,
+            // players have to harvest manually if they want more seeds.
+            transaction.add(new ItemStack(Material.WHEAT));
+            if (harvestWheatSeeds) {
+                transaction.add(new ItemStack(Material.SEEDS));
+            }
+            break;
+        case CARROT:
+            transaction.add(new ItemStack(Material.CARROT_ITEM, random.nextInt(4) + 1));
+            break;
+        case POTATO:
+            transaction.add(new ItemStack(Material.POTATO_ITEM, random.nextInt(4) + 1));
+            if (random.nextInt(100) < 2) {
+                transaction.add(new ItemStack(Material.POISONOUS_POTATO));
+            }
+            break;
+        default:
+            return false;
         }
+
         return doHarvest(crop, transaction);
     }
 
@@ -263,7 +303,7 @@ class Planter implements Machina {
         // Hardcoded drop as Block.getDrops() does not return nether stalk
         // stacks.
         InventoryTransaction transaction = new InventoryTransaction(chestInventory());
-        transaction.add(new ItemStack(Material.NETHER_STALK, 2 + random.nextInt() % 4));
+        transaction.add(new ItemStack(Material.NETHER_STALK, 2 + random.nextInt(4)));
         return doHarvest(crop, transaction);
     }
 
@@ -271,7 +311,7 @@ class Planter implements Machina {
         // Hardcoded drop as Block.getDrops() returns 3-7 melons rather than
         // melon slices.
         InventoryTransaction transaction = new InventoryTransaction(chestInventory());
-        transaction.add(new ItemStack(Material.MELON, 3 + random.nextInt() % 5));
+        transaction.add(new ItemStack(Material.MELON, 3 + random.nextInt(5)));
         return doHarvest(crop, transaction);
     }
 
@@ -297,7 +337,7 @@ class Planter implements Machina {
         } catch (NoToolException e) {
             return false;
         }
-        
+
         if (!transaction.execute())
             return false;
         crop.setEmpty();
@@ -444,6 +484,8 @@ class Planter implements Machina {
             case SEEDS:
             case PUMPKIN_SEEDS:
             case MELON_SEEDS:
+            case CARROT_ITEM:
+            case POTATO_ITEM:
                 return true;
             default:
                 return false;
@@ -483,6 +525,8 @@ class Planter implements Machina {
         harvestPumpkin = configuration.getBoolean("harvest-pumpkin", harvestPumpkin);
         harvestMelon = configuration.getBoolean("harvest-melon", harvestMelon);
         harvestNetherWart = configuration.getBoolean("harvest-netherwart", harvestNetherWart);
+        harvestCarrot = configuration.getBoolean("harvest-carrot", harvestCarrot);
+        harvestPotato = configuration.getBoolean("harvest-potato", harvestPotato);
         useEnergy = configuration.getBoolean("use-energy", useEnergy);
         useTool = configuration.getBoolean("use-tool", useTool);
     }

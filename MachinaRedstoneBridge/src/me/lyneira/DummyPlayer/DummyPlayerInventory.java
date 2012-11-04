@@ -78,4 +78,9 @@ public class DummyPlayerInventory extends DummyInventory implements PlayerInvent
     public InventoryType getType() {
         return InventoryType.PLAYER;
     }
+
+    @Override
+    public int clear(int id, int data) {
+        return 0;
+    }
 }

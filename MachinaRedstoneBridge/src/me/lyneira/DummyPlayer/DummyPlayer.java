@@ -872,4 +872,12 @@ public class DummyPlayer extends PermissibleBase implements Player {
     public void playSound(Location arg0, Sound arg1, float arg2, float arg3) {
     }
 
+    @Override
+    public void giveExpLevels(int arg0) {
+    }
+
+    @Override
+    public void setBedSpawnLocation(Location arg0, boolean arg1) {
+    }
+
 }
