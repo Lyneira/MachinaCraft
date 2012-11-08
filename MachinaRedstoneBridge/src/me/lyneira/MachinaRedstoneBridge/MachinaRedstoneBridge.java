@@ -63,7 +63,7 @@ public class MachinaRedstoneBridge extends JavaPlugin implements Runnable {
         machinaCore = (MachinaCore) getServer().getPluginManager().getPlugin("MachinaCore");
         scheduler = getServer().getScheduler();
         dummyPlayers = new HashMap<World, Player>(8);
-        
+
         scheduler.scheduleSyncDelayedTask(this, loadConfiguration);
 
         getServer().getPluginManager().registerEvents(new RedstoneBridgeListener(this), this);
@@ -135,6 +135,8 @@ public class MachinaRedstoneBridge extends JavaPlugin implements Runnable {
         public void run() {
             ConfigurationManager config = new ConfigurationManager(MachinaRedstoneBridge.this);
             ConfigurationSection configuration = config.getAll();
+
+            RedstoneBridgeListener.bridgeBlock = configuration.getInt("bridge-block", RedstoneBridgeListener.bridgeBlock);
 
             List<String> permissionStrings = configuration.getStringList("permissions");
             if (permissionStrings == null) {

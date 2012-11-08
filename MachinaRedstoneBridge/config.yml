@@ -7,6 +7,8 @@
 # Note: Use of .* permissions as wildcards won't work unless the plugin
 # in question registers a permission that ends with .*
 
+# ID of the block needed to be under the repeater. Default is Bricks (45)
+bridge-block: 45
 permissions:
     - machinadrill.all
     - machinabuilder.all
