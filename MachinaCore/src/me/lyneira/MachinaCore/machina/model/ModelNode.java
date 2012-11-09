@@ -1,8 +1,11 @@
 package me.lyneira.MachinaCore.machina.model;
 
-import java.util.List;
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.set.hash.TIntHashSet;
 
-import me.lyneira.util.collection.IdHolder;
+import me.lyneira.MachinaCore.block.BlockVector;
+import me.lyneira.MachinaCore.block.MachinaBlock;
+import me.lyneira.util.collection.UniqueIdObjectMap;
 
 /**
  * Represents a part (or all) of the blocks of a machina. A machina can consist
@@ -18,22 +21,51 @@ import me.lyneira.util.collection.IdHolder;
  * 
  * @author Lyneira
  */
-class ModelNode implements IdHolder {
+class ModelNode {
 
-    // *** State ***
-    int id;
+    /**
+     * This id must be set by the managing collection!
+     */
+    // int id;
+    BlockVector origin;
     boolean active = true;
-    int[] blocks;
-    ModelNode parent;
-    List<ModelNode> children;
-    
-    @Override
-    public void setId(int id) {
-        this.id = id;
+    UniqueIdObjectMap<MachinaBlock> blocks = new UniqueIdObjectMap<MachinaBlock>(1);
+    final int parent;
+    private TIntHashSet children = null;
+
+    /**
+     * Creates a new root modelnode.
+     * @param origin
+     */
+    ModelNode(BlockVector origin) {
+        parent = -1;
+        this.origin = origin;
     }
-    
-    public int getId() {
-        return id;
+
+    ModelNode(int parent, BlockVector origin) {
+        this.parent = parent;
+        this.origin = origin;
+    }
+
+    void addChild(int id) {
+        if (children == null) {
+            children = new TIntHashSet(4);
+        }
+        children.add(id);
+    }
+
+    void removeChild(int id) {
+        if (children == null) {
+            return;
+        }
+        children.remove(id);
+    }
+
+    void forEachChild(TIntProcedure procedure) {
+        if (children == null) {
+            return;
+        }
+        children.forEach(procedure);
     }
 
     /*

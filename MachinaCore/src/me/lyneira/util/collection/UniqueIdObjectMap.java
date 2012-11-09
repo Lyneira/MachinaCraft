@@ -1,37 +1,36 @@
 package me.lyneira.util.collection;
 
-import java.lang.ref.ReferenceQueue;
 import java.util.Arrays;
 
 /**
  * Class for internal use by a collection that needs to assign unique ids to its
- * elements. Also provides O(1) lookup of elements by their id. It keeps only
- * weak references to the objects in it, and ids belonging to garbage collected
- * objects will become available again during the next add operation.
+ * elements. Also provides O(1) lookup of elements by their id.
  * 
  * This map expects reasonable use by its end user in order to be less
- * defensively coded: No negative integers given as ids to either get or put.
+ * defensively coded: No negative integers given as ids to get, put or remove.
  * 
- * Additionally, since the references are weak, null values added to this map
- * will immediately count as stale.
+ * This map does not permit null values.
  * 
  * @author Lyneira
  * 
  * @param <T>
  */
-public class IntWeakObjectMap<T> {
+public class UniqueIdObjectMap<T> {
 
-    private WeakIdReference<T>[] elementData;
+    private T[] elementData;
     private int size;
     private int firstFree;
-    private final ReferenceQueue<T> queue = new ReferenceQueue<T>();
 
+    /**
+     * Constructs a new map with space for at least the specified number of elements.
+     * @param initialCapacity The initial capacity of the map
+     */
     @SuppressWarnings("unchecked")
-    public IntWeakObjectMap(int initialCapacity) {
+    public UniqueIdObjectMap(int initialCapacity) {
         if (initialCapacity < 0)
             throw new IllegalArgumentException("Illegal Capacity: " + initialCapacity);
 
-        elementData = new WeakIdReference[initialCapacity];
+        elementData = (T[]) new Object[initialCapacity];
     }
 
     private void ensureCapacityInternal(int minCapacity) {
@@ -59,6 +58,14 @@ public class IntWeakObjectMap<T> {
             throw new OutOfMemoryError();
         return (minCapacity > MAX_ARRAY_SIZE) ? Integer.MAX_VALUE : MAX_ARRAY_SIZE;
     }
+    
+    /**
+     * Returns this map's size.
+     * @return The size of the map
+     */
+    public int size() {
+        return size;
+    }
 
     /**
      * Returns the element at the given id, or null if no such element exists.
@@ -72,15 +79,11 @@ public class IntWeakObjectMap<T> {
             return null;
         }
         /*
-         * If the end user of this map's collection is stupid enough to pass in
-         * a negative id they could not possibly get from this map, they deserve
-         * the exception they get.
+         * If the end user of this map's collection passes in a negative id they
+         * could not possibly get from this map, they deserve the exception they
+         * get.
          */
-        WeakIdReference<T> ref = elementData[id];
-        if (ref == null)
-            return null;
-
-        return ref.get();
+        return elementData[id];
     }
 
     /**
@@ -91,10 +94,12 @@ public class IntWeakObjectMap<T> {
      * @return The id for the added element
      */
     public int add(T element) {
-        expungeStale();
+        if (element == null) {
+            throw new NullPointerException("Cannot add null elements to UniqueIdObjectMap!");
+        }
         ensureCapacityInternal(size + 1);
         final int id = firstFree;
-        elementData[id] = new WeakIdReference<T>(element, queue, id);
+        elementData[id] = element;
         size++;
 
         findNextFree();
@@ -111,31 +116,29 @@ public class IntWeakObjectMap<T> {
      *            The slot to put the element at
      */
     public void put(T element, int id) {
-        expungeStale();
+        if (element == null) {
+            throw new NullPointerException("Cannot add null elements to UniqueIdObjectMap!");
+        }
         ensureCapacityInternal(id + 1);
         if (elementData[id] == null) {
             size++;
         }
-        elementData[id] = new WeakIdReference<T>(element, queue, id);
+        elementData[id] = element;
         if (firstFree == id) {
             findNextFree();
         }
     }
 
-    /**
-     * Cleans up references from the array that have been cleared. Ids cleared
-     * by this process will become available again for the next add operation,
-     * starting with the lowest id found.
-     */
-    @SuppressWarnings("rawtypes")
-    private void expungeStale() {
-        for (Object r; (r = queue.poll()) != null;) {
-            final int id = ((WeakIdReference) r).id;
-            if (id < firstFree) {
-                firstFree = id;
-            }
-            elementData[id] = null;
+    public void remove(int id) {
+        if (id >= elementData.length) {
+            return;
+        }
+        if (elementData[id] != null) {
             size--;
+            elementData[id] = null;
+        }
+        if (id < firstFree) {
+            firstFree = id;
         }
     }
 

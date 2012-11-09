@@ -4,8 +4,6 @@ import me.lyneira.MachinaCore.block.BlockRotation;
 import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.block.MachinaBlock;
 import me.lyneira.MachinaCore.machina.model.ConstructionModelTree;
-import me.lyneira.MachinaCore.machina.model.ModelTree;
-
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -13,9 +11,9 @@ import org.bukkit.entity.Player;
 /**
  * Represents the blueprint of a machina. The blueprint is used to detect and
  * create a new machina when the player rightclicks the appropriate tool on the
- * specified trigger block. It can be supplied with a
- * detector class that identifies additional portions of the machina and performs other
- * detect-time configuration.
+ * specified trigger block. It can be supplied with a detector class that
+ * identifies additional portions of the machina and performs other detect-time
+ * configuration.
  * 
  * The trigger block
  * 
@@ -23,11 +21,27 @@ import org.bukkit.entity.Player;
  */
 public class MachinaBlueprint {
 
+    /**
+     * The model that should be scanned for when detection is triggered. The
+     * base model is a part of the machina that remains present and static in
+     * all forms and variations of the machina. For best detection performance,
+     * it should be a set of blocks that fully defines the direction of the
+     * machina. (for example blocks of differing types that don't occur
+     * symmetrically)
+     */
     private final ConstructionModelTree baseModel;
+
+    /**
+     * Callback class that will be run when the base model has been detected. It
+     * may detect extensions on the base model and add them to the machina being
+     * constructed. The detector will receive the direction used by MachinaCore
+     * to detect the base model, but in some cases (like a symmetric machina)
+     * this may not be the correct direction.
+     */
     private final MachinaDetector detector;
     private final MachinaBlock triggerBlock;
 
-    public MachinaBlueprint(MachinaDetector detector, MachinaBlock triggerBlock, ModelTree baseModel) {
+    public MachinaBlueprint(MachinaDetector detector, MachinaBlock triggerBlock, ConstructionModelTree baseModel) {
         this.baseModel = new ConstructionModelTree(baseModel);
         if (detector == null)
             throw new NullPointerException("Cannot construct a MachinaBlueprint without a MachinaDetector!");
@@ -36,18 +50,6 @@ public class MachinaBlueprint {
             throw new NullPointerException("Cannot construct a MachinaBlueprint without a trigger block!");
         this.triggerBlock = triggerBlock;
     }
-
-    /*
-     * Base model - The model that should be scanned for when detection is
-     * triggered. The base model is the part of the machina that remains present
-     * and static in all forms and variations of the machina. For best
-     * performance, the trigger block should be in the base model but it is
-     * possible to program the trigger block to be in a dynamic part of the
-     * machina.
-     * 
-     * The base model can be predefined in code in a compact way, but it can
-     * also be loaded from configuration files.
-     */
 
     /*
      * Extensions - Extensions are the same as a base model but the location and
@@ -74,7 +76,8 @@ public class MachinaBlueprint {
      * Detects whether a machina conforming to this blueprint is present at the
      * given block and adds it to the given universe.
      * 
-     * @param universe The universe (and its corresponding world) to detect in
+     * @param universe
+     *            The universe (and its corresponding world) to detect in
      * @param block
      *            The block to detect at
      * @param player
@@ -93,7 +96,10 @@ public class MachinaBlueprint {
             final World world = block.getWorld();
             machinaModel = baseModel.construct(block.getWorld(), r, origin);
             if (machinaModel != null) {
-                // Machina base model was constructed, now hand it to the detector
+                /*
+                 * Machina base model was constructed, now hand it to the
+                 * detector for extension
+                 */
                 final MachinaController controller = detector.detect(machinaModel, player, world, r, origin);
                 if (controller == null) {
                     return DetectResult.FAILURE;

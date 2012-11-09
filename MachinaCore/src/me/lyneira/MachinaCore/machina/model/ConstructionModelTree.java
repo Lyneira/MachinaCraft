@@ -1,5 +1,10 @@
 package me.lyneira.MachinaCore.machina.model;
 
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.procedure.TIntProcedure;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Iterator;
 
 import org.bukkit.World;
@@ -7,42 +12,88 @@ import org.bukkit.World;
 import me.lyneira.MachinaCore.block.BlockRotation;
 import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.block.MachinaBlock;
-import me.lyneira.util.collection.IntWeakObjectMap;
+import me.lyneira.util.collection.UniqueIdObjectMap;
 
+/**
+ * ModelTree for a machina that will be detected. Modifications to this tree
+ * take effect immediately.
+ * 
+ * @author Lyneira
+ * 
+ */
 public class ConstructionModelTree implements ModelTree {
-    private final IntWeakObjectMap<ModelNode> nodes;
-    
+    private final UniqueIdObjectMap<ModelNode> nodes;
+    private ModelNode root;
+    private int size = 1;
+
     public ConstructionModelTree(int initialCapacity) {
-        nodes = new IntWeakObjectMap<ModelNode>(initialCapacity);
+        nodes = new UniqueIdObjectMap<ModelNode>(initialCapacity);
+        root = new ModelNode(new BlockVector(0, 0, 0));
+        nodes.add(root);
     }
-    
-    public ConstructionModelTree(ModelTree other) {
-        nodes = new IntWeakObjectMap<ModelNode>(other.nodeCount());
+
+    public ConstructionModelTree(ConstructionModelTree other) {
+        nodes = new UniqueIdObjectMap<ModelNode>(other.nodeCount());
+        // Copy other model node?
+        root = new ModelNode(other.root.origin);
         // TODO
     }
 
     @Override
-    public int addNode() {
-        // TODO Auto-generated method stub
-        return 0;
+    public int addNode(BlockVector origin) {
+        return (addNode(0, origin));
     }
 
     @Override
-    public int addNode(int parentId) {
-        // TODO Auto-generated method stub
-        return 0;
+    public int addNode(int parentId, BlockVector origin) {
+        final ModelNode parent = nodes.get(parentId);
+        if (parent == null) {
+            throw new IllegalArgumentException("Cannot add a node to a nonexistent parent!");
+        }
+        final ModelNode newNode = new ModelNode(parentId, origin);
+        final int id = nodes.add(newNode);
+        parent.addChild(id);
+        size++;
+        return id;
     }
 
     @Override
-    public void removeNode(int node) {
-        // TODO Auto-generated method stub
+    public void removeNode(int nodeId) {
+        ModelNode node = nodes.get(nodeId);
+        if (node == null) {
+            return;
+        }
+
+        final int parentId = node.parent;
+        if (parentId >= 0) {
+            // Node is not the root, so remove it from parent
+            nodes.get(node.parent).removeChild(nodeId);
+        }
         
+     // Walk the tree and remove all subnodes
+        for (NodeIterator it = new NodeIterator(nodeId); it.hasNext();) {
+            nodes.remove(it.next());
+            size--;
+        }
     }
 
     @Override
-    public int[] getChildren(int node) {
-        // TODO Auto-generated method stub
-        return null;
+    public boolean hasNode(int nodeId) {
+        return nodes.get(nodeId) != null;
+    }
+
+    @Override
+    public void forEachChild(int nodeId, TIntProcedure procedure) {
+        ModelNode node = nodes.get(nodeId);
+        if (node == null) {
+            return;
+        }
+        node.forEachChild(procedure);
+    }
+
+    @Override
+    public int nodeCount() {
+        return size;
     }
 
     @Override
@@ -52,13 +103,13 @@ public class ConstructionModelTree implements ModelTree {
     }
 
     @Override
-    public MachinaBlock getBlock(int node, int id) {
+    public MachinaBlock getBlock(int nodeId, int id) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Iterator<Integer> getBlocks(int node) {
+    public Iterator<Integer> getBlocks(int nodeId) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -70,7 +121,7 @@ public class ConstructionModelTree implements ModelTree {
     }
 
     @Override
-    public int addBlock(MachinaBlock block, int node) {
+    public int addBlock(MachinaBlock block, int nodeId) {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -78,44 +129,41 @@ public class ConstructionModelTree implements ModelTree {
     @Override
     public void deleteBlock(int id) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
-    public void deleteBlock(int node, int id) {
+    public void deleteBlock(int nodeId, int id) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
-    public void clearBlocks(int node) {
+    public void clearBlocks(int nodeId) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void putBlock(MachinaBlock newBlock, int id) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
-    public void putBlock(MachinaBlock newBlock, int node, int id) {
+    public void putBlock(MachinaBlock newBlock, int nodeId, int id) {
         // TODO Auto-generated method stub
-        
+
     }
-    
-    @Override
-    public int nodeCount() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-    
+
     /* *************
      * Other methods
      */
     /**
-     * Detects whether this model is present for the given world, rotation and origin and returns a properly rotated copy of this model if successful. Returns null on failure.   
+     * Detects whether this model is present for the given world, rotation and
+     * origin and returns a properly rotated copy of this model if successful.
+     * Returns null on failure.
+     * 
      * @param world
      * @param rotation
      * @param originX
@@ -125,16 +173,55 @@ public class ConstructionModelTree implements ModelTree {
      */
     public ConstructionModelTree construct(World world, BlockRotation rotation, BlockVector origin) {
         // TODO
+        // Make sure to create copies of every machinablock in the source tree
+        // and if the data value was -1, set it to whatever was detected at that
+        // location
         return null;
     }
-    
+
     /**
      * Converts this model into a MachinaModelTree and returns it.
+     * 
      * @return The MachinaModeltree that was created.
      */
     public MachinaModelTree machinaModel() {
         // TODO
         return null;
+    }
+
+    private class NodeIterator implements TIntIterator {
+
+        Deque<Integer> queue = new ArrayDeque<Integer>();
+
+        NodeIterator(int nodeId) {
+            queue.add(nodeId);
+        }
+
+        @Override
+        public boolean hasNext() {
+            return queue.size() > 0;
+        }
+
+        @Override
+        public void remove() {
+            // Does nothing.
+        }
+
+        @Override
+        public int next() {
+            final int id = queue.poll();
+            nodes.get(id).forEachChild(addChildren);
+
+            return id;
+        };
+
+        private final TIntProcedure addChildren = new TIntProcedure() {
+            @Override
+            public boolean execute(int value) {
+                queue.add(value);
+                return true;
+            }
+        };
     }
 
 }
