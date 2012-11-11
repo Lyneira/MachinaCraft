@@ -1,5 +1,6 @@
 package me.lyneira.MachinaCore.machina.model;
 
+import gnu.trove.iterator.TIntIterator;
 import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -27,21 +28,31 @@ class ModelNode {
      * This id must be set by the managing collection!
      */
     // int id;
+    final int parent;
     BlockVector origin;
     boolean active = true;
     UniqueIdObjectMap<MachinaBlock> blocks = new UniqueIdObjectMap<MachinaBlock>(1);
-    final int parent;
     private TIntHashSet children = null;
 
     /**
-     * Creates a new root modelnode.
+     * Creates a new root node with the given origin.
+     * 
      * @param origin
+     *            The location around which this node's blocks are centered
      */
     ModelNode(BlockVector origin) {
         parent = -1;
         this.origin = origin;
     }
 
+    /**
+     * Creates a new node with the given parent and origin
+     * 
+     * @param parent
+     *            The parent node of this node
+     * @param origin
+     *            The location around which this node's blocks are centered
+     */
     ModelNode(int parent, BlockVector origin) {
         this.parent = parent;
         this.origin = origin;
@@ -59,6 +70,10 @@ class ModelNode {
             return;
         }
         children.remove(id);
+    }
+    
+    TIntIterator children() {
+        return children.iterator();
     }
 
     void forEachChild(TIntProcedure procedure) {

@@ -5,10 +5,11 @@ import gnu.trove.procedure.TIntProcedure;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import org.bukkit.World;
 
+import me.lyneira.MachinaCore.MachinaCore;
 import me.lyneira.MachinaCore.block.BlockRotation;
 import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.block.MachinaBlock;
@@ -25,6 +26,10 @@ public class ConstructionModelTree implements ModelTree {
     private final UniqueIdObjectMap<ModelNode> nodes;
     private ModelNode root;
     private int size = 1;
+    
+    public ConstructionModelTree() {
+        this(10);
+    }
 
     public ConstructionModelTree(int initialCapacity) {
         nodes = new UniqueIdObjectMap<ModelNode>(initialCapacity);
@@ -33,7 +38,7 @@ public class ConstructionModelTree implements ModelTree {
     }
 
     public ConstructionModelTree(ConstructionModelTree other) {
-        nodes = new UniqueIdObjectMap<ModelNode>(other.nodeCount());
+        nodes = new UniqueIdObjectMap<ModelNode>(other.size);
         // Copy other model node?
         root = new ModelNode(other.root.origin);
         // TODO
@@ -68,13 +73,16 @@ public class ConstructionModelTree implements ModelTree {
         if (parentId >= 0) {
             // Node is not the root, so remove it from parent
             nodes.get(node.parent).removeChild(nodeId);
+
+            // Walk the tree and remove all subnodes
+            for (NodeIterator it = new NodeIterator(nodeId); it.hasNext();) {
+                nodes.remove(it.next());
+                size--;
+            }
+        } else {
+            throw new UnsupportedOperationException("Cannot remove the root node in a ConstructionModelTree!");
         }
-        
-     // Walk the tree and remove all subnodes
-        for (NodeIterator it = new NodeIterator(nodeId); it.hasNext();) {
-            nodes.remove(it.next());
-            size--;
-        }
+
     }
 
     @Override
@@ -83,12 +91,12 @@ public class ConstructionModelTree implements ModelTree {
     }
 
     @Override
-    public void forEachChild(int nodeId, TIntProcedure procedure) {
-        ModelNode node = nodes.get(nodeId);
+    public TIntIterator children(int nodeId) {
+        final ModelNode node = nodes.get(nodeId);
         if (node == null) {
-            return;
+            return null;
         }
-        node.forEachChild(procedure);
+        return node.children();
     }
 
     @Override
@@ -97,7 +105,7 @@ public class ConstructionModelTree implements ModelTree {
     }
 
     @Override
-    public MachinaBlock getBlock(int id) {
+    public MachinaBlock getRootBlock(int id) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -109,13 +117,7 @@ public class ConstructionModelTree implements ModelTree {
     }
 
     @Override
-    public Iterator<Integer> getBlocks(int nodeId) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public int addBlock(MachinaBlock block) {
+    public int addRootBlock(MachinaBlock block) {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -127,7 +129,7 @@ public class ConstructionModelTree implements ModelTree {
     }
 
     @Override
-    public void deleteBlock(int id) {
+    public void deleteRootBlock(int id) {
         // TODO Auto-generated method stub
 
     }
@@ -139,13 +141,19 @@ public class ConstructionModelTree implements ModelTree {
     }
 
     @Override
+    public void clearRootBlocks() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
     public void clearBlocks(int nodeId) {
         // TODO Auto-generated method stub
 
     }
 
     @Override
-    public void putBlock(MachinaBlock newBlock, int id) {
+    public void putRootBlock(MachinaBlock newBlock, int id) {
         // TODO Auto-generated method stub
 
     }
@@ -204,13 +212,28 @@ public class ConstructionModelTree implements ModelTree {
 
         @Override
         public void remove() {
-            // Does nothing.
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public int next() {
-            final int id = queue.poll();
-            nodes.get(id).forEachChild(addChildren);
+            ModelNode node;
+            Integer id;
+            while (true) {
+                id = queue.poll();
+                if (id == null) {
+                    throw new NoSuchElementException("No elements left in ConstructionModelTree!");
+                }
+
+                node = nodes.get(id);
+                
+                if (node == null) {
+                    MachinaCore.severe("Removal from ConstructionModelTree detected while retrieving next through iterator!");
+                } else {
+                    break;
+                }
+            }
+            node.forEachChild(addChildren);
 
             return id;
         };

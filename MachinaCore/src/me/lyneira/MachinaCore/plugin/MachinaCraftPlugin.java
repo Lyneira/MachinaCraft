@@ -8,7 +8,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * Template class for quick development of any plugin that interacts with
- * MachinaCraft. Provides logging functionality and enable/disable messages.
+ * MachinaCraft. Provides logging functionality, enable/disable messages and a
+ * config retrieval method that takes care of saving the default config if not
+ * already there.
  * 
  * If you extend this class instead of MachinaPlugin, you are expected to call
  * super.onEnable() and super.onDisable() if you override them.

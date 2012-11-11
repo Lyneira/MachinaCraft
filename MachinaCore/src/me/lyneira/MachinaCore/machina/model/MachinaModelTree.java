@@ -1,9 +1,6 @@
 package me.lyneira.MachinaCore.machina.model;
 
-import gnu.trove.procedure.TIntProcedure;
-
-import java.util.Iterator;
-
+import gnu.trove.iterator.TIntIterator;
 import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.block.MachinaBlock;
 
@@ -34,9 +31,9 @@ public class MachinaModelTree implements ModelTree {
     }
 
     @Override
-    public void forEachChild(int nodeId, TIntProcedure procedure) {
+    public TIntIterator children(int nodeId) {
         // TODO Auto-generated method stub
-        
+        return null;
     }
 
     @Override
@@ -46,7 +43,7 @@ public class MachinaModelTree implements ModelTree {
     }
 
     @Override
-    public MachinaBlock getBlock(int id) {
+    public MachinaBlock getRootBlock(int id) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -58,13 +55,7 @@ public class MachinaModelTree implements ModelTree {
     }
 
     @Override
-    public Iterator<Integer> getBlocks(int nodeId) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public int addBlock(MachinaBlock block) {
+    public int addRootBlock(MachinaBlock block) {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -76,7 +67,7 @@ public class MachinaModelTree implements ModelTree {
     }
 
     @Override
-    public void deleteBlock(int id) {
+    public void deleteRootBlock(int id) {
         // TODO Auto-generated method stub
         
     }
@@ -88,13 +79,19 @@ public class MachinaModelTree implements ModelTree {
     }
 
     @Override
+    public void clearRootBlocks() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
     public void clearBlocks(int nodeId) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public void putBlock(MachinaBlock newBlock, int id) {
+    public void putRootBlock(MachinaBlock newBlock, int id) {
         // TODO Auto-generated method stub
         
     }

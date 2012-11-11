@@ -22,8 +22,11 @@ public class UniqueIdObjectMap<T> {
     private int firstFree;
 
     /**
-     * Constructs a new map with space for at least the specified number of elements.
-     * @param initialCapacity The initial capacity of the map
+     * Constructs a new map with space for at least the specified number of
+     * elements.
+     * 
+     * @param initialCapacity
+     *            The initial capacity of the map
      */
     @SuppressWarnings("unchecked")
     public UniqueIdObjectMap(int initialCapacity) {
@@ -58,9 +61,10 @@ public class UniqueIdObjectMap<T> {
             throw new OutOfMemoryError();
         return (minCapacity > MAX_ARRAY_SIZE) ? Integer.MAX_VALUE : MAX_ARRAY_SIZE;
     }
-    
+
     /**
      * Returns this map's size.
+     * 
      * @return The size of the map
      */
     public int size() {
@@ -140,6 +144,13 @@ public class UniqueIdObjectMap<T> {
         if (id < firstFree) {
             firstFree = id;
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public void clear() {
+        elementData = (T[]) new Object[elementData.length];
+        size = 0;
+        firstFree = 0;
     }
 
     /**

@@ -48,6 +48,9 @@ public abstract class MachinaPlugin extends MachinaCraftPlugin {
      *            A blueprint to add to this plugin.
      */
     protected void addBlueprint(MachinaBlueprint blueprint) {
+        if (blueprint == null) {
+            throw new NullPointerException("Cannot register a null blueprint!");
+        }
         if (blueprints == null) {
             blueprints = new ArrayList<MachinaBlueprint>(1);
         }

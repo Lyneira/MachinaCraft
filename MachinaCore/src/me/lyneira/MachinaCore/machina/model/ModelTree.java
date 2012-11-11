@@ -1,9 +1,6 @@
 package me.lyneira.MachinaCore.machina.model;
 
-import gnu.trove.procedure.TIntProcedure;
-
-import java.util.Iterator;
-
+import gnu.trove.iterator.TIntIterator;
 import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.block.MachinaBlock;
 
@@ -41,16 +38,18 @@ public interface ModelTree {
     public int addNode(int parentId, BlockVector origin);
 
     /**
-     * Deletes a node and all its subnodes from the model.
+     * Deletes a node and all its subnodes from the model. Removal of the root node is not supported. Use the appropriate clear() method instead.
      * 
      * @param id
      *            The id of the node to remove
      */
     public void removeNode(int nodeId);
-    
+
     /**
      * Returns true if the given node identifier exists in this model.
-     * @param nodeId True if the node exists, false otherwise
+     * 
+     * @param nodeId
+     *            True if the node exists, false otherwise
      */
     public boolean hasNode(int nodeId);
 
@@ -59,12 +58,12 @@ public interface ModelTree {
      * 
      * @return
      */
-    public void forEachChild(int nodeId, TIntProcedure procedure);
+    public TIntIterator children(int nodeId);
 
     /**
      * Returns the number of nodes held by this tree. Note that depending on
-     * pending modifications, this may return a larger
-     * number than the actual nodes reachable in the live tree.
+     * pending modifications, this may return a larger number than the actual
+     * nodes reachable in the live tree.
      * 
      * @return Node count
      */
@@ -73,23 +72,25 @@ public interface ModelTree {
     /* *************
      * Block methods
      */
-    public MachinaBlock getBlock(int id);
+    public MachinaBlock getRootBlock(int id);
 
     public MachinaBlock getBlock(int nodeId, int id);
 
-    public Iterator<Integer> getBlocks(int nodeId);
+    // public Iterator<Integer> getBlocks(int nodeId);
 
-    public int addBlock(MachinaBlock block);
+    public int addRootBlock(MachinaBlock block);
 
     public int addBlock(MachinaBlock block, int nodeId);
 
-    public void deleteBlock(int id);
+    public void deleteRootBlock(int id);
 
     public void deleteBlock(int nodeId, int id);
 
+    public void clearRootBlocks();
+
     public void clearBlocks(int nodeId);
 
-    public void putBlock(MachinaBlock newBlock, int id);
+    public void putRootBlock(MachinaBlock newBlock, int id);
 
     public void putBlock(MachinaBlock newBlock, int nodeId, int id);
 }
