@@ -43,7 +43,7 @@ class MachinaRunner implements Runnable {
         this.machina = machina;
         this.anchor = anchor;
         machinae.put(anchor, this);
-        plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, this);
+        plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, this, 1);
     }
 
     /**
