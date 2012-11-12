@@ -10,10 +10,13 @@
 # The planter will only harvest if the activating player has permission to harvest!
 # Use these to fine-tune what players with this permission can harvest.
 #
-# harvest-wheat: Harvest wheat and seeds.
+# harvest-wheat: Harvest wheat.
+# harvest-wheat-seeds: Harvest seeds from wheat. Only works if harvest-wheat is true.
 # harvest-pumpkin: Harvest pumpkins.
 # harvest-melon: Harvest melons.
 # harvest-netherwart: Harvest nether wart.
+# harvest-carrot: Harvest carrots.
+# harvest-potato: Harvest potatoes.
 
 action-delay: 20
 max-length: 16

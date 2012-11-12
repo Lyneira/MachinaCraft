@@ -149,7 +149,7 @@ class Planter implements Machina {
                 break;
             case CROPS:
                 if (harvest && harvestWheat) {
-                    if (harvestCrops(crop, Material.WHEAT))
+                    if (harvestCrops(crop, Material.CROPS))
                         plantFarmland(crop);
                 }
                 break;
@@ -266,16 +266,16 @@ class Planter implements Machina {
         InventoryTransaction transaction = new InventoryTransaction(chestInventory());
 
         switch (material) {
-        case WHEAT:
+        case CROPS:
             // Hardcoded drops for now, as Block.getDrops() does not return the
             // seeds properly.
 
-            // Added bonus: Seed supply from automatic harvesting will stay
-            // stable,
-            // players have to harvest manually if they want more seeds.
             transaction.add(new ItemStack(Material.WHEAT));
             if (harvestWheatSeeds) {
-                transaction.add(new ItemStack(Material.SEEDS));
+                int seedAmount = random.nextInt(4);
+                if (seedAmount > 0) {
+                    transaction.add(new ItemStack(Material.SEEDS, seedAmount));
+                }
             }
             break;
         case CARROT:
