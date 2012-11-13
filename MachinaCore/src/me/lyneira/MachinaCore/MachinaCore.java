@@ -10,6 +10,7 @@ import org.bukkit.event.HandlerList;
 import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.machina.Machina;
 import me.lyneira.MachinaCore.machina.MachinaBlueprint;
+import me.lyneira.MachinaCore.machina.MachinaDetector;
 import me.lyneira.MachinaCore.machina.Universe;
 import me.lyneira.MachinaCore.plugin.MachinaCraftPlugin;
 import me.lyneira.MachinaCore.plugin.MachinaPlugin;
@@ -90,11 +91,18 @@ public final class MachinaCore extends MachinaCraftPlugin {
         return ToolInteractResult.NODAMAGE;
     }
 
-    public void registerBlueprints(MachinaPlugin plugin, List<MachinaBlueprint> blueprintList) {
-        blueprints.put(plugin, blueprintList);
+    public void registerDetectors(MachinaPlugin plugin, List<MachinaDetector> detectorList) {
+        MachinaBlueprint[] blueprintArray = new MachinaBlueprint[detectorList.size()];
+        int i = 0;
+        for (MachinaDetector detector : detectorList) {
+            final MachinaBlueprint blueprint = detector.getBlueprint();
+            MachinaBlueprint.machinaCoreFriend.setDetector(blueprint, detector);
+            blueprintArray[i++] = blueprint;
+        }
+        blueprints.put(plugin, blueprintArray);
     }
 
-    public void unregisterBlueprints(MachinaPlugin plugin) {
+    public void unregisterDetectors(MachinaPlugin plugin) {
         blueprints.remove(plugin);
     }
 
@@ -130,5 +138,9 @@ public final class MachinaCore extends MachinaCraftPlugin {
      */
     public final static void info(String message) {
         plugin.logInfo(message);
+    }
+    
+    public static abstract class MachinaBlueprintFriend {
+        protected abstract void setDetector(MachinaBlueprint blueprint, MachinaDetector detector);
     }
 }

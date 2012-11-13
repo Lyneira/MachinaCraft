@@ -16,7 +16,7 @@ import me.lyneira.MachinaCore.plugin.MachinaPlugin;
  * @author Lyneira
  */
 class BlueprintStore {
-    private final Map<MachinaPlugin, List<MachinaBlueprint>> blueprints = new THashMap<MachinaPlugin, List<MachinaBlueprint>>(8);
+    private final Map<MachinaPlugin, MachinaBlueprint[]> blueprints = new THashMap<MachinaPlugin, MachinaBlueprint[]>(8);
     private MachinaBlueprint[] bakedBlueprints;
     private boolean modified = true;
 
@@ -27,11 +27,11 @@ class BlueprintStore {
      * 
      * @param plugin
      *            The plugin for which to store
-     * @param blueprintList
+     * @param blueprintArray
      *            The list of blueprints to store
      */
-    void put(MachinaPlugin plugin, List<MachinaBlueprint> blueprintList) {
-        blueprints.put(plugin, blueprintList);
+    void put(MachinaPlugin plugin, MachinaBlueprint[] blueprintArray) {
+        blueprints.put(plugin, blueprintArray);
         modified = true;
     }
 
@@ -78,8 +78,10 @@ class BlueprintStore {
         }
 
         List<MachinaBlueprint> blueprintsFlat = new ArrayList<MachinaBlueprint>(8);
-        for (List<MachinaBlueprint> blueprintList : blueprints.values()) {
-            blueprintsFlat.addAll(blueprintList);
+        for (MachinaBlueprint[] blueprintArray : blueprints.values()) {
+            for (int i = 0; i < blueprintArray.length; i++) {
+                blueprintsFlat.add(blueprintArray[i]);
+            }
         }
         bakedBlueprints = (MachinaBlueprint[]) blueprintsFlat.toArray();
         modified = false;

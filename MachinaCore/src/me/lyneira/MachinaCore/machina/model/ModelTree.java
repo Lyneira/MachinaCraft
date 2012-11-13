@@ -78,11 +78,11 @@ public interface ModelTree {
 
     // public Iterator<Integer> getBlocks(int nodeId);
 
-    public int addRootBlock(MachinaBlock block);
+    public int addBlock(MachinaBlock block);
 
     public int addBlock(MachinaBlock block, int nodeId);
 
-    public void deleteRootBlock(int id);
+    public void deleteBlock(int id);
 
     public void deleteBlock(int nodeId, int id);
 

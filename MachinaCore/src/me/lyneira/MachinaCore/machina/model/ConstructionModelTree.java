@@ -117,7 +117,7 @@ public class ConstructionModelTree implements ModelTree {
     }
 
     @Override
-    public int addRootBlock(MachinaBlock block) {
+    public int addBlock(MachinaBlock block) {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -129,7 +129,7 @@ public class ConstructionModelTree implements ModelTree {
     }
 
     @Override
-    public void deleteRootBlock(int id) {
+    public void deleteBlock(int id) {
         // TODO Auto-generated method stub
 
     }

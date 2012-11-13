@@ -7,6 +7,7 @@ import org.bukkit.plugin.Plugin;
 
 import me.lyneira.MachinaCore.MachinaCore;
 import me.lyneira.MachinaCore.machina.MachinaBlueprint;
+import me.lyneira.MachinaCore.machina.MachinaDetector;
 
 /**
  * Template class for quick development of a machina plugin. In addition to the
@@ -17,7 +18,7 @@ import me.lyneira.MachinaCore.machina.MachinaBlueprint;
  */
 public abstract class MachinaPlugin extends MachinaCraftPlugin {
 
-    private List<MachinaBlueprint> blueprints = null;
+    private List<MachinaDetector> detectors;
     private MachinaCore machinaCore;
 
     @Override
@@ -30,31 +31,31 @@ public abstract class MachinaPlugin extends MachinaCraftPlugin {
         }
         machinaCore = (MachinaCore) plugin;
         mpEnable();
-        registerBlueprints();
+        registerDetectors();
     }
 
     @Override
     public final void onDisable() {
         mpDisable();
-        unregisterBlueprints();
+        unregisterDetectors();
         super.onDisable();
     }
 
     /**
-     * Call this method during mpEnable() to add your blueprints for
+     * Call this method during mpEnable() to add your detectors for
      * registration.
      * 
-     * @param blueprint
-     *            A blueprint to add to this plugin.
+     * @param detector
+     *            A detector to add for this plugin.
      */
-    protected void addBlueprint(MachinaBlueprint blueprint) {
-        if (blueprint == null) {
+    protected void addDetector(MachinaDetector detector) {
+        if (detector == null) {
             throw new NullPointerException("Cannot register a null blueprint!");
         }
-        if (blueprints == null) {
-            blueprints = new ArrayList<MachinaBlueprint>(1);
+        if (detectors == null) {
+            detectors = new ArrayList<MachinaDetector>(1);
         }
-        blueprints.add(blueprint);
+        detectors.add(detector);
     }
 
     /**
@@ -70,12 +71,13 @@ public abstract class MachinaPlugin extends MachinaCraftPlugin {
 
     /* ***********************************************************************
      * Do not call these methods unless you know what you are doing with them!
-     * MachinaPlugin handles your blueprints automatically as long as you add
-     * them through addBlueprint() during mpEnable().
+     * MachinaPlugin handles your detectors automatically as long as you add
+     * them through addDetector() during mpEnable().
      * 
      * The methods below are only included for cases where you might need to do
-     * some really strange stuff with modifying the available blueprints while a
-     * server is running.
+     * some really strange stuff with modifying the available detectors while a
+     * server is running. If you do modify the list of detectors, you must
+     * re-run registerDetectors() for the changes to take effect.
      */
 
     /**
@@ -85,9 +87,9 @@ public abstract class MachinaPlugin extends MachinaCraftPlugin {
      * @param blueprint
      *            A blueprint to remove from this plugin.
      */
-    protected void removeBlueprint(MachinaBlueprint blueprint) {
-        if (blueprints != null) {
-            blueprints.remove(blueprint);
+    protected void removeDetector(MachinaBlueprint blueprint) {
+        if (detectors != null) {
+            detectors.remove(blueprint);
         }
     }
 
@@ -95,9 +97,9 @@ public abstract class MachinaPlugin extends MachinaCraftPlugin {
      * Removes all registered blueprints for this plugin. You should not
      * normally need to call this method.
      */
-    protected void clearBlueprints() {
-        if (blueprints != null) {
-            blueprints.clear();
+    protected void clearDetectors() {
+        if (detectors != null) {
+            detectors.clear();
         }
     }
 
@@ -106,9 +108,9 @@ public abstract class MachinaPlugin extends MachinaCraftPlugin {
      * call this method. Registers all blueprints added by addBlueprint() to
      * MachinaCore.
      */
-    protected void registerBlueprints() {
-        if (blueprints != null) {
-            machinaCore.registerBlueprints(this, blueprints);
+    protected void registerDetectors() {
+        if (detectors != null) {
+            machinaCore.registerDetectors(this, detectors);
         }
     }
 
@@ -117,8 +119,8 @@ public abstract class MachinaPlugin extends MachinaCraftPlugin {
      * call this method. Unregisters all blueprints for the plugin from
      * MachinaCore.
      */
-    protected void unregisterBlueprints() {
-        machinaCore.unregisterBlueprints(this);
-        blueprints = null;
+    protected void unregisterDetectors() {
+        machinaCore.unregisterDetectors(this);
+        detectors = null;
     }
 }

@@ -1,5 +1,6 @@
 package me.lyneira.MachinaCore.machina;
 
+import me.lyneira.MachinaCore.MachinaCore;
 import me.lyneira.MachinaCore.block.BlockRotation;
 import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.block.MachinaBlock;
@@ -9,11 +10,11 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 /**
- * Represents the blueprint of a machina. The blueprint is used to detect and
- * create a new machina when the player rightclicks the appropriate tool on the
- * specified trigger block. It can be supplied with a detector class that
- * identifies additional portions of the machina and performs other detect-time
- * configuration.
+ * Represents the blueprint of a machina. It is used to detect and create a new
+ * machina when the player rightclicks the appropriate tool on the specified
+ * trigger block. Its results are handed to the BlueprintDetector that made it
+ * It can be supplied with a detector class that identifies additional portions
+ * of the machina and performs other detect-time configuration.
  * 
  * The trigger block
  * 
@@ -38,14 +39,11 @@ public class MachinaBlueprint {
      * to detect the base model, but in some cases (like a symmetric machina)
      * this may not be the correct direction.
      */
-    private final MachinaDetector detector;
+    private MachinaDetector detector;
     private final MachinaBlock triggerBlock;
 
-    public MachinaBlueprint(MachinaDetector detector, MachinaBlock triggerBlock, ConstructionModelTree baseModel) {
+    public MachinaBlueprint(MachinaBlock triggerBlock, ConstructionModelTree baseModel) {
         this.baseModel = new ConstructionModelTree(baseModel);
-        if (detector == null)
-            throw new NullPointerException("Cannot construct a MachinaBlueprint without a MachinaDetector!");
-        this.detector = detector;
         if (triggerBlock == null)
             throw new NullPointerException("Cannot construct a MachinaBlueprint without a trigger block!");
         this.triggerBlock = triggerBlock;
@@ -112,4 +110,11 @@ public class MachinaBlueprint {
         }
         return DetectResult.FAILURE;
     }
+    
+    public final static MachinaCore.MachinaBlueprintFriend machinaCoreFriend = new MachinaCore.MachinaBlueprintFriend() {
+        @Override
+        protected void setDetector(MachinaBlueprint blueprint, MachinaDetector detector) {
+            blueprint.detector = detector;
+        }
+    };
 }

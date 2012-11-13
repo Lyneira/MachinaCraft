@@ -13,18 +13,16 @@ import me.lyneira.MachinaCore.plugin.MachinaPlugin;
  * @author Lyneira
  */
 public class MachinaDrill extends MachinaPlugin {
-    static Material coreMaterial = Material.GOLD_BLOCK;
-    static Material baseMaterial = Material.WOOD;
-    static Material headMaterialNormal = Material.IRON_BLOCK;
-    static Material headMaterialFast = Material.DIAMOND_BLOCK;
+    static int materialCore = Material.GOLD_BLOCK.getId();
+    static int materialBase = Material.WOOD.getId();
+    static int materialHeadNormal = Material.IRON_BLOCK.getId();
+    static int materialHeadFast = Material.DIAMOND_BLOCK.getId();
     
     private final Detector detector = new Detector();
 
     @Override
     protected void mpEnable() {
-        // TODO
-        addBlueprint(createBlueprint());
-        
+        addDetector(createBlueprint());
     }
 
     @Override
@@ -33,10 +31,11 @@ public class MachinaDrill extends MachinaPlugin {
     }
     
     private MachinaBlueprint createBlueprint() {
-        MachinaBlock trigger = new MachinaBlock(0,0,0,coreMaterial.getId());
+        MachinaBlock trigger = new MachinaBlock(0,0,0,materialCore);
         ConstructionModelTree model = new ConstructionModelTree();
+        model.addBlock(trigger);
 // TODO
-        return new MachinaBlueprint(detector, trigger, model);
+        return new MachinaBlueprint(trigger, model);
         
     }
 //    final static Logger log = Logger.getLogger("Minecraft");

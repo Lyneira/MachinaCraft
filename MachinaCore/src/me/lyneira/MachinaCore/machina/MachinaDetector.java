@@ -19,6 +19,15 @@ import me.lyneira.MachinaCore.machina.model.ModelTree;
 public interface MachinaDetector {
 
     /**
+     * Called when the detector is registered with MachinaCore. The returned
+     * blueprint will be used to detect a machina's base model before being
+     * handed to the detector.
+     * 
+     * @return The base blueprint for this detector.
+     */
+    public MachinaBlueprint getBlueprint();
+
+    /**
      * Performs any dynamic detection for the detected base model, adding those
      * blocks to it. Performs needed permission checks for the player.
      * Configures a MachinaController and returns it if detection was
@@ -26,7 +35,7 @@ public interface MachinaDetector {
      * will be used to initialize the corresponding machina and it will be
      * linked to the returned MachinaController.
      * 
-     * @param baseModel
+     * @param model
      *            The base model that was detected
      * @param player
      *            The player that initiated the detection
