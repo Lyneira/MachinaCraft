@@ -4,6 +4,7 @@ import gnu.trove.iterator.TIntIterator;
 import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.hash.TIntHashSet;
 
+import me.lyneira.MachinaCore.MachinaCore;
 import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.block.MachinaBlock;
 import me.lyneira.util.collection.UniqueIdObjectIterator;
@@ -115,6 +116,15 @@ class ModelNode {
     
     UniqueIdObjectIterator<MachinaBlock> blockIterator() {
         return blocks.iterator();
+    }
+    
+    void dumpBlocks() {
+        for (UniqueIdObjectIterator<MachinaBlock> it = blocks.iterator(); it.hasNext();) {
+            it.next();
+            int id = it.lastId();
+            MachinaBlock block = blocks.get(id);
+            MachinaCore.info("Block " + id + " " + block.toString());
+        }
     }
 
     /*

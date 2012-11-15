@@ -26,7 +26,7 @@ public abstract class MachinaPlugin extends MachinaCraftPlugin {
         super.onEnable();
         Plugin plugin = getServer().getPluginManager().getPlugin("MachinaCore");
         if (plugin == null) {
-            log.severe("Could not retrieve MachinaCore plugin from server, something is very wrong! Not continuing with enable.");
+            logSevere("Could not retrieve MachinaCore plugin from server, something is very wrong! Not continuing with enable.");
             return;
         }
         machinaCore = (MachinaCore) plugin;

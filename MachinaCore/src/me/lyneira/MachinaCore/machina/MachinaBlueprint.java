@@ -103,11 +103,15 @@ public class MachinaBlueprint {
                 final MachinaController controller = detector.detect(constructionModel, player, world, r, origin);
                 if (controller == null) {
                     return DetectResult.FAILURE;
+                }
+                MachinaCore.info("Successfully detected a drill!");
+                return DetectResult.SUCCESS;
+                    /*
                 } else if (universe.add(new Machina(universe, constructionModel.machinaModel(), controller))) {
                     return DetectResult.SUCCESS;
                 } else {
                     return DetectResult.COLLISION;
-                }
+                } */
             }
         }
         return DetectResult.FAILURE;

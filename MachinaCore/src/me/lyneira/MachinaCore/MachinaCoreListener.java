@@ -30,13 +30,15 @@ public class MachinaCoreListener implements Listener {
         MPConfig config = plugin.mpGetConfig();
         wrenchId = config.getMaterialId("machina-wrench", Material.WOOD_AXE.getId());
         tinkerToolId = config.getMaterialId("machina-tinkertool", Material.WOOD_HOE.getId());
-        plugin.log.info("Using id " + wrenchId + " as wrench tool.");
-        plugin.log.info("Using id " + tinkerToolId + " as tinkering tool.");
+        plugin.logInfo("Using id " + wrenchId + " as wrench tool.");
+        plugin.logInfo("Using id " + tinkerToolId + " as tinkering tool.");
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
+        if (item == null)
+            return;
         int typeId = item.getTypeId();
         ToolInteractResult result = ToolInteractResult.NODAMAGE;
         if (typeId == wrenchId) {
@@ -56,8 +58,8 @@ public class MachinaCoreListener implements Listener {
             short newDurability = (short) (item.getDurability() + 1);
             if (newDurability >= maxDurability) {
                 // TODO Check if this works
-                // player.setItemInHand(null);
-                item.setTypeId(0);
+                event.getPlayer().setItemInHand(null);
+                // item.setTypeId(0);
             } else {
                 item.setDurability(newDurability);
             }

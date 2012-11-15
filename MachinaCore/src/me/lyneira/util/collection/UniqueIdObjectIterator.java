@@ -16,7 +16,6 @@ public class UniqueIdObjectIterator<T> implements Iterator<T> {
     private final T[] elementData;
     private int cursor = 0;
     private int lastItemId = -1;
-    private T lastItem;
 
     UniqueIdObjectIterator(UniqueIdObjectMap<T> map) {
         this.map = map;
@@ -36,9 +35,7 @@ public class UniqueIdObjectIterator<T> implements Iterator<T> {
     @Override
     public T next() {
         lastItemId = cursor;
-        lastItem = elementData[cursor];
-        cursor++;
-        return lastItem;
+        return elementData[cursor++];
     }
 
     /**

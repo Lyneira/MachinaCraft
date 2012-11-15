@@ -33,19 +33,25 @@ public class BlueprintModel {
     public BlueprintModel(int initialCapacity) {
         nodes = new UniqueIdObjectMap<ModelNode>(initialCapacity);
         root = new ModelNode(new BlockVector(0, 0, 0));
-        nodes.add(root);
+        nodes.put(root, 0);
     }
 
     public BlueprintModel(BlueprintModel other) {
         nodes = new UniqueIdObjectMap<ModelNode>(other.nodes.capacity());
-        // Copy other model node?
         root = new ModelNode(other.root);
+        nodes.put(root, 0);
         NodeIterator it = other.nodeIterator(0);
         it.next();
         while (it.hasNext()) {
             final int id = it.next();
             nodes.put(new ModelNode(other.nodes.get(id)), id);
         }
+    }
+    
+    private BlueprintModel(int initialCapacity, ModelNode root) {
+        nodes = new UniqueIdObjectMap<ModelNode>(initialCapacity);
+        this.root = root;
+        nodes.put(root, 0);
     }
 
     public int addNode(BlockVector origin) {
@@ -103,6 +109,9 @@ public class BlueprintModel {
     }
 
     public MachinaBlock getBlock(int id) {
+        MachinaCore.info("Attempting to retrieve block " + id + " from root, dumping tree and root node");
+        dumpTree();
+        root.dumpBlocks();
         return root.blocks.get(id);
     }
 
@@ -156,6 +165,17 @@ public class BlueprintModel {
             return;
         node.blocks.put(newBlock, id);
     }
+    
+    public void dumpTree() {
+        MachinaCore.info("Beginning tree dump");
+        NodeIterator it = new NodeIterator(0);
+        while (it.hasNext()) {
+            int nodeId = it.next();
+            MachinaCore.info("Dumping node id " + nodeId);
+            ModelNode node = nodes.get(nodeId);
+            node.dumpBlocks();
+        }
+    }
 
     /* *************
      * Other methods
@@ -171,13 +191,24 @@ public class BlueprintModel {
      * @return
      */
     public ConstructionModel construct(World world, BlockRotation rotation, BlockVector origin) {
-        BlueprintModel constructionBlueprint = new BlueprintModel(nodes.capacity());
+        
+        MachinaCore.info("Constructing root node ");
+        ModelNode newRoot = new ModelNode(root.parent, root.origin, root.blocks.capacity());
+        newRoot.copyChildren(root);
+        
+        BlueprintModel constructionBlueprint = new BlueprintModel(nodes.capacity(), newRoot);
         ConstructionModel constructionModel = new ConstructionModel(constructionBlueprint, world, origin);
-
+        
+        if (constructionModel.putBlueprintBlocks(0, root.blockIterator(), rotation) == false)
+            return null;
+        
         NodeIterator it = new NodeIterator(0);
+        // We've already added the root, so the while is only necessary for subnodes.
         it.next();
+        
         while (it.hasNext()) {
             final int nodeId = it.next();
+            MachinaCore.info("Constructing node " + nodeId);
             ModelNode node = nodes.get(nodeId);
             ModelNode newNode = new ModelNode(node.parent, node.origin, node.blocks.capacity());
             newNode.copyChildren(node);
@@ -196,7 +227,7 @@ public class BlueprintModel {
         return new NodeIterator(nodeId);
     }
 
-    private class NodeIterator implements TIntIterator {
+    class NodeIterator implements TIntIterator {
 
         Deque<Integer> queue = new ArrayDeque<Integer>();
 

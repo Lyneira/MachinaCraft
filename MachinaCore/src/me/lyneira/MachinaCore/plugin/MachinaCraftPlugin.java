@@ -16,16 +16,14 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author Lyneira
  */
 public abstract class MachinaCraftPlugin extends JavaPlugin {
-    public final Logger log = getLogger();
-
     private boolean configFirstCall = true;
+    private Logger log;
 
     /**
      * Similar to getConfig(), returns the plugin's configuration. On the first
      * call since enable, also saves the default config.yml if none exists yet.
      */
     public final MPConfig mpGetConfig() {
-        this.getLogger();
         FileConfiguration config = getConfig();
         if (configFirstCall) {
             saveDefaultConfig();
@@ -35,7 +33,24 @@ public abstract class MachinaCraftPlugin extends JavaPlugin {
     }
 
     @Override
+    public void onEnable() {
+        log = getLogger();
+    }
+
+    @Override
     public void onDisable() {
         configFirstCall = true;
+    }
+
+    public void logInfo(String message) {
+        log.info(message);
+    }
+
+    public void logWarning(String message) {
+        log.warning(message);
+    }
+
+    public void logSevere(String message) {
+        log.severe(message);
     }
 }

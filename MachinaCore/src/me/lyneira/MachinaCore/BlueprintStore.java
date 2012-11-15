@@ -83,7 +83,7 @@ class BlueprintStore {
                 blueprintsFlat.add(blueprintArray[i]);
             }
         }
-        bakedBlueprints = (MachinaBlueprint[]) blueprintsFlat.toArray();
+        bakedBlueprints = blueprintsFlat.toArray(new MachinaBlueprint[blueprintsFlat.size()]);
         modified = false;
     }
 }
