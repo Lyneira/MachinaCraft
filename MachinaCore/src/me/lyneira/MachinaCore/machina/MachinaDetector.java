@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 
 import me.lyneira.MachinaCore.block.BlockRotation;
 import me.lyneira.MachinaCore.block.BlockVector;
-import me.lyneira.MachinaCore.machina.model.ModelTree;
+import me.lyneira.MachinaCore.machina.model.ConstructionModel;
 
 /**
  * Interface for a class that can detect dynamic portions of a machina being
@@ -38,10 +38,11 @@ public interface MachinaDetector {
      * @param model
      *            The base model that was detected
      * @param player
-     *            The player that initiated the detection
+     *            The player that initiated the detection. Can be null if
+     *            detection was triggered by redstone or other plugin means.
      * @param world
      *            The world the machina is being detected in
-     * @param rotation
+     * @param yaw
      *            The direction detected for the base model. May not be the only
      *            valid direction if the trigger block is also the origin and
      *            the machina's base model has symmetry.
@@ -49,5 +50,5 @@ public interface MachinaDetector {
      *            The origin point for the detected base model
      * @return A MachinaController if successful, null otherwise.
      */
-    public MachinaController detect(ModelTree model, Player player, World world, BlockRotation rotation, BlockVector origin);
+    public MachinaController detect(ConstructionModel model, Player player, World world, BlockRotation yaw, BlockVector origin);
 }

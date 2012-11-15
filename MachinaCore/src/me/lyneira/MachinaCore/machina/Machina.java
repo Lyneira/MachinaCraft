@@ -1,7 +1,7 @@
 package me.lyneira.MachinaCore.machina;
 
 import me.lyneira.MachinaCore.block.MachinaBlock;
-import me.lyneira.MachinaCore.machina.model.MachinaModelTree;
+import me.lyneira.MachinaCore.machina.model.MachinaModel;
 
 /**
  * 
@@ -29,9 +29,9 @@ public final class Machina {
     public final Universe universe;
     public final MachinaController controller;
     
-    private final MachinaModelTree model;
+    private final MachinaModel model;
 
-    Machina(Universe universe, MachinaModelTree model, MachinaController controller) {
+    Machina(Universe universe, MachinaModel model, MachinaController controller) {
         this.universe = universe;
         this.model = model;
         this.controller = controller;

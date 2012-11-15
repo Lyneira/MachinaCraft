@@ -1,6 +1,5 @@
 package me.lyneira.MachinaCore.block;
 
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 

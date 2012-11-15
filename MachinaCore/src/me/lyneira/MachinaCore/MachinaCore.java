@@ -96,6 +96,10 @@ public final class MachinaCore extends MachinaCraftPlugin {
         int i = 0;
         for (MachinaDetector detector : detectorList) {
             final MachinaBlueprint blueprint = detector.getBlueprint();
+            if (blueprint == null) {
+                log.severe("Detector registration for " + plugin.getName() + " encountered a null blueprint, not continuing!");
+                return;
+            }
             MachinaBlueprint.machinaCoreFriend.setDetector(blueprint, detector);
             blueprintArray[i++] = blueprint;
         }
@@ -117,7 +121,7 @@ public final class MachinaCore extends MachinaCraftPlugin {
      *            Message to send
      */
     public final static void severe(String message) {
-        plugin.logSevere(message);
+        plugin.log.severe(message);
     }
 
     /**
@@ -127,7 +131,7 @@ public final class MachinaCore extends MachinaCraftPlugin {
      *            Message to send
      */
     public final static void warning(String message) {
-        plugin.logWarning(message);
+        plugin.log.warning(message);
     }
 
     /**
@@ -137,7 +141,7 @@ public final class MachinaCore extends MachinaCraftPlugin {
      *            Message to send
      */
     public final static void info(String message) {
-        plugin.logInfo(message);
+        plugin.log.info(message);
     }
     
     public static abstract class MachinaBlueprintFriend {

@@ -6,9 +6,6 @@ import java.util.Arrays;
  * Class for internal use by a collection that needs to assign unique ids to its
  * elements. Also provides O(1) lookup of elements by their id.
  * 
- * This map expects reasonable use by its end user in order to be less
- * defensively coded: No negative integers given as ids to get, put or remove.
- * 
  * This map does not permit null values.
  * 
  * @author Lyneira
@@ -17,9 +14,9 @@ import java.util.Arrays;
  */
 public class UniqueIdObjectMap<T> {
 
-    private T[] elementData;
+    T[] elementData;
+    int firstFree;
     private int size;
-    private int firstFree;
 
     /**
      * Constructs a new map with space for at least the specified number of
@@ -34,6 +31,19 @@ public class UniqueIdObjectMap<T> {
             throw new IllegalArgumentException("Illegal Capacity: " + initialCapacity);
 
         elementData = (T[]) new Object[initialCapacity];
+    }
+
+    /**
+     * Constructs a shallow copy of the given map. Suitable when the map
+     * contains immutable objects.
+     * 
+     * @param other
+     *            The map to copy.
+     */
+    public UniqueIdObjectMap(UniqueIdObjectMap<T> other) {
+        elementData = Arrays.copyOf(other.elementData, other.elementData.length);
+        size = other.size;
+        firstFree = other.firstFree;
     }
 
     private void ensureCapacityInternal(int minCapacity) {
@@ -72,6 +82,15 @@ public class UniqueIdObjectMap<T> {
     }
 
     /**
+     * Returns this map's capacity.
+     * 
+     * @return The capacity of the map
+     */
+    public int capacity() {
+        return elementData.length;
+    }
+
+    /**
      * Returns the element at the given id, or null if no such element exists.
      * 
      * @param id
@@ -79,14 +98,9 @@ public class UniqueIdObjectMap<T> {
      * @return The requested element or null.
      */
     public T get(int id) {
-        if (id >= elementData.length) {
+        if (id >= elementData.length || id < 0) {
             return null;
         }
-        /*
-         * If the end user of this map's collection passes in a negative id they
-         * could not possibly get from this map, they deserve the exception they
-         * get.
-         */
         return elementData[id];
     }
 
@@ -123,6 +137,8 @@ public class UniqueIdObjectMap<T> {
         if (element == null) {
             throw new NullPointerException("Cannot add null elements to UniqueIdObjectMap!");
         }
+        if (id < 0)
+            throw new IllegalArgumentException("Attempt to put an element at a negative index!");
         ensureCapacityInternal(id + 1);
         if (elementData[id] == null) {
             size++;
@@ -134,7 +150,7 @@ public class UniqueIdObjectMap<T> {
     }
 
     public void remove(int id) {
-        if (id >= elementData.length) {
+        if (id >= elementData.length || id < 0) {
             return;
         }
         if (elementData[id] != null) {
@@ -146,11 +162,27 @@ public class UniqueIdObjectMap<T> {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public void clear() {
-        elementData = (T[]) new Object[elementData.length];
+        Arrays.fill(elementData, null);
         size = 0;
         firstFree = 0;
+    }
+
+    @SuppressWarnings("unchecked")
+    public void clear(int newCapacity) {
+        elementData = (T[]) new Object[newCapacity];
+        size = 0;
+        firstFree = 0;
+    }
+
+    /**
+     * Returns an iterator over all elements of this map. If this iterator is
+     * used after the map is cleared, the results are undefined.
+     * 
+     * @return An iterator over all elements of the map
+     */
+    public UniqueIdObjectIterator<T> iterator() {
+        return new UniqueIdObjectIterator<T>(this);
     }
 
     /**

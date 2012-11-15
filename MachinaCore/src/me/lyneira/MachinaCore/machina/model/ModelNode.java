@@ -6,6 +6,7 @@ import gnu.trove.set.hash.TIntHashSet;
 
 import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.block.MachinaBlock;
+import me.lyneira.util.collection.UniqueIdObjectIterator;
 import me.lyneira.util.collection.UniqueIdObjectMap;
 
 /**
@@ -31,7 +32,7 @@ class ModelNode {
     final int parent;
     BlockVector origin;
     boolean active = true;
-    UniqueIdObjectMap<MachinaBlock> blocks = new UniqueIdObjectMap<MachinaBlock>(1);
+    final UniqueIdObjectMap<MachinaBlock> blocks;
     private TIntHashSet children = null;
 
     /**
@@ -43,6 +44,7 @@ class ModelNode {
     ModelNode(BlockVector origin) {
         parent = -1;
         this.origin = origin;
+        blocks = new UniqueIdObjectMap<MachinaBlock>(initialBlockCapacity);
     }
 
     /**
@@ -56,11 +58,35 @@ class ModelNode {
     ModelNode(int parent, BlockVector origin) {
         this.parent = parent;
         this.origin = origin;
+        blocks = new UniqueIdObjectMap<MachinaBlock>(initialBlockCapacity);
+    }
+    
+    ModelNode(int parent, BlockVector origin, int initialBlockCapacity) {
+        this.parent = parent;
+        this.origin = origin;
+        blocks = new UniqueIdObjectMap<MachinaBlock>(initialBlockCapacity);
+    }
+
+    ModelNode(ModelNode other) {
+        parent = other.parent;
+        origin = other.origin;
+        blocks = new UniqueIdObjectMap<MachinaBlock>(other.blocks);
+        active = other.active;
+        copyChildren(other);
+    }
+    
+    void copyChildren(ModelNode other) {
+        if (other.children != null) {
+            children = new TIntHashSet(other.children.capacity());
+            children.addAll(other.children);
+        } else {
+            children = null;
+        }
     }
 
     void addChild(int id) {
         if (children == null) {
-            children = new TIntHashSet(4);
+            children = new TIntHashSet(initialChildCapacity);
         }
         children.add(id);
     }
@@ -71,7 +97,7 @@ class ModelNode {
         }
         children.remove(id);
     }
-    
+
     TIntIterator children() {
         return children.iterator();
     }
@@ -81,6 +107,14 @@ class ModelNode {
             return;
         }
         children.forEach(procedure);
+    }
+
+    void clearBlocks() {
+        blocks.clear(initialBlockCapacity);
+    }
+    
+    UniqueIdObjectIterator<MachinaBlock> blockIterator() {
+        return blocks.iterator();
     }
 
     /*
@@ -123,5 +157,6 @@ class ModelNode {
      * 
      * Method to remove a block from this section
      */
-
+    private final static int initialBlockCapacity = 1;
+    private final static int initialChildCapacity = 4;
 }

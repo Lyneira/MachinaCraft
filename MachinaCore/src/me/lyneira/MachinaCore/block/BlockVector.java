@@ -80,6 +80,24 @@ public class BlockVector {
     }
 
     /**
+     * Returns the {@link Block} that this BlockVector represents in the given
+     * World.
+     * 
+     * @param world
+     *            The world to get the block in
+     * @param originX
+     *            The X origin this block is relative to
+     * @param originY
+     *            The Y origin this block is relative to
+     * @param originZ
+     *            The Z origin this block is relative to
+     * @return The block corresponding to this BlockVector and the given origin.
+     */
+    public final Block getBlock(World world, int originX, int originY, int originZ) {
+        return world.getBlockAt(x + originX, y + originY, z + originZ);
+    }
+
+    /**
      * Adds the given BlockFace to this BlockVector
      * 
      * @param face
@@ -88,6 +106,19 @@ public class BlockVector {
      */
     public BlockVector add(BlockFace face) {
         return new BlockVector(x + face.getModX(), y + face.getModY(), z + face.getModZ());
+    }
+
+    /**
+     * Adds the given BlockFace n times to this BlockVector
+     * 
+     * @param face
+     *            The BlockFace to add
+     * @param n
+     *            The number of times to apply this blockface.
+     * @return A new BlockVector with the BlockFace added
+     */
+    public BlockVector add(BlockFace face, int n) {
+        return new BlockVector(x + face.getModX() * n, y + face.getModY() * n, z + face.getModZ() * n);
     }
 
     /**

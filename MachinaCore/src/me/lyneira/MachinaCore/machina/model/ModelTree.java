@@ -72,7 +72,7 @@ public interface ModelTree {
     /* *************
      * Block methods
      */
-    public MachinaBlock getRootBlock(int id);
+    public MachinaBlock getBlock(int id);
 
     public MachinaBlock getBlock(int nodeId, int id);
 
@@ -80,7 +80,7 @@ public interface ModelTree {
 
     public int addBlock(MachinaBlock block);
 
-    public int addBlock(MachinaBlock block, int nodeId);
+    public int addBlock(int nodeId, MachinaBlock block);
 
     public void deleteBlock(int id);
 
@@ -90,7 +90,7 @@ public interface ModelTree {
 
     public void clearBlocks(int nodeId);
 
-    public void putRootBlock(MachinaBlock newBlock, int id);
+    public void putBlock(MachinaBlock newBlock, int id);
 
-    public void putBlock(MachinaBlock newBlock, int nodeId, int id);
+    public void putBlock(int nodeId, MachinaBlock newBlock, int id);
 }

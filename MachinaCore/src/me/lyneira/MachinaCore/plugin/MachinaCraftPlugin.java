@@ -3,14 +3,12 @@ package me.lyneira.MachinaCore.plugin;
 import java.util.logging.Logger;
 
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * Template class for quick development of any plugin that interacts with
- * MachinaCraft. Provides logging functionality, enable/disable messages and a
- * config retrieval method that takes care of saving the default config if not
- * already there.
+ * MachinaCraft. Provides logging functionality and a config retrieval method
+ * that takes care of saving the default config if not already there.
  * 
  * If you extend this class instead of MachinaPlugin, you are expected to call
  * super.onEnable() and super.onDisable() if you override them.
@@ -18,9 +16,8 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author Lyneira
  */
 public abstract class MachinaCraftPlugin extends JavaPlugin {
-    private final static Logger log = Logger.getLogger("Minecraft");
+    public final Logger log = getLogger();
 
-    private String name = "MachinaPlugin";
     private boolean configFirstCall = true;
 
     /**
@@ -28,6 +25,7 @@ public abstract class MachinaCraftPlugin extends JavaPlugin {
      * call since enable, also saves the default config.yml if none exists yet.
      */
     public final MPConfig mpGetConfig() {
+        this.getLogger();
         FileConfiguration config = getConfig();
         if (configFirstCall) {
             saveDefaultConfig();
@@ -37,44 +35,7 @@ public abstract class MachinaCraftPlugin extends JavaPlugin {
     }
 
     @Override
-    public void onEnable() {
-        PluginDescriptionFile pdf = getDescription();
-        name = pdf.getName();
-    }
-
-    @Override
     public void onDisable() {
         configFirstCall = true;
     }
-
-    /**
-     * Send a severe message to the server log.
-     * 
-     * @param message
-     *            Message to send
-     */
-    public final void logSevere(String message) {
-        log.severe("[" + name + "] " + message);
-    }
-
-    /**
-     * Send a warning message to the server log.
-     * 
-     * @param message
-     *            Message to send
-     */
-    public final void logWarning(String message) {
-        log.warning("[" + name + "] " + message);
-    }
-
-    /**
-     * Send an informational message to the server log.
-     * 
-     * @param message
-     *            Message to send
-     */
-    public final void logInfo(String message) {
-        log.info("[" + name + "] " + message);
-    }
-
 }

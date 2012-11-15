@@ -4,7 +4,9 @@ import me.lyneira.MachinaCore.MachinaCore;
 import me.lyneira.MachinaCore.block.BlockRotation;
 import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.block.MachinaBlock;
-import me.lyneira.MachinaCore.machina.model.ConstructionModelTree;
+import me.lyneira.MachinaCore.machina.model.BlueprintModel;
+import me.lyneira.MachinaCore.machina.model.ConstructionModel;
+
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -30,7 +32,7 @@ public class MachinaBlueprint {
      * machina. (for example blocks of differing types that don't occur
      * symmetrically)
      */
-    private final ConstructionModelTree baseModel;
+    private final BlueprintModel baseModel;
 
     /**
      * Callback class that will be run when the base model has been detected. It
@@ -42,8 +44,8 @@ public class MachinaBlueprint {
     private MachinaDetector detector;
     private final MachinaBlock triggerBlock;
 
-    public MachinaBlueprint(MachinaBlock triggerBlock, ConstructionModelTree baseModel) {
-        this.baseModel = new ConstructionModelTree(baseModel);
+    public MachinaBlueprint(MachinaBlock triggerBlock, BlueprintModel baseModel) {
+        this.baseModel = new BlueprintModel(baseModel);
         if (triggerBlock == null)
             throw new NullPointerException("Cannot construct a MachinaBlueprint without a trigger block!");
         this.triggerBlock = triggerBlock;
@@ -87,21 +89,21 @@ public class MachinaBlueprint {
         if (!triggerBlock.matchTypeOnly(block))
             return DetectResult.FAILURE;
 
-        ConstructionModelTree machinaModel = null;
+        ConstructionModel constructionModel = null;
         for (BlockRotation r : BlockRotation.values()) {
             final MachinaBlock rotatedTrigger = triggerBlock.rotateYaw(r);
             final BlockVector origin = new BlockVector(block.getX() - rotatedTrigger.x, block.getY() - rotatedTrigger.y, block.getZ() - rotatedTrigger.z);
             final World world = block.getWorld();
-            machinaModel = baseModel.construct(block.getWorld(), r, origin);
-            if (machinaModel != null) {
+            constructionModel = baseModel.construct(block.getWorld(), r, origin);
+            if (constructionModel != null) {
                 /*
                  * Machina base model was constructed, now hand it to the
                  * detector for extension
                  */
-                final MachinaController controller = detector.detect(machinaModel, player, world, r, origin);
+                final MachinaController controller = detector.detect(constructionModel, player, world, r, origin);
                 if (controller == null) {
                     return DetectResult.FAILURE;
-                } else if (universe.add(new Machina(universe, machinaModel.machinaModel(), controller))) {
+                } else if (universe.add(new Machina(universe, constructionModel.machinaModel(), controller))) {
                     return DetectResult.SUCCESS;
                 } else {
                     return DetectResult.COLLISION;

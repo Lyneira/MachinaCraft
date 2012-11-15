@@ -26,7 +26,7 @@ public abstract class MachinaPlugin extends MachinaCraftPlugin {
         super.onEnable();
         Plugin plugin = getServer().getPluginManager().getPlugin("MachinaCore");
         if (plugin == null) {
-            logSevere("Could not retrieve MachinaCore plugin from server, something is very wrong! Not continuing with enable.");
+            log.severe("Could not retrieve MachinaCore plugin from server, something is very wrong! Not continuing with enable.");
             return;
         }
         machinaCore = (MachinaCore) plugin;
@@ -50,7 +50,7 @@ public abstract class MachinaPlugin extends MachinaCraftPlugin {
      */
     protected void addDetector(MachinaDetector detector) {
         if (detector == null) {
-            throw new NullPointerException("Cannot register a null blueprint!");
+            throw new NullPointerException("Cannot register a null detector!");
         }
         if (detectors == null) {
             detectors = new ArrayList<MachinaDetector>(1);

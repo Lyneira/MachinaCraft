@@ -29,7 +29,7 @@ public class MPConfig {
                 return material.getId();
             }
         }
-        plugin.logWarning("Config option '" + path + "' was not a valid material id, loading default value " + defaultValue);
+        plugin.log.warning("Config option '" + path + "' was not a valid material id, loading default value " + defaultValue);
         return defaultValue;
     }
 }

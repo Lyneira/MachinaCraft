@@ -16,40 +16,42 @@ import me.lyneira.MachinaCore.block.MachinaBlock;
 import me.lyneira.util.collection.UniqueIdObjectMap;
 
 /**
- * ModelTree for a machina that will be detected. Modifications to this tree
- * take effect immediately.
+ * Tree structure for specifying the detect-time blueprint of a machina.
  * 
  * @author Lyneira
  * 
  */
-public class ConstructionModelTree implements ModelTree {
-    private final UniqueIdObjectMap<ModelNode> nodes;
+public class BlueprintModel {
+    protected final UniqueIdObjectMap<ModelNode> nodes;
     private ModelNode root;
     private int size = 1;
-    
-    public ConstructionModelTree() {
+
+    public BlueprintModel() {
         this(10);
     }
 
-    public ConstructionModelTree(int initialCapacity) {
+    public BlueprintModel(int initialCapacity) {
         nodes = new UniqueIdObjectMap<ModelNode>(initialCapacity);
         root = new ModelNode(new BlockVector(0, 0, 0));
         nodes.add(root);
     }
 
-    public ConstructionModelTree(ConstructionModelTree other) {
-        nodes = new UniqueIdObjectMap<ModelNode>(other.size);
+    public BlueprintModel(BlueprintModel other) {
+        nodes = new UniqueIdObjectMap<ModelNode>(other.nodes.capacity());
         // Copy other model node?
-        root = new ModelNode(other.root.origin);
-        // TODO
+        root = new ModelNode(other.root);
+        NodeIterator it = other.nodeIterator(0);
+        it.next();
+        while (it.hasNext()) {
+            final int id = it.next();
+            nodes.put(new ModelNode(other.nodes.get(id)), id);
+        }
     }
 
-    @Override
     public int addNode(BlockVector origin) {
         return (addNode(0, origin));
     }
 
-    @Override
     public int addNode(int parentId, BlockVector origin) {
         final ModelNode parent = nodes.get(parentId);
         if (parent == null) {
@@ -62,7 +64,6 @@ public class ConstructionModelTree implements ModelTree {
         return id;
     }
 
-    @Override
     public void removeNode(int nodeId) {
         ModelNode node = nodes.get(nodeId);
         if (node == null) {
@@ -85,12 +86,10 @@ public class ConstructionModelTree implements ModelTree {
 
     }
 
-    @Override
     public boolean hasNode(int nodeId) {
         return nodes.get(nodeId) != null;
     }
 
-    @Override
     public TIntIterator children(int nodeId) {
         final ModelNode node = nodes.get(nodeId);
         if (node == null) {
@@ -99,69 +98,63 @@ public class ConstructionModelTree implements ModelTree {
         return node.children();
     }
 
-    @Override
     public int nodeCount() {
         return size;
     }
 
-    @Override
-    public MachinaBlock getRootBlock(int id) {
-        // TODO Auto-generated method stub
-        return null;
+    public MachinaBlock getBlock(int id) {
+        return root.blocks.get(id);
     }
 
-    @Override
     public MachinaBlock getBlock(int nodeId, int id) {
-        // TODO Auto-generated method stub
-        return null;
+        ModelNode node = nodes.get(nodeId);
+        if (node == null)
+            return null;
+        return node.blocks.get(id);
     }
 
-    @Override
     public int addBlock(MachinaBlock block) {
-        // TODO Auto-generated method stub
-        return 0;
+        return root.blocks.add(block);
     }
 
-    @Override
-    public int addBlock(MachinaBlock block, int nodeId) {
-        // TODO Auto-generated method stub
-        return 0;
+    public int addBlock(int nodeId, MachinaBlock block) {
+        ModelNode node = nodes.get(nodeId);
+        if (node == null)
+            return -1;
+        return node.blocks.add(block);
     }
 
-    @Override
     public void deleteBlock(int id) {
-        // TODO Auto-generated method stub
-
+        root.blocks.remove(id);
     }
 
-    @Override
     public void deleteBlock(int nodeId, int id) {
-        // TODO Auto-generated method stub
-
+        ModelNode node = nodes.get(nodeId);
+        if (node == null)
+            return;
+        node.blocks.remove(id);
     }
 
-    @Override
     public void clearRootBlocks() {
-        // TODO Auto-generated method stub
-
+        root.clearBlocks();
     }
 
-    @Override
     public void clearBlocks(int nodeId) {
-        // TODO Auto-generated method stub
-
+        ModelNode node = nodes.get(nodeId);
+        if (node == null)
+            return;
+        node.clearBlocks();
     }
 
-    @Override
-    public void putRootBlock(MachinaBlock newBlock, int id) {
-        // TODO Auto-generated method stub
-
+    public void putBlock(MachinaBlock newBlock, int id) {
+        root.blocks.put(newBlock, id);
     }
 
-    @Override
-    public void putBlock(MachinaBlock newBlock, int nodeId, int id) {
-        // TODO Auto-generated method stub
-
+    public void putBlock(int nodeId, MachinaBlock newBlock, int id) {
+        ModelNode node = nodes.get(nodeId);
+        if (node == null)
+            return;
+        node.blocks.put(newBlock, id);
     }
 
     /* *************
@@ -174,27 +167,33 @@ public class ConstructionModelTree implements ModelTree {
      * 
      * @param world
      * @param rotation
-     * @param originX
-     * @param originY
-     * @param originZ
+     * @param origin
      * @return
      */
-    public ConstructionModelTree construct(World world, BlockRotation rotation, BlockVector origin) {
-        // TODO
-        // Make sure to create copies of every machinablock in the source tree
-        // and if the data value was -1, set it to whatever was detected at that
-        // location
-        return null;
+    public ConstructionModel construct(World world, BlockRotation rotation, BlockVector origin) {
+        BlueprintModel constructionBlueprint = new BlueprintModel(nodes.capacity());
+        ConstructionModel constructionModel = new ConstructionModel(constructionBlueprint, world, origin);
+
+        NodeIterator it = new NodeIterator(0);
+        it.next();
+        while (it.hasNext()) {
+            final int nodeId = it.next();
+            ModelNode node = nodes.get(nodeId);
+            ModelNode newNode = new ModelNode(node.parent, node.origin, node.blocks.capacity());
+            newNode.copyChildren(node);
+            constructionBlueprint.nodes.put(newNode, nodeId);
+            if (constructionModel.putBlueprintBlocks(nodeId, node.blockIterator(), rotation) == false)
+                return null;
+        }
+
+        return constructionModel;
     }
 
-    /**
-     * Converts this model into a MachinaModelTree and returns it.
-     * 
-     * @return The MachinaModeltree that was created.
+    /*
+     * Nonpublic methods
      */
-    public MachinaModelTree machinaModel() {
-        // TODO
-        return null;
+    NodeIterator nodeIterator(int nodeId) {
+        return new NodeIterator(nodeId);
     }
 
     private class NodeIterator implements TIntIterator {
@@ -226,7 +225,7 @@ public class ConstructionModelTree implements ModelTree {
                 }
 
                 node = nodes.get(id);
-                
+
                 if (node == null) {
                     MachinaCore.severe("Removal from ConstructionModelTree detected while retrieving next through iterator!");
                 } else {
