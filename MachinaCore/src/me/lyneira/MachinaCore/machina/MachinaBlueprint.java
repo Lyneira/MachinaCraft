@@ -103,20 +103,18 @@ public class MachinaBlueprint {
                 final MachinaController controller = detector.detect(constructionModel, player, world, r, origin);
                 if (controller == null) {
                     return DetectResult.FAILURE;
-                }
-                MachinaCore.info("Successfully detected a drill!");
-                return DetectResult.SUCCESS;
-                    /*
                 } else if (universe.add(new Machina(universe, constructionModel.machinaModel(), controller))) {
+                    MachinaCore.info("Successfully detected a drill!");
                     return DetectResult.SUCCESS;
                 } else {
+                    MachinaCore.info("Successfully detected a drill but had a collision!");
                     return DetectResult.COLLISION;
-                } */
+                }
             }
         }
         return DetectResult.FAILURE;
     }
-    
+
     public final static MachinaCore.MachinaBlueprintFriend machinaCoreFriend = new MachinaCore.MachinaBlueprintFriend() {
         @Override
         protected void setDetector(MachinaBlueprint blueprint, MachinaDetector detector) {

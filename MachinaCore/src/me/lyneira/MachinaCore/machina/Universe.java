@@ -75,7 +75,7 @@ public class Universe {
 
         machinae.add(machina);
 
-        // Send initialize event
+        // TODO Send initialize event
         machina.controller.initialize(machina);
         return true;
     }

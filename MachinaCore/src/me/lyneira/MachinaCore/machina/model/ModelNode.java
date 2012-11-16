@@ -29,11 +29,11 @@ class ModelNode {
     /**
      * This id must be set by the managing collection!
      */
-    // int id;
     final int parent;
+    final UniqueIdObjectMap<MachinaBlock> blocks;
     BlockVector origin;
     boolean active = true;
-    final UniqueIdObjectMap<MachinaBlock> blocks;
+    ModelNode modifed = null;
     private TIntHashSet children = null;
 
     /**
@@ -61,7 +61,7 @@ class ModelNode {
         this.origin = origin;
         blocks = new UniqueIdObjectMap<MachinaBlock>(initialBlockCapacity);
     }
-    
+
     ModelNode(int parent, BlockVector origin, int initialBlockCapacity) {
         this.parent = parent;
         this.origin = origin;
@@ -75,7 +75,7 @@ class ModelNode {
         active = other.active;
         copyChildren(other);
     }
-    
+
     void copyChildren(ModelNode other) {
         if (other.children != null) {
             children = new TIntHashSet(other.children.capacity());
@@ -113,11 +113,11 @@ class ModelNode {
     void clearBlocks() {
         blocks.clear(initialBlockCapacity);
     }
-    
+
     UniqueIdObjectIterator<MachinaBlock> blockIterator() {
         return blocks.iterator();
     }
-    
+
     void dumpBlocks() {
         for (UniqueIdObjectIterator<MachinaBlock> it = blocks.iterator(); it.hasNext();) {
             it.next();

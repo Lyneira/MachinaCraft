@@ -9,17 +9,24 @@ import me.lyneira.util.collection.UniqueIdObjectIterator;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 
-public class ConstructionModel {
+/**
+ * Tree structure used for detecting the blocks in a BlueprintModel and
+ * performing extensions on the model. Intermediate step towards creation of a
+ * Machina.
+ * 
+ * @author Lyneira
+ * 
+ */
+public class ConstructionModel extends BlueprintModel {
 
-    private final BlueprintModel model;
     private final World world;
     private final BlockVector origin;
     private int x;
     private int y;
     private int z;
 
-    ConstructionModel(BlueprintModel model, World world, BlockVector origin) {
-        this.model = model;
+    ConstructionModel(World world, BlockVector origin, int initialCapacity, ModelNode root) {
+        super(initialCapacity, root);
         this.world = world;
         this.origin = origin;
     }
@@ -29,18 +36,10 @@ public class ConstructionModel {
     }
 
     public Block getWorldBlock(int nodeId, BlockVector location) {
-        if (!model.hasNode(nodeId))
+        if (!hasNode(nodeId))
             return null;
         determineOrigin(nodeId);
         return location.getBlock(world, x, y, z);
-    }
-
-    public MachinaBlock getBlock(int id) {
-        return model.getBlock(id);
-    }
-
-    public MachinaBlock getBlock(int nodeId, int id) {
-        return model.getBlock(nodeId, id);
     }
 
     public int extend(BlockVector location) {
@@ -72,14 +71,14 @@ public class ConstructionModel {
     }
 
     public int extend(int nodeId, BlockVector location) {
-        if (!model.hasNode(nodeId))
+        if (!hasNode(nodeId))
             return -1;
         determineOrigin(nodeId);
         return extendInternal(nodeId, location);
     }
 
     public int extend(int nodeId, BlockVector location, int[] types) {
-        if (!model.hasNode(nodeId))
+        if (!hasNode(nodeId))
             return -1;
         determineOrigin(nodeId);
 
@@ -87,7 +86,7 @@ public class ConstructionModel {
     }
 
     public int extend(int nodeId, BlockVector location, int typeId) {
-        if (!model.hasNode(nodeId))
+        if (!hasNode(nodeId))
             return -1;
         determineOrigin(nodeId);
 
@@ -95,7 +94,7 @@ public class ConstructionModel {
     }
 
     public int extend(int nodeId, BlockVector location, int typeId, short data) {
-        if (!model.hasNode(nodeId))
+        if (!hasNode(nodeId))
             return -1;
         determineOrigin(nodeId);
 
@@ -103,17 +102,12 @@ public class ConstructionModel {
     }
 
     /**
-     * Converts this model into a MachinaModelTree and returns it.
+     * Converts this model into a MachinaModel and returns it.
      * 
-     * @return The MachinaModeltree that was created.
+     * @return The MachinaModel that was created.
      */
     public MachinaModel machinaModel() {
-        // TODO
-        return null;
-    }
-    
-    public void dumpTree() {
-        model.dumpTree();
+        return new MachinaModel(world, origin, this);
     }
 
     /*
@@ -138,7 +132,7 @@ public class ConstructionModel {
      */
     boolean putBlueprintBlocks(int nodeId, UniqueIdObjectIterator<MachinaBlock> it, BlockRotation rotation) {
         determineOrigin(nodeId);
-        ModelNode node = model.nodes.get(nodeId);
+        ModelNode node = nodes.get(nodeId);
         while (it.hasNext()) {
             final MachinaBlock block = it.next();
             MachinaCore.info("Comparing block id " + it.lastId() + " with type " + block.toString());
@@ -173,7 +167,7 @@ public class ConstructionModel {
          * safe to skip the root, otherwise this would be -1
          */
         for (int i = nodeId; i != 0;) {
-            ModelNode node = model.nodes.get(i);
+            ModelNode node = nodes.get(i);
             BlockVector nodeOrigin = node.origin;
             x += nodeOrigin.x;
             y += nodeOrigin.y;
@@ -184,7 +178,7 @@ public class ConstructionModel {
 
     private int extendInternal(int nodeId, BlockVector location) {
         final Block block = location.getBlock(world, x, y, z);
-        return model.addBlock(nodeId, new MachinaBlock(location.x, location.y, location.z, block.getTypeId(), block.getData()));
+        return addBlock(nodeId, new MachinaBlock(location.x, location.y, location.z, block.getTypeId(), block.getData()));
     }
 
     private int extendInternal(int nodeId, BlockVector location, int[] types) {
@@ -192,7 +186,7 @@ public class ConstructionModel {
         final int blockType = block.getTypeId();
         for (int i : types) {
             if (i == blockType) {
-                return model.addBlock(nodeId, new MachinaBlock(location.x, location.y, location.z, i, block.getData()));
+                return addBlock(nodeId, new MachinaBlock(location.x, location.y, location.z, i, block.getData()));
             }
         }
         return -1;
@@ -201,7 +195,7 @@ public class ConstructionModel {
     private int extendInternal(int nodeId, BlockVector location, int typeId) {
         final Block block = location.getBlock(world, x, y, z);
         if (block.getTypeId() == typeId) {
-            return model.addBlock(nodeId, new MachinaBlock(location.x, location.y, location.z, typeId, block.getData()));
+            return addBlock(nodeId, new MachinaBlock(location.x, location.y, location.z, typeId, block.getData()));
         }
         return -1;
     }
@@ -214,7 +208,7 @@ public class ConstructionModel {
             } else if (block.getData() != data) {
                 return -1;
             }
-            return model.addBlock(nodeId, new MachinaBlock(location.x, location.y, location.z, typeId, data));
+            return addBlock(nodeId, new MachinaBlock(location.x, location.y, location.z, typeId, data));
         }
         return -1;
     }

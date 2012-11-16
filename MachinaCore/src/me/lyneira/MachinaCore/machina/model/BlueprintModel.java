@@ -16,15 +16,15 @@ import me.lyneira.MachinaCore.block.MachinaBlock;
 import me.lyneira.util.collection.UniqueIdObjectMap;
 
 /**
- * Tree structure for specifying the detect-time blueprint of a machina.
+ * Tree structure for specifying the blueprint of a machina. First
+ * step towards the creation of a Machina.
  * 
  * @author Lyneira
  * 
  */
 public class BlueprintModel {
-    protected final UniqueIdObjectMap<ModelNode> nodes;
+    final UniqueIdObjectMap<ModelNode> nodes;
     private ModelNode root;
-    private int size = 1;
 
     public BlueprintModel() {
         this(10);
@@ -47,8 +47,8 @@ public class BlueprintModel {
             nodes.put(new ModelNode(other.nodes.get(id)), id);
         }
     }
-    
-    private BlueprintModel(int initialCapacity, ModelNode root) {
+
+    protected BlueprintModel(int initialCapacity, ModelNode root) {
         nodes = new UniqueIdObjectMap<ModelNode>(initialCapacity);
         this.root = root;
         nodes.put(root, 0);
@@ -66,7 +66,6 @@ public class BlueprintModel {
         final ModelNode newNode = new ModelNode(parentId, origin);
         final int id = nodes.add(newNode);
         parent.addChild(id);
-        size++;
         return id;
     }
 
@@ -84,7 +83,6 @@ public class BlueprintModel {
             // Walk the tree and remove all subnodes
             for (NodeIterator it = new NodeIterator(nodeId); it.hasNext();) {
                 nodes.remove(it.next());
-                size--;
             }
         } else {
             throw new UnsupportedOperationException("Cannot remove the root node in a ConstructionModelTree!");
@@ -102,10 +100,6 @@ public class BlueprintModel {
             return null;
         }
         return node.children();
-    }
-
-    public int nodeCount() {
-        return size;
     }
 
     public MachinaBlock getBlock(int id) {
@@ -165,7 +159,7 @@ public class BlueprintModel {
             return;
         node.blocks.put(newBlock, id);
     }
-    
+
     public void dumpTree() {
         MachinaCore.info("Beginning tree dump");
         NodeIterator it = new NodeIterator(0);
@@ -191,28 +185,28 @@ public class BlueprintModel {
      * @return
      */
     public ConstructionModel construct(World world, BlockRotation rotation, BlockVector origin) {
-        
+
         MachinaCore.info("Constructing root node ");
         ModelNode newRoot = new ModelNode(root.parent, root.origin, root.blocks.capacity());
         newRoot.copyChildren(root);
-        
-        BlueprintModel constructionBlueprint = new BlueprintModel(nodes.capacity(), newRoot);
-        ConstructionModel constructionModel = new ConstructionModel(constructionBlueprint, world, origin);
-        
+
+        ConstructionModel constructionModel = new ConstructionModel(world, origin, nodes.capacity(), newRoot);
+
         if (constructionModel.putBlueprintBlocks(0, root.blockIterator(), rotation) == false)
             return null;
-        
+
         NodeIterator it = new NodeIterator(0);
-        // We've already added the root, so the while is only necessary for subnodes.
+        // We've already added the root, so the while is only necessary for
+        // subnodes.
         it.next();
-        
+
         while (it.hasNext()) {
             final int nodeId = it.next();
             MachinaCore.info("Constructing node " + nodeId);
             ModelNode node = nodes.get(nodeId);
             ModelNode newNode = new ModelNode(node.parent, node.origin, node.blocks.capacity());
             newNode.copyChildren(node);
-            constructionBlueprint.nodes.put(newNode, nodeId);
+            constructionModel.nodes.put(newNode, nodeId);
             if (constructionModel.putBlueprintBlocks(nodeId, node.blockIterator(), rotation) == false)
                 return null;
         }
