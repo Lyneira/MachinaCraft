@@ -35,7 +35,6 @@ public final class MachinaCore extends MachinaCraftPlugin {
 
         plugin = this;
         // Set listener
-        // pluginManager = this.getServer().getPluginManager();
         getServer().getPluginManager().registerEvents(new MachinaCoreListener(this), this);
 
         // Initialize the currently loaded worlds
@@ -70,6 +69,7 @@ public final class MachinaCore extends MachinaCraftPlugin {
         if (rightClick) {
             if (machina != null) {
                 // TODO Show status information
+                info("You rightclicked on a machina, yadayada hooray and stuff");
             } else {
                 for (MachinaBlueprint blueprint : blueprints.blueprints()) {
 

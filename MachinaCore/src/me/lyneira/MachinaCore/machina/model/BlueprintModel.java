@@ -1,11 +1,7 @@
 package me.lyneira.MachinaCore.machina.model;
 
 import gnu.trove.iterator.TIntIterator;
-import gnu.trove.procedure.TIntProcedure;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.NoSuchElementException;
 
 import org.bukkit.World;
 
@@ -81,7 +77,7 @@ public class BlueprintModel {
             nodes.get(node.parent).removeChild(nodeId);
 
             // Walk the tree and remove all subnodes
-            for (NodeIterator it = new NodeIterator(nodeId); it.hasNext();) {
+            for (NodeIterator it = nodeIterator(nodeId); it.hasNext();) {
                 nodes.remove(it.next());
             }
         } else {
@@ -162,7 +158,7 @@ public class BlueprintModel {
 
     public void dumpTree() {
         MachinaCore.info("Beginning tree dump");
-        NodeIterator it = new NodeIterator(0);
+        NodeIterator it = nodeIterator(0);
         while (it.hasNext()) {
             int nodeId = it.next();
             MachinaCore.info("Dumping node id " + nodeId);
@@ -195,7 +191,7 @@ public class BlueprintModel {
         if (constructionModel.putBlueprintBlocks(0, root.blockIterator(), rotation) == false)
             return null;
 
-        NodeIterator it = new NodeIterator(0);
+        NodeIterator it = nodeIterator(0);
         // We've already added the root, so the while is only necessary for
         // subnodes.
         it.next();
@@ -218,57 +214,7 @@ public class BlueprintModel {
      * Nonpublic methods
      */
     NodeIterator nodeIterator(int nodeId) {
-        return new NodeIterator(nodeId);
-    }
-
-    class NodeIterator implements TIntIterator {
-
-        Deque<Integer> queue = new ArrayDeque<Integer>();
-
-        NodeIterator(int nodeId) {
-            queue.add(nodeId);
-        }
-
-        @Override
-        public boolean hasNext() {
-            return queue.size() > 0;
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public int next() {
-            ModelNode node;
-            Integer id;
-            while (true) {
-                id = queue.poll();
-                if (id == null) {
-                    throw new NoSuchElementException("No elements left in ConstructionModelTree!");
-                }
-
-                node = nodes.get(id);
-
-                if (node == null) {
-                    MachinaCore.severe("Removal from ConstructionModelTree detected while retrieving next through iterator!");
-                } else {
-                    break;
-                }
-            }
-            node.forEachChild(addChildren);
-
-            return id;
-        };
-
-        private final TIntProcedure addChildren = new TIntProcedure() {
-            @Override
-            public boolean execute(int value) {
-                queue.add(value);
-                return true;
-            }
-        };
+        return new NodeIterator(nodeId, nodes);
     }
 
 }

@@ -12,40 +12,29 @@ import me.lyneira.MachinaCore.machina.model.MachinaModel;
  * 
  * A Machina consists of a model with a tree structure. The model represents the
  * machina as it exists in the game world right now and cannot be modified
- * directly. Modifications will be held When a modification is made, ta shadow copy of
- * the relevant portion of the model is made  all the ones below it is made, which the controller can edit.
- * One or more shadow copies existing for (parts of) the model can be manifested
- * by updating the machina.
+ * directly. Modifications will be held in a shadow copy of the relevant portion
+ * of the model which the controller can edit. The modified model can be
+ * manifested by updating the machina.
  * <p/>
  * 
- * A machina keeps track of the blocks that it is made up of in
- * two ways: The machina-centric model and the world-centric instance. The model
- * can be modified by the plugin controlling this machina, while the
- * instance is managed by the machina's universe.
+ * A machina keeps track of the blocks that it is made up of in two ways: The
+ * machina-centric model and the world-centric instance. The model can be
+ * modified by the plugin controlling this machina, while the instance is
+ * managed by the machina's universe.
  * 
  * @author Lyneira
  */
 public final class Machina {
     public final Universe universe;
     public final MachinaController controller;
-    
+
     private final MachinaModel model;
+    private MachinaBlock[] instance;
 
     Machina(Universe universe, MachinaModel model, MachinaController controller) {
         this.universe = universe;
         this.model = model;
         this.controller = controller;
-    }
-
-    /**
-     * Returns the array containing all the machina's blocks in absolute
-     * positions. The array has no null elements, and each element is unique.
-     * 
-     * @return Array of the machina's blocks
-     */
-    MachinaBlock[] instance() {
-        // TODO
-        return null;
     }
 
     /**
@@ -63,13 +52,23 @@ public final class Machina {
      * that need to have their inventory overwritten, and the arrays therein are
      * the correct size for the type of inventory being overwritten.
      * 
-     * 
-     * Plugin developers should not need to use this method.
-     * 
      * @return An update for the machina
      */
-    public MachinaUpdate createUpdate() {
+    MachinaUpdate createUpdate() {
         // TODO
         return new MachinaUpdate(null, null, null);
+    }
+
+    /**
+     * Returns the array containing all the machina's blocks in absolute
+     * positions. The array has no null elements.
+     * 
+     * @return Array of the machina's blocks
+     */
+    MachinaBlock[] instance() {
+        if (instance == null) {
+            instance = model.instance();
+        }
+        return instance;
     }
 }
