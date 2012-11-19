@@ -4,6 +4,7 @@ import me.lyneira.MachinaCore.MachinaCore;
 import me.lyneira.MachinaCore.block.BlockRotation;
 import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.block.MachinaBlock;
+import me.lyneira.MachinaCore.event.CreationEvent;
 import me.lyneira.MachinaCore.machina.model.BlueprintModel;
 import me.lyneira.MachinaCore.machina.model.ConstructionModel;
 
@@ -101,13 +102,21 @@ public class MachinaBlueprint {
                  * detector for extension
                  */
                 final MachinaController controller = detector.detect(constructionModel, player, world, r, origin);
+                final Machina machina;
                 if (controller == null) {
                     return DetectResult.FAILURE;
-                } else if (universe.add(new Machina(universe, constructionModel.machinaModel(), controller))) {
-                    MachinaCore.info("Successfully detected a drill!");
+                } else if (universe.add(machina = new Machina(universe, constructionModel.machinaModel(), controller))) {
+                    //MachinaCore.info("Successfully detected a drill!");
+                    final CreationEvent event = new CreationEvent(player);
+                    MachinaCore.runTask(new Runnable() {
+                        @Override
+                        public void run() {
+                            machina.callEvent(event);
+                        }
+                    }, 1);
                     return DetectResult.SUCCESS;
                 } else {
-                    MachinaCore.info("Successfully detected a drill but had a collision!");
+                    MachinaCore.info("Successfully detected a machina but had a collision!");
                     return DetectResult.COLLISION;
                 }
             }

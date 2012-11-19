@@ -6,6 +6,8 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
+import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.scheduler.BukkitTask;
 
 import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.machina.Machina;
@@ -23,10 +25,12 @@ import me.lyneira.MachinaCore.tool.ToolInteractResult;
  */
 public final class MachinaCore extends MachinaCraftPlugin {
     private static MachinaCore plugin;
+    private static BukkitScheduler scheduler;
     // private static PluginManager pluginManager;
 
     private final BlueprintStore blueprints = new BlueprintStore();
     final Multiverse multiverse = new Multiverse();
+    
 
     @Override
     public void onEnable() {
@@ -34,6 +38,8 @@ public final class MachinaCore extends MachinaCraftPlugin {
         // Call super.onEnable first.
 
         plugin = this;
+        scheduler = getServer().getScheduler();
+
         // Set listener
         getServer().getPluginManager().registerEvents(new MachinaCoreListener(this), this);
 
@@ -113,6 +119,16 @@ public final class MachinaCore extends MachinaCraftPlugin {
     /* **************
      * Static methods
      */
+    
+    /**
+     * Schedules a runnable task to occur after the specified number of server ticks
+     * @param task 
+     * @param delay
+     * @return A BukkitTask with the task id
+     */
+    public final static BukkitTask runTask(Runnable task, long delay) {
+        return scheduler.runTaskLater(plugin, task, delay);
+    }
 
     /**
      * Send an informational message to the server log.
@@ -142,6 +158,18 @@ public final class MachinaCore extends MachinaCraftPlugin {
      */
     public final static void severe(String message) {
         plugin.logSevere(message);
+    }
+
+    /**
+     * Send a severe message and an exception to the server log.
+     * 
+     * @param message
+     *            Message to send
+     * @param ex
+     *            Exception to send
+     */
+    public final static void exception(String message, Throwable ex) {
+        plugin.logException(message, ex);
     }
 
     public static abstract class MachinaBlueprintFriend {

@@ -1,6 +1,8 @@
 package me.lyneira.MachinaCore.machina;
 
+import me.lyneira.MachinaCore.MachinaCore;
 import me.lyneira.MachinaCore.block.MachinaBlock;
+import me.lyneira.MachinaCore.event.Event;
 import me.lyneira.MachinaCore.machina.model.MachinaModel;
 
 /**
@@ -59,6 +61,10 @@ public final class Machina {
         return new MachinaUpdate(null, null, null);
     }
 
+    void initialize() {
+        controller.initialize(this);
+    }
+
     /**
      * Returns the array containing all the machina's blocks in absolute
      * positions. The array has no null elements.
@@ -70,5 +76,17 @@ public final class Machina {
             instance = model.instance();
         }
         return instance;
+    }
+
+    public void callEvent(Event event) {
+        try {
+            event.getDispatcher().dispatch(controller, event);
+        } catch (Throwable ex) {
+            MachinaCore.exception("Could not pass event " + event.getEventName() + " to " + getControllerName(), ex);
+        }
+    }
+
+    private String getControllerName() {
+        return controller.getClass().getSimpleName();
     }
 }

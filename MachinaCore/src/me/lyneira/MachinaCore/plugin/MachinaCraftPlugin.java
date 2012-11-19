@@ -1,5 +1,6 @@
 package me.lyneira.MachinaCore.plugin;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bukkit.configuration.file.FileConfiguration;
@@ -52,5 +53,9 @@ public abstract class MachinaCraftPlugin extends JavaPlugin {
 
     public void logSevere(String message) {
         log.severe(message);
+    }
+    
+    public void logException(String message, Throwable ex) {
+        log.log(Level.SEVERE, message, ex);
     }
 }

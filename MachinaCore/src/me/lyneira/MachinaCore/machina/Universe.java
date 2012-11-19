@@ -74,9 +74,8 @@ public class Universe {
         }
 
         machinae.add(machina);
-
-        // TODO Send initialize event
-        machina.controller.initialize(machina);
+        
+        machina.initialize();
         return true;
     }
 
@@ -88,7 +87,7 @@ public class Universe {
      * @return True if the machina was successfully updated, false if there was
      *         a collision or it was not in this universe.
      */
-    public boolean update(Machina machina) {
+    boolean update(Machina machina) {
         if (!machinae.contains(machina))
             return false;
 
@@ -151,7 +150,7 @@ public class Universe {
             }
         }
         // Clear blocks that the machina left empty
-        updateClearSet.forEach(new ClearRemovedVectors());
+        updateClearSet.forEach(clearRemovedVectors);
 
         return true;
     }
@@ -165,6 +164,8 @@ public class Universe {
     public void remove(Machina machina) {
         if (!machinae.contains(machina))
             return;
+        
+        // TODO Send removal event
 
         for (BlockVector v : machina.instance()) {
             globalMap.remove(v);
@@ -184,13 +185,13 @@ public class Universe {
         // TODO
     }
 
-    private class ClearRemovedVectors implements TObjectProcedure<BlockVector> {
+    private TObjectProcedure<BlockVector> clearRemovedVectors = new TObjectProcedure<BlockVector>() {
         @Override
         public boolean execute(BlockVector v) {
             v.getBlock(world).setTypeIdAndData(0, (byte) 0, false);
             return true;
         }
-    }
+    };
     
     public final static Multiverse.UniverseFriend multiverseFriend = new Multiverse.UniverseFriend() {
         @Override

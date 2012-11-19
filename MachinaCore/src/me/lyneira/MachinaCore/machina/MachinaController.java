@@ -9,9 +9,15 @@ package me.lyneira.MachinaCore.machina;
  */
 public interface MachinaController {
     /**
-     * Called when a machina is successfully added to the universe. 
+     * Called to inform the controller that its machina has been created and is
+     * successfully added to the universe.
+     * <p>
+     * <b>Note:</b> Since it may also be called when a
+     * machina gets loaded with the world, not just when a player creates a new
+     * machina, this method is not a replacement for CreationEvent!
      * 
-     * @param machina The machina to link to
+     * @param machina
+     *            The machina to link to
      */
     public void initialize(Machina machina);
 }

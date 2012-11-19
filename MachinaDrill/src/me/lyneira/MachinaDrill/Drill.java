@@ -1,5 +1,7 @@
 package me.lyneira.MachinaDrill;
 
+import me.lyneira.MachinaCore.event.CreationEvent;
+import me.lyneira.MachinaCore.event.EventHandler;
 import me.lyneira.MachinaCore.machina.Machina;
 import me.lyneira.MachinaCore.machina.MachinaController;
 
@@ -15,6 +17,11 @@ class Drill implements MachinaController {
     public void initialize(Machina machina) {
         // TODO Auto-generated method stub
         
+    }
+    
+    @EventHandler
+    public void onCreate(CreationEvent event) {
+        MachinaDrill.plugin.logInfo("Successfully detected a drill creation event!");
     }
 //    /**
 //     * The number of server ticks to wait for a move action.

@@ -74,6 +74,7 @@ public class MachinaCoreListener implements Listener {
         plugin.multiverse.unload(event.getWorld());
     }
 
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onWorldSave(WorldSaveEvent event) {
         plugin.multiverse.save(event.getWorld());
     }
