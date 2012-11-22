@@ -2,6 +2,10 @@ package me.lyneira.MachinaDrill;
 
 import me.lyneira.MachinaCore.event.CreationEvent;
 import me.lyneira.MachinaCore.event.EventHandler;
+import me.lyneira.MachinaCore.event.HeartBeatEvent;
+import me.lyneira.MachinaCore.event.RemovalEvent;
+import me.lyneira.MachinaCore.event.StatusEvent;
+import me.lyneira.MachinaCore.event.VerifyEvent;
 import me.lyneira.MachinaCore.machina.Machina;
 import me.lyneira.MachinaCore.machina.MachinaController;
 
@@ -12,16 +16,43 @@ import me.lyneira.MachinaCore.machina.MachinaController;
  * @author 5phinX
  */
 class Drill implements MachinaController {
+    
+    private Machina machina;
 
     @Override
     public void initialize(Machina machina) {
-        // TODO Auto-generated method stub
-        
+        this.machina = machina;
     }
     
     @EventHandler
     public void onCreate(CreationEvent event) {
-        MachinaDrill.plugin.logInfo("Successfully detected a drill creation event!");
+        MachinaDrill.plugin.logInfo("Successfully detected a drill creation event by player " + event.getPlayer().getName() + "!");
+        machina.setHeartBeat(60);
+    }
+    
+    @EventHandler
+    public void onHeartBeat(HeartBeatEvent event) {
+        MachinaDrill.plugin.logInfo("Woop");
+        event.next(20);
+    }
+    
+    @EventHandler
+    public void onRemoval(RemovalEvent event) {
+        MachinaDrill.plugin.logInfo("BOOM! I'm dead.");
+    }
+    
+    @EventHandler
+    public void onVerify(VerifyEvent event) {
+        if (event.isDamaged()) {
+            MachinaDrill.plugin.logInfo("I'm damaged! Block damage is " + event.getDamage().size());
+        } else {
+            MachinaDrill.plugin.logInfo("Verify succeeded");
+        }
+    }
+    
+    @EventHandler
+    public void onStatus(StatusEvent event) {
+        event.player.sendMessage("Hey this is Drill speaking, thanks for rightclicking on me!");
     }
 //    /**
 //     * The number of server ticks to wait for a move action.

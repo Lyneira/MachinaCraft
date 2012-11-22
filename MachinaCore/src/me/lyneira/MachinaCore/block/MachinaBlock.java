@@ -3,7 +3,6 @@ package me.lyneira.MachinaCore.block;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 
-
 /**
  * Represents a single block with type and data in a Machina. A data value of -1
  * means anything goes.
@@ -38,7 +37,7 @@ public class MachinaBlock extends BlockVector {
         this.typeId = typeId;
         this.data = -1;
     }
-    
+
     /**
      * Returns a MachinaBlock rotated by the given BlockRotation around the Y
      * axis.
@@ -62,25 +61,40 @@ public class MachinaBlock extends BlockVector {
         }
     }
 
+    /**
+     * Matches this {@link MachinaBlock} with the given world and returns true
+     * if successful. In other words, it returns true if the world contains this
+     * block's type and data at this block's location. A data value of -1 will
+     * only match the type.
+     * 
+     * @param world
+     * @return
+     */
     public boolean match(World world) {
         return matchInternal(world, x, y, z);
     }
-    
+
     public boolean match(World world, int originX, int originY, int originZ) {
         return matchInternal(world, x + originX, y + originY, z + originZ);
     }
-    
+
     public boolean match(World world, BlockVector origin) {
         return matchInternal(world, x + origin.x, y + origin.y, z + origin.z);
     }
-    
+
     /**
-     * Compares only the type of this MachinaBlock to the given block and returns true if they match.
-     * @param block The block to compare to
+     * Compares only the type of this MachinaBlock to the given block and
+     * returns true if they match.
+     * 
+     * @param block
+     *            The block to compare to
      * @return True if the type matches.
      */
     public boolean matchTypeOnly(Block block) {
-        return matchInternal(block.getWorld(), block.getX(), block.getY(), block.getZ());
+        if (data == -1) {
+            return block.getTypeId() == typeId;
+        }
+        return block.getTypeId() == typeId && block.getData() == data;
     }
 
     private boolean matchInternal(World world, int x, int y, int z) {
@@ -91,7 +105,7 @@ public class MachinaBlock extends BlockVector {
             return (block.getTypeId() == typeId && block.getData() == data);
         }
     }
-    
+
     @Override
     public String toString() {
         return "[type: " + typeId + " data: " + data + " - " + super.toString() + "]";

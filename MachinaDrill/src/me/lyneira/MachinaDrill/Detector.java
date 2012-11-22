@@ -47,8 +47,6 @@ class Detector implements MachinaDetector {
 
     @Override
     public MachinaController detect(ConstructionModel model, Player player, World world, BlockRotation yaw, BlockVector origin) {
-        model.dumpTree();
-        MachinaDrill.plugin.logInfo("Retrieving model block " + core);
         BlockVector coreBlock = model.getBlock(core);
         BlockVector baseBlock = coreBlock.add(BlockFace.DOWN);
         int centralBase = model.extend(baseBlock, materialBase);

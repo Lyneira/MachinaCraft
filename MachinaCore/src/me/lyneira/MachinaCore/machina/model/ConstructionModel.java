@@ -1,6 +1,5 @@
 package me.lyneira.MachinaCore.machina.model;
 
-import me.lyneira.MachinaCore.MachinaCore;
 import me.lyneira.MachinaCore.block.BlockRotation;
 import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.block.MachinaBlock;
@@ -135,7 +134,6 @@ public class ConstructionModel extends BlueprintModel {
         ModelNode node = nodes.get(nodeId);
         while (it.hasNext()) {
             final MachinaBlock block = it.next();
-            MachinaCore.info("Comparing block id " + it.lastId() + " with type " + block.toString());
             final BlockVector rotated = block.rotateYaw(rotation);
             final Block worldBlock = rotated.getBlock(world, x, y, z);
             final int typeId = worldBlock.getTypeId();
@@ -145,7 +143,6 @@ public class ConstructionModel extends BlueprintModel {
             if (block.data != -1 && data != block.data) {
                 return false;
             }
-            MachinaCore.info("Putting new block at " + rotated.toString() + ", type " + typeId + ", data " + data);
             node.blocks.put(new MachinaBlock(rotated, typeId, data), it.lastId());
         }
 

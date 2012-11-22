@@ -1,8 +1,15 @@
 package me.lyneira.MachinaCore.machina;
 
+import org.bukkit.World;
+import org.bukkit.scheduler.BukkitTask;
+
 import me.lyneira.MachinaCore.MachinaCore;
 import me.lyneira.MachinaCore.block.MachinaBlock;
 import me.lyneira.MachinaCore.event.Event;
+import me.lyneira.MachinaCore.event.EventHandler;
+import me.lyneira.MachinaCore.event.HeartBeatEvent;
+import me.lyneira.MachinaCore.event.RemovalEvent;
+import me.lyneira.MachinaCore.event.VerifyEvent;
 import me.lyneira.MachinaCore.machina.model.MachinaModel;
 
 /**
@@ -27,11 +34,85 @@ import me.lyneira.MachinaCore.machina.model.MachinaModel;
  * @author Lyneira
  */
 public final class Machina {
+
+    /* **************************
+     * Plugin API
+     */
+
     public final Universe universe;
     public final MachinaController controller;
 
+    /**
+     * Causes a {@link HeartBeatEvent} to occur after the given delay in server
+     * ticks. If a delay < 1 is specified, no event will occur and if an event
+     * was scheduled earlier, it will be cancelled.
+     * 
+     * @param delay
+     *            The delay for the next heartbeat
+     */
+    public void setHeartBeat(int delay) {
+        if (heartBeat != null) {
+            heartBeat.cancel();
+        }
+        if (delay < 1) {
+            heartBeat = null;
+            return;
+        }
+        heartBeat = MachinaCore.runTask(new Runnable() {
+            @Override
+            public void run() {
+                heartBeat = null;
+                HeartBeatEvent event = new HeartBeatEvent();
+                Machina.this.callEvent(event);
+                setHeartBeat(event.getNext());
+            }
+        }, delay);
+    }
+
+    /**
+     * Calls the given event on this machina's controller. If the controller has
+     * an {@link EventHandler} set up for the event, it will be able to react to
+     * it.
+     * 
+     * @param event
+     *            The event to call
+     */
+    public void callEvent(Event event) {
+        if (verify()) {
+            callEventInternal(event);
+        }
+    }
+
+    /**
+     * Sets this machina as unverified. This guarantees that another
+     * verification will be done if this machina receives any further events on
+     * this server tick.
+     */
+    public void setUnverified() {
+        lastVerify = -1;
+    }
+
+    /* **************************
+     * MachinaCore API
+     */
+
+    /**
+     * Machina centric model that allows advanced manipulation of the machina's
+     * blocks
+     */
     private final MachinaModel model;
+    /**
+     * The blocks belonging to this machina in real world coordinates
+     */
     private MachinaBlock[] instance;
+    /**
+     * The current heartbeat task scheduled.
+     */
+    private BukkitTask heartBeat;
+    /**
+     * Used to avoid calling verify() more than once in a tick.
+     */
+    private long lastVerify = -1;
 
     Machina(Universe universe, MachinaModel model, MachinaController controller) {
         this.universe = universe;
@@ -78,12 +159,48 @@ public final class Machina {
         return instance;
     }
 
-    public void callEvent(Event event) {
+    /**
+     * Sends the irrevocable removal event and prepares the machina for removal
+     * from the universe.
+     */
+    void onRemove() {
+        callEventInternal(new RemovalEvent());
+
+        // Cancel any potential heartbeats that may be pending for this machina
+        setHeartBeat(0);
+    }
+
+    private void callEventInternal(Event event) {
         try {
             event.getDispatcher().dispatch(controller, event);
         } catch (Throwable ex) {
             MachinaCore.exception("Could not pass event " + event.getEventName() + " to " + getControllerName(), ex);
         }
+    }
+
+    private boolean verify() {
+        final World world = universe.world;
+        final long time = world.getFullTime();
+        if (time == lastVerify) {
+            return true;
+        }
+        final VerifyEvent event = new VerifyEvent();
+        for (MachinaBlock block : instance()) {
+            if (!block.match(world)) {
+                event.addDamage(block);
+                event.verified = false;
+            }
+        }
+        // Allow controller to act now that the basic blocks have been verified.
+        callEventInternal(event);
+        if (event.verified) {
+            lastVerify = time;
+            return true;
+        }
+
+        // Verify failed, remove this machina
+        universe.remove(this);
+        return false;
     }
 
     private String getControllerName() {

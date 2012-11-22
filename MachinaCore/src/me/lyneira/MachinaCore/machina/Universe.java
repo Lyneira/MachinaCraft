@@ -165,7 +165,7 @@ public class Universe {
         if (!machinae.contains(machina))
             return;
         
-        // TODO Send removal event
+        machina.onRemove();
 
         for (BlockVector v : machina.instance()) {
             globalMap.remove(v);

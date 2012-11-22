@@ -10,6 +10,7 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 
 import me.lyneira.MachinaCore.block.BlockVector;
+import me.lyneira.MachinaCore.event.StatusEvent;
 import me.lyneira.MachinaCore.machina.Machina;
 import me.lyneira.MachinaCore.machina.MachinaBlueprint;
 import me.lyneira.MachinaCore.machina.MachinaDetector;
@@ -74,8 +75,7 @@ public final class MachinaCore extends MachinaCraftPlugin {
         Machina machina = universe.get(location);
         if (rightClick) {
             if (machina != null) {
-                // TODO Show status information
-                info("You rightclicked on a machina, yadayada hooray and stuff");
+                machina.callEvent(new StatusEvent(player));
             } else {
                 for (MachinaBlueprint blueprint : blueprints.blueprints()) {
 
@@ -90,7 +90,7 @@ public final class MachinaCore extends MachinaCraftPlugin {
             }
         } else {
             if (machina != null) {
-                // TODO check permissions
+                // TODO Make it a destroy event rather than instant removal
                 universe.remove(machina);
             }
         }

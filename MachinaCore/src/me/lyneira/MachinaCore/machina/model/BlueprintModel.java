@@ -99,8 +99,6 @@ public class BlueprintModel {
     }
 
     public MachinaBlock getBlock(int id) {
-        MachinaCore.info("Attempting to retrieve block " + id + " from root, dumping tree and root node");
-        dumpTree();
         root.dumpBlocks();
         return root.blocks.get(id);
     }
@@ -156,17 +154,6 @@ public class BlueprintModel {
         node.blocks.put(newBlock, id);
     }
 
-    public void dumpTree() {
-        MachinaCore.info("Beginning tree dump");
-        NodeIterator it = nodeIterator(0);
-        while (it.hasNext()) {
-            int nodeId = it.next();
-            MachinaCore.info("Dumping node id " + nodeId);
-            ModelNode node = nodes.get(nodeId);
-            node.dumpBlocks();
-        }
-    }
-
     /* *************
      * Other methods
      */
@@ -181,8 +168,6 @@ public class BlueprintModel {
      * @return
      */
     public ConstructionModel construct(World world, BlockRotation rotation, BlockVector origin) {
-
-        MachinaCore.info("Constructing root node ");
         ModelNode newRoot = new ModelNode(root.parent, root.origin, root.blocks.capacity());
         newRoot.copyChildren(root);
 
@@ -198,7 +183,6 @@ public class BlueprintModel {
 
         while (it.hasNext()) {
             final int nodeId = it.next();
-            MachinaCore.info("Constructing node " + nodeId);
             ModelNode node = nodes.get(nodeId);
             ModelNode newNode = new ModelNode(node.parent, node.origin, node.blocks.capacity());
             newNode.copyChildren(node);
@@ -215,6 +199,20 @@ public class BlueprintModel {
      */
     NodeIterator nodeIterator(int nodeId) {
         return new NodeIterator(nodeId, nodes);
+    }
+    
+    /*
+     * Debug
+     */
+    public void dumpTree() {
+        MachinaCore.info("Beginning tree dump");
+        NodeIterator it = nodeIterator(0);
+        while (it.hasNext()) {
+            int nodeId = it.next();
+            MachinaCore.info("Dumping node id " + nodeId);
+            ModelNode node = nodes.get(nodeId);
+            node.dumpBlocks();
+        }
     }
 
 }
