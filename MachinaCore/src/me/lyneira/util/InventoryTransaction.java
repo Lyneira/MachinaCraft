@@ -151,11 +151,12 @@ public class InventoryTransaction {
                         return verifyResult = false;
                     } else {
                         // Free slot, store the itemstack.
-                        ItemStack newItem = item.clone();
+                        ItemStack newItem = new ItemStack(item);
                         // Make sure the new item doesn't get negative
                         // durability.
                         if (newItem.getDurability() == -1)
                             newItem.setDurability((short) 0);
+                        newItem.setAmount(remainingAmount);
                         contents[firstEmpty] = newItem;
                         break;
                     }
@@ -165,15 +166,16 @@ public class InventoryTransaction {
 
                     int partialAmount = partialItem.getAmount();
                     int maxAmount = partialItem.getMaxStackSize();
+                    int freeSpace = maxAmount - partialAmount;
 
-                    if (remainingAmount + partialAmount <= maxAmount) {
+                    if (remainingAmount <= freeSpace) {
                         // Itemstack fits
                         partialItem.setAmount(remainingAmount + partialAmount);
                         break;
                     }
                     // Partial fit
+                    remainingAmount -= freeSpace;
                     partialItem.setAmount(maxAmount);
-                    remainingAmount = partialAmount - maxAmount;
                 }
             }
         }
