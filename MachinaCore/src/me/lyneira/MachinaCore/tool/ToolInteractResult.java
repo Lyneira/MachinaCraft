@@ -1,6 +1,7 @@
 package me.lyneira.MachinaCore.tool;
 
 public enum ToolInteractResult {
-    DAMAGE,
-    NODAMAGE,
+    FAILURE,
+    SUCCESS_DAMAGE,
+    SUCCESS_NODAMAGE,
 }

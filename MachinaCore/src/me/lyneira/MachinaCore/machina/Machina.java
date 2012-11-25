@@ -43,6 +43,30 @@ public final class Machina {
     public final MachinaController controller;
 
     /**
+     * Machina centric model that allows advanced manipulation of the machina's
+     * blocks
+     */
+    public final MachinaModel model;
+
+    /**
+     * Attempts to apply any pending modifications to the machina to the world
+     * and return true if successful. If successful, the modifications to the
+     * model will write through to both the world and the current model.
+     * Otherwise, the modifications will be cancelled.
+     * 
+     * @return True if the update was successfully applied, false if there was a
+     *         collision.
+     */
+    public boolean update() {
+        if (universe.update(this)) {
+            model.applyModifications();
+            return true;
+        }
+        model.clearModifications();
+        return false;
+    }
+
+    /**
      * Causes a {@link HeartBeatEvent} to occur after the given delay in server
      * ticks. If a delay < 1 is specified, no event will occur and if an event
      * was scheduled earlier, it will be cancelled.
@@ -50,7 +74,7 @@ public final class Machina {
      * @param delay
      *            The delay for the next heartbeat
      */
-    public void setHeartBeat(int delay) {
+    public void setHeartBeat(long delay) {
         if (heartBeat != null) {
             heartBeat.cancel();
         }
@@ -84,6 +108,27 @@ public final class Machina {
     }
 
     /**
+     * Schedules an event to be called on this machina's controller after a
+     * delay. The minimum delay is always 1 server tick.
+     * 
+     * @param event
+     *            The event to call
+     * @param delay
+     *            The number of server ticks to wait
+     * @return Bukkit task representing the scheduled event
+     */
+    public BukkitTask scheduleEvent(final Event event, long delay) {
+        if (delay < 1)
+            delay = 1;
+        return MachinaCore.runTask(new Runnable() {
+            @Override
+            public void run() {
+                callEvent(event);
+            }
+        }, delay);
+    }
+
+    /**
      * Sets this machina as unverified. This guarantees that another
      * verification will be done if this machina receives any further events on
      * this server tick.
@@ -96,11 +141,6 @@ public final class Machina {
      * MachinaCore API
      */
 
-    /**
-     * Machina centric model that allows advanced manipulation of the machina's
-     * blocks
-     */
-    private final MachinaModel model;
     /**
      * The blocks belonging to this machina in real world coordinates
      */
@@ -120,23 +160,6 @@ public final class Machina {
         this.controller = controller;
     }
 
-    /**
-     * Returns a MachinaUpdate holding all necessary data to perform an update
-     * to the machina. The update contains only data about modified parts of the
-     * machina's model.
-     * 
-     * <li>Arrays are all the same size.
-     * 
-     * <li>The block arrays have no null elements.
-     * 
-     * <li>Each element is unique.
-     * 
-     * <li>The inventories array only contains non-null elements for the blocks
-     * that need to have their inventory overwritten, and the arrays therein are
-     * the correct size for the type of inventory being overwritten.
-     * 
-     * @return An update for the machina
-     */
     MachinaUpdate createUpdate() {
         // TODO
         return new MachinaUpdate(null, null, null);

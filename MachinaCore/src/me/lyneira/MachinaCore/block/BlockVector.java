@@ -259,4 +259,22 @@ public class BlockVector {
     public String toString() {
         return Integer.toString(x) + ", " + Integer.toString(y) + ", " + Integer.toString(z);
     }
+
+    /*
+     * Static stuff
+     */
+    
+    public static BlockVector fromBlockFace(BlockFace face) {
+        return faceVectors[face.ordinal()];
+    }
+    
+    private final static BlockVector[] faceVectors;
+    
+    static {
+        BlockFace[] faces = BlockFace.values();
+        faceVectors = new BlockVector[faces.length];
+        for (int i = 0; i < faces.length; i++) {
+            faceVectors[i] = new BlockVector(faces[i]);
+        }
+    }  
 }

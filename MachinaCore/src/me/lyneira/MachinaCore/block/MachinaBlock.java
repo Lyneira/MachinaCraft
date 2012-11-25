@@ -37,6 +37,12 @@ public class MachinaBlock extends BlockVector {
         this.typeId = typeId;
         this.data = -1;
     }
+    
+    public MachinaBlock(MachinaBlock other, int originX, int originY, int originZ) {
+        super(other.x + originX, other.y + originY, other.z + originZ);
+        typeId = other.typeId;
+        data = other.data;
+    }
 
     /**
      * Returns a MachinaBlock rotated by the given BlockRotation around the Y

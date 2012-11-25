@@ -81,9 +81,9 @@ public final class MachinaCore extends MachinaCraftPlugin {
 
                     switch (blueprint.detect(universe, block, player)) {
                     case SUCCESS:
-                        return ToolInteractResult.DAMAGE;
+                        return ToolInteractResult.SUCCESS_DAMAGE;
                     case COLLISION:
-                        return ToolInteractResult.NODAMAGE;
+                        return ToolInteractResult.SUCCESS_NODAMAGE;
                     case FAILURE:
                     }
                 }
@@ -92,9 +92,10 @@ public final class MachinaCore extends MachinaCraftPlugin {
             if (machina != null) {
                 // TODO Make it a destroy event rather than instant removal
                 universe.remove(machina);
+                return ToolInteractResult.SUCCESS_NODAMAGE;
             }
         }
-        return ToolInteractResult.NODAMAGE;
+        return ToolInteractResult.FAILURE;
     }
 
     public void registerDetectors(MachinaPlugin plugin, List<MachinaDetector> detectorList) {

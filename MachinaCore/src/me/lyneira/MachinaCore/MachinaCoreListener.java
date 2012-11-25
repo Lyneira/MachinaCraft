@@ -34,23 +34,26 @@ public class MachinaCoreListener implements Listener {
         plugin.logInfo("Using id " + tinkerToolId + " as tinkering tool.");
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
         if (item == null)
             return;
         int typeId = item.getTypeId();
-        ToolInteractResult result = ToolInteractResult.NODAMAGE;
+        ToolInteractResult result = ToolInteractResult.FAILURE;
         if (typeId == wrenchId) {
             // Call the wrench method
             result = plugin.wrenchClick(event.getPlayer(), event.getClickedBlock(), event.getAction() == Action.RIGHT_CLICK_BLOCK);
         } else if (typeId == tinkerToolId) {
             // TODO Call the tinker tool method
+            // result = ...
         } else {
             // TODO Allow machina to react to the item used on click
+            // result = ...
         }
 
-        if (result == ToolInteractResult.DAMAGE) {
+        switch (result) {
+        case SUCCESS_DAMAGE:
             // The tool was used for something, decrease durability.
             short maxDurability = item.getType().getMaxDurability();
             if (maxDurability == 0)
@@ -61,6 +64,10 @@ public class MachinaCoreListener implements Listener {
             } else {
                 item.setDurability(newDurability);
             }
+        case SUCCESS_NODAMAGE:
+            event.setCancelled(true);
+            break;
+        case FAILURE:
         }
     }
 

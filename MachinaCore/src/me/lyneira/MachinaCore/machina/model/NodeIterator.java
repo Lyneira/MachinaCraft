@@ -53,6 +53,31 @@ class NodeIterator implements TIntIterator {
         return id;
     };
 
+    /**
+     * Returns the next node without advancing the iterator. Can be used to
+     * include or exclude the node and its subtree combined with next() or
+     * skip() respectively. Like next(), this method should only be called after
+     * hasNext() returns true.
+     * 
+     * @return The next node in the tree
+     */
+    public int peek() {
+        Integer id = queue.peek();
+        if (id == null) {
+            throw new NoSuchElementException("No elements left in model!");
+        }
+        return id;
+    }
+
+    /**
+     * Advances the iterator to the next node. Any nodes in the skipped node's
+     * subtree will not be returned by subsequent calls to next(). Like next(),
+     * this method should only be called after hasNext() returns true.
+     */
+    public void skip() {
+        queue.remove();
+    }
+
     private final TIntProcedure addChildren = new TIntProcedure() {
         @Override
         public boolean execute(int value) {

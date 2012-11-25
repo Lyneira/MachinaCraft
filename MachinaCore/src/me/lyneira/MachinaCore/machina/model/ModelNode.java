@@ -26,14 +26,16 @@ import me.lyneira.util.collection.UniqueIdObjectMap;
  */
 class ModelNode {
 
-    /**
-     * This id must be set by the managing collection!
-     */
     final int parent;
     final UniqueIdObjectMap<MachinaBlock> blocks;
     BlockVector origin;
     boolean active = true;
-    ModelNode modifed = null;
+    /**
+     * <li> If null, this node and its subtree is unmodified
+     * <li> If pointing to itself, there is a modified node in this node's subtree.
+     * <li> Otherwise, it points to a new node that will replace this node during an update.
+     */
+    ModelNode modified = null;
     private TIntHashSet children = null;
 
     /**

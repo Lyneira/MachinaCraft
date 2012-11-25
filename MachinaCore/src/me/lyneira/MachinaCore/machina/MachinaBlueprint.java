@@ -106,14 +106,7 @@ public class MachinaBlueprint {
                 if (controller == null) {
                     return DetectResult.FAILURE;
                 } else if (universe.add(machina = new Machina(universe, constructionModel.machinaModel(), controller))) {
-                    //MachinaCore.info("Successfully detected a drill!");
-                    final CreationEvent event = new CreationEvent(player);
-                    MachinaCore.runTask(new Runnable() {
-                        @Override
-                        public void run() {
-                            machina.callEvent(event);
-                        }
-                    }, 1);
+                    machina.scheduleEvent(new CreationEvent(player), 1);
                     return DetectResult.SUCCESS;
                 } else {
                     MachinaCore.info("Successfully detected a machina but had a collision!");

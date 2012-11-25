@@ -74,7 +74,7 @@ public class Universe {
         }
 
         machinae.add(machina);
-        
+
         machina.initialize();
         return true;
     }
@@ -133,20 +133,23 @@ public class Universe {
             if (b.typeId != typeId || b.data != data) {
                 block.setTypeIdAndData(typeId, data, false);
             }
-            ItemStack[] contents = inventories[i];
-            if (contents != null) {
-                Inventory inventory;
-                try {
-                    if (typeId == chestId) {
-                        inventory = ((Chest) block.getState()).getBlockInventory();
-                    } else {
-                        inventory = ((InventoryHolder) block.getState()).getInventory();
-                    }
-                    inventory.setContents(contents);
-                } catch (Exception e) {
-                    MachinaCore.warning("While updating a machina, attempted to write inventory to a block that does not seem to support it! - block: " + block.toString() + ", inventory size: "
-                            + contents.length);
+            if (inventories == null)
+                continue;
+            final ItemStack[] contents = inventories[i];
+            if (contents == null)
+                continue;
+            final Inventory inventory;
+            try {
+                if (typeId == chestId) {
+                    inventory = ((Chest) block.getState()).getBlockInventory();
+                } else {
+                    inventory = ((InventoryHolder) block.getState()).getInventory();
                 }
+                inventory.setContents(contents);
+            } catch (Throwable ex) {
+                MachinaCore.warning("While updating a machina, attempted to write inventory to a block that does not seem to support it! - block: " + block.toString() + ", inventory size: "
+                        + contents.length);
+                ex.printStackTrace();
             }
         }
         // Clear blocks that the machina left empty
@@ -164,7 +167,7 @@ public class Universe {
     public void remove(Machina machina) {
         if (!machinae.contains(machina))
             return;
-        
+
         machina.onRemove();
 
         for (BlockVector v : machina.instance()) {
@@ -192,20 +195,23 @@ public class Universe {
             return true;
         }
     };
-    
+
     public final static Multiverse.UniverseFriend multiverseFriend = new Multiverse.UniverseFriend() {
         @Override
         protected Universe create(World world) {
             return new Universe(world);
         }
+
         @Override
         protected void load(Universe universe) {
             universe.load();
         }
+
         @Override
         protected void unload(Universe universe) {
             universe.unload();
         }
+
         @Override
         protected void save(Universe universe) {
             universe.save();
