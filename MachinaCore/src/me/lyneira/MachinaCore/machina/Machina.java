@@ -60,6 +60,7 @@ public final class Machina {
     public boolean update() {
         if (universe.update(this)) {
             model.applyModifications();
+            instance = null;
             return true;
         }
         model.clearModifications();
@@ -158,11 +159,6 @@ public final class Machina {
         this.universe = universe;
         this.model = model;
         this.controller = controller;
-    }
-
-    MachinaUpdate createUpdate() {
-        // TODO
-        return new MachinaUpdate(null, null, null);
     }
 
     void initialize() {

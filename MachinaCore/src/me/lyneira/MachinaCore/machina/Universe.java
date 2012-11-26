@@ -91,24 +91,30 @@ public class Universe {
         if (!machinae.contains(machina))
             return false;
 
-        MachinaUpdate update = machina.createUpdate();
+        MachinaUpdate update = machina.model.createUpdate();
         BlockVector[] oldBlocks = update.oldBlocks;
         MachinaBlock[] newBlocks = update.newBlocks;
         ItemStack[][] inventories = update.inventories;
 
         for (MachinaBlock b : newBlocks) {
+            MachinaCore.info("Going to check block " + b.toString() + "Actual block is: " + b.getBlock(world).toString());
             Machina m = globalMap.get(b);
 
-            if (m != machina) {
-                // Block belongs to another machina, definitely a collision.
-                return false;
-            } else if (m == null) {
+            if (m == null) {
                 // Do collision detection here.
                 // TODO Expand collision detection to allow grass/snow as empty
                 if (!b.getBlock(world).isEmpty()) {
+                    MachinaCore.info("The block was not empty!");
                     return false;
                 }
+                MachinaCore.info("Empty block");
+                continue;
+            } else if (m != machina) {
+                // Block belongs to another machina, definitely a collision.
+                MachinaCore.info("It belongs to another machina");
+                return false;
             }
+            MachinaCore.info("Block belongs to this machina");
             /*
              * If neither of the above is true, the block belongs to this
              * machina's existing instance, that's never a collision
@@ -129,9 +135,13 @@ public class Universe {
 
             final Block block = b.getBlock(world);
             final int typeId = block.getTypeId();
-            final byte data = block.getData();
-            if (b.typeId != typeId || b.data != data) {
-                block.setTypeIdAndData(typeId, data, false);
+            if (b.typeId != typeId || b.data != block.getData()) {
+                // TODO Add in a proper inventory check to clear any and all
+                // inventory encountered
+                if (typeId == chestId) {
+                    ((Chest) block.getState()).getBlockInventory().clear();
+                }
+                block.setTypeIdAndData(b.typeId, (byte) b.data, false);
             }
             if (inventories == null)
                 continue;
@@ -140,7 +150,7 @@ public class Universe {
                 continue;
             final Inventory inventory;
             try {
-                if (typeId == chestId) {
+                if (b.typeId == chestId) {
                     inventory = ((Chest) block.getState()).getBlockInventory();
                 } else {
                     inventory = ((InventoryHolder) block.getState()).getInventory();
@@ -191,7 +201,12 @@ public class Universe {
     private TObjectProcedure<BlockVector> clearRemovedVectors = new TObjectProcedure<BlockVector>() {
         @Override
         public boolean execute(BlockVector v) {
-            v.getBlock(world).setTypeIdAndData(0, (byte) 0, false);
+            final Block block = v.getBlock(world);
+            // TODO add proper inventory check
+            if (block.getTypeId() == chestId) {
+                ((Chest) block.getState()).getBlockInventory().clear();
+            }
+            block.setTypeIdAndData(0, (byte) 0, false);
             return true;
         }
     };

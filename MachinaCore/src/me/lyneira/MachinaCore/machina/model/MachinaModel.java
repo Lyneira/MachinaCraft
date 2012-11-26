@@ -215,11 +215,11 @@ public class MachinaModel {
             for (int i = node.parent; i != -1;) {
                 node = nodes.get(i);
 
-                if (node.modified == null) {
-                    node.modified = node;
-                } else {
+                if (node.modified != null) {
+                    // The rest of the path upward is already marked as modified
                     break;
                 }
+                node.modified = node;
                 i = node.parent;
             }
         } else if (node.modified == node) {

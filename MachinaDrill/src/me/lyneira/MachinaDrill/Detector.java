@@ -60,6 +60,6 @@ class Detector implements MachinaDetector {
         if (drillHead < 0)
             return null;
 
-        return new Drill();
+        return new Drill(yaw);
     }
 }

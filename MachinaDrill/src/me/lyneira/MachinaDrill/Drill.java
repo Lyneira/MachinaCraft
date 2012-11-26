@@ -1,5 +1,6 @@
 package me.lyneira.MachinaDrill;
 
+import me.lyneira.MachinaCore.block.BlockRotation;
 import me.lyneira.MachinaCore.event.CreationEvent;
 import me.lyneira.MachinaCore.event.EventHandler;
 import me.lyneira.MachinaCore.event.HeartBeatEvent;
@@ -17,7 +18,12 @@ import me.lyneira.MachinaCore.machina.MachinaController;
  */
 class Drill implements MachinaController {
     
+    private final BlockRotation yaw;
     private Machina machina;
+    
+    Drill(BlockRotation yaw) {
+        this.yaw = yaw;
+    }
 
     @Override
     public void initialize(Machina machina) {
@@ -32,7 +38,14 @@ class Drill implements MachinaController {
     
     @EventHandler
     public void onHeartBeat(HeartBeatEvent event) {
-        MachinaDrill.plugin.logInfo("Woop");
+        // TODO Test movement
+        machina.model.move(yaw.getYawVector());
+        if (machina.update()) {
+            MachinaDrill.plugin.logInfo("Moved 1 block");
+        } else {
+            MachinaDrill.plugin.logInfo("Failed to move, something in the way");
+            return;
+        }
         event.next(20);
     }
     
