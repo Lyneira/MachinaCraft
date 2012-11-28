@@ -28,8 +28,8 @@ public class MachinaCoreListener implements Listener {
     MachinaCoreListener(MachinaCore plugin) {
         this.plugin = plugin;
         MPConfig config = plugin.mpGetConfig();
-        wrenchId = config.getMaterialId("machina-wrench", Material.WOOD_AXE.getId());
-        tinkerToolId = config.getMaterialId("machina-tinkertool", Material.WOOD_HOE.getId());
+        wrenchId = config.getPathTypeId("machina-wrench", Material.WOOD_AXE.getId());
+        tinkerToolId = config.getPathTypeId("machina-tinkertool", Material.WOOD_HOE.getId());
         plugin.logInfo("Using id " + wrenchId + " as wrench tool.");
         plugin.logInfo("Using id " + tinkerToolId + " as tinkering tool.");
     }

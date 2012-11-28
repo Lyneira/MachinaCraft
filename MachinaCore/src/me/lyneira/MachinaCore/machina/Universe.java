@@ -4,7 +4,6 @@ import gnu.trove.map.hash.THashMap;
 import gnu.trove.procedure.TObjectProcedure;
 import gnu.trove.set.hash.THashSet;
 
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
@@ -12,6 +11,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
+import me.lyneira.MachinaCore.BlockData;
 import me.lyneira.MachinaCore.MachinaCore;
 import me.lyneira.MachinaCore.Multiverse;
 import me.lyneira.MachinaCore.block.BlockVector;
@@ -30,8 +30,6 @@ public class Universe {
     public final World world;
     private final THashMap<BlockVector, Machina> globalMap = new THashMap<BlockVector, Machina>();
     private final THashSet<Machina> machinae = new THashSet<Machina>();
-
-    private static final int chestId = Material.CHEST.getId();
 
     Universe(World world) {
         this.world = world;
@@ -135,31 +133,42 @@ public class Universe {
 
             final Block block = b.getBlock(world);
             final int typeId = block.getTypeId();
-            if (b.typeId != typeId || b.data != block.getData()) {
-                // TODO Add in a proper inventory check to clear any and all
-                // inventory encountered
-                if (typeId == chestId) {
-                    ((Chest) block.getState()).getBlockInventory().clear();
+            /*
+             * Even if the block type is not modified, this is still necessary
+             * in the case of a machina moving in the direction of a double
+             * chest or a very lucky teleport.
+             */
+            if (BlockData.hasInventory(typeId)) {
+                try {
+                    if (typeId == BlockData.chestId) {
+                        ((Chest) block.getState()).getBlockInventory().clear();
+                    } else {
+                        ((InventoryHolder) block.getState()).getInventory().clear();
+                    }
+                } catch (Throwable e) {
+                    MachinaCore.severe("Unsuccessful attempt to clear inventory from block before write: " + block.toString());
+                    e.printStackTrace();
                 }
+            }
+            if (b.typeId != typeId || b.data != block.getData()) {
                 block.setTypeIdAndData(b.typeId, (byte) b.data, false);
             }
-            if (inventories == null)
-                continue;
+
             final ItemStack[] contents = inventories[i];
             if (contents == null)
                 continue;
             final Inventory inventory;
             try {
-                if (b.typeId == chestId) {
+                if (b.typeId == BlockData.chestId) {
                     inventory = ((Chest) block.getState()).getBlockInventory();
                 } else {
                     inventory = ((InventoryHolder) block.getState()).getInventory();
                 }
                 inventory.setContents(contents);
-            } catch (Throwable ex) {
+            } catch (Throwable e) {
                 MachinaCore.warning("While updating a machina, attempted to write inventory to a block that does not seem to support it! - block: " + block.toString() + ", inventory size: "
                         + contents.length);
-                ex.printStackTrace();
+                e.printStackTrace();
             }
         }
         // Clear blocks that the machina left empty
@@ -202,9 +211,18 @@ public class Universe {
         @Override
         public boolean execute(BlockVector v) {
             final Block block = v.getBlock(world);
-            // TODO add proper inventory check
-            if (block.getTypeId() == chestId) {
-                ((Chest) block.getState()).getBlockInventory().clear();
+            int typeId = block.getTypeId();
+            if (BlockData.hasInventory(typeId)) {
+                try {
+                    if (typeId == BlockData.chestId) {
+                        ((Chest) block.getState()).getBlockInventory().clear();
+                    } else {
+                        ((InventoryHolder) block.getState()).getInventory().clear();
+                    }
+                } catch (Throwable e) {
+                    MachinaCore.severe("Unsuccessful attempt to clear inventory from block after write: " + block.toString());
+                    e.printStackTrace();
+                }
             }
             block.setTypeIdAndData(0, (byte) 0, false);
             return true;

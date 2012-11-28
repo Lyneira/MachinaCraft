@@ -2,11 +2,12 @@ package me.lyneira.MachinaCore.machina.model;
 
 import java.util.Arrays;
 
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Chest;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
+import me.lyneira.MachinaCore.BlockData;
 import me.lyneira.MachinaCore.MachinaCore;
 import me.lyneira.MachinaCore.block.BlockVector;
 import me.lyneira.MachinaCore.block.MachinaBlock;
@@ -140,8 +141,19 @@ public class MachinaModel {
                         // TODO Check more extensively for existence of
                         // inventory, do error checking and stuff. Make it a
                         // proper method
-                        if (newModelBlock != null && oldModelBlock.typeId == Material.CHEST.getId() && newModelBlock.typeId == oldModelBlock.typeId) {
-                            ItemStack[] contents = ((Chest) oldInstanceBlock.getBlock(world).getState()).getBlockInventory().getContents();
+                        if (newModelBlock != null && BlockData.hasInventory(oldModelBlock.typeId) && newModelBlock.typeId == oldModelBlock.typeId) {
+                            ItemStack[] contents;
+                            try {
+                                if (oldModelBlock.typeId == BlockData.chestId) {
+                                    contents = ((Chest) oldInstanceBlock.getBlock(world).getState()).getBlockInventory().getContents();
+                                } else {
+                                    contents = ((InventoryHolder) oldInstanceBlock.getBlock(world).getState()).getInventory().getContents();
+                                }
+                            } catch (Throwable e) {
+                                MachinaCore.severe("Unsuccessful attempt to copy inventory from model block " + oldModelBlock.toString() + ", actual block was: " + oldInstanceBlock.getBlock(world).toString());
+                                e.printStackTrace();
+                                contents = null;
+                            }
                             inventories[newCount] = contents;
                         }
                         oldBlocks[oldCount++] = oldInstanceBlock;

@@ -20,7 +20,13 @@ public class MPConfig {
         this.config = config;
     }
 
-    public int getMaterialId(String path, int defaultValue) {
+    /**
+     * Returns the typeId specified by the given config path. Will match either an integer or a material enum name.
+     * @param path The config path to get
+     * @param defaultValue The default value to return if a typeId could not be matched.
+     * @return A type id
+     */
+    public int getPathTypeId(String path, int defaultValue) {
         if (config.isInt(path)) {
             return config.getInt(path);
         } else if (config.isString(path)) {
@@ -30,6 +36,24 @@ public class MPConfig {
             }
         }
         plugin.logWarning("Config option '" + path + "' was not a valid material id, loading default value " + defaultValue);
+        return defaultValue;
+    }
+
+    /**
+     * Returns the typeId specified by the given string. Will match either an integer or a material enum name.
+     * @param configItem The string to parse
+     * @param The default value to return if a typeId could not be matched.
+     * @return A type id
+     */
+    public static int parseTypeId(String stringType, int defaultValue) {
+        try {
+            return Integer.parseInt(stringType);
+        } catch (NumberFormatException e) {
+        }
+        Material material = Material.matchMaterial(stringType);
+        if (material != null) {
+            return material.getId();
+        }
         return defaultValue;
     }
 }
