@@ -17,7 +17,7 @@ public abstract class MovableBlueprint implements MachinaBlueprint {
      * Constructs a new MovableBlueprint using the given
      * {@link ModuleFactory} List.
      * 
-     * @param blueprintSouth
+     * @param blueprint
      */
     protected MovableBlueprint(final BlueprintFactory blueprint) {
         modules = new ArrayList<BlueprintModule>(blueprint.modules.size());

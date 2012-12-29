@@ -8,21 +8,20 @@ import org.bukkit.block.BlockFace;
  * 
  * When used for specifying yaw, they represent rotations to the following
  * BlockFace compass directions:<br>
- * ROTATE_0: SOUTH<br>
- * ROTATE_90: EAST<br>
- * ROTATE_180: NORTH<br>
- * ROTATE_270: WEST<br>
+ * ROTATE_0: EAST<br>
+ * ROTATE_90: NORTH<br>
+ * ROTATE_180: WEST<br>
+ * ROTATE_270: SOUTH<br>
  * 
  * @author Lyneira
  */
 public enum BlockRotation {
     ROTATE_0, ROTATE_90, ROTATE_180, ROTATE_270;
 
-    private final static BlockFace[] yawFace = { BlockFace.SOUTH, BlockFace.EAST, BlockFace.NORTH, BlockFace.WEST };
+    private final static BlockFace[] yawFace = { BlockFace.EAST, BlockFace.NORTH, BlockFace.WEST, BlockFace.SOUTH };
     private final static BlockVector[] yawVector = { new BlockVector(yawFace[0]), new BlockVector(yawFace[1]), new BlockVector(yawFace[2]), new BlockVector(yawFace[3]) };
     private final static byte[] yawData = { 0x5, 0x2, 0x4, 0x3 };
     private final static BlockRotation[] byOrdinal = BlockRotation.values();
-    
 
     /**
      * Returns the opposite rotation.
@@ -76,7 +75,7 @@ public enum BlockRotation {
     public final BlockFace getYawFace() {
         return yawFace[this.ordinal()];
     }
-    
+
     /**
      * Converts a BlockRotation into a BlockVector in the XZ plane.
      * 
@@ -85,9 +84,10 @@ public enum BlockRotation {
     public final BlockVector getYawVector() {
         return yawVector[this.ordinal()];
     }
-    
+
     /**
-     * Returns the proper data value to set the direction of a Wall Sign, Furnace, Dispenser or Chest.
+     * Returns the proper data value to set the direction of a Wall Sign,
+     * Furnace, Dispenser or Chest.
      * 
      * @return
      */
@@ -98,42 +98,49 @@ public enum BlockRotation {
     /**
      * Converts the yaw from a float-based {@link Location} to a BlockRotation
      * 
+     * 
      * @param yaw
      * @return
      */
     public static final BlockRotation yawFromLocation(Location location) {
-        // Normalize yaw (which can be negative) to an integer between 0 and 360 (exclusive).
-        int yaw = ((int)location.getYaw() % 360 + 360) % 360;
+        /*
+         * Normalize yaw (which can be negative) to an integer between 0 and 360
+         * (exclusive).
+         * 
+         * TODO If yaw is limited to the -180 to +180 degree range, optimize for
+         * that?
+         */
+        int yaw = ((int) location.getYaw() % 360 + 360) % 360;
         if (yaw < 45) {
-            // WEST
+            // SOUTH
             return ROTATE_270;
         } else if (yaw < 135) {
-            // NORTH
+            // WEST
             return ROTATE_180;
         } else if (yaw < 225) {
-            // EAST
+            // NORTH
             return ROTATE_90;
         } else if (yaw < 315) {
-            // SOUTH
+            // EAST
             return ROTATE_0;
         } else {
-            // WEST
+            // SOUTH
             return ROTATE_270;
         }
     }
 
     public static final BlockRotation yawFromBlockFace(BlockFace face) throws Exception {
-        switch(face) {
-        case SOUTH:
-            return ROTATE_0;
+        switch (face) {
         case EAST:
-            return ROTATE_90;
+            return ROTATE_0;
         case NORTH:
-            return ROTATE_180;
+            return ROTATE_90;
         case WEST:
+            return ROTATE_180;
+        case SOUTH:
             return ROTATE_270;
         default:
-            throw new Exception("Invalid BlockFace given to yawFromBlockFace, must be one of: SOUTH, EAST, NORTH, WEST");
+            throw new Exception("Invalid BlockFace given to yawFromBlockFace, must be one of: EAST, NORTH, WEST, SOUTH");
         }
     }
 }

@@ -65,7 +65,7 @@ public final class BlockData {
         }
 
         int item;
-        byte dataValue;
+        short damageValue;
         if (data.drop == 0) {
             return null;
         } else {
@@ -74,9 +74,9 @@ public final class BlockData {
         // Determine if we should use the Block's data value or the predefined
         // one
         if (data.data < 0) {
-            dataValue = block.getData();
+            damageValue = block.getData();
         } else {
-            dataValue = (byte) data.data;
+            damageValue = (byte) data.data;
         }
         // Determine drop amount
         int amount;
@@ -87,7 +87,7 @@ public final class BlockData {
         }
         if (amount > 0) {
             List<ItemStack> drop = new ArrayList<ItemStack>(1);
-            drop.add(new ItemStack(item, amount, (short) 0, new Byte(dataValue)));
+            drop.add(new ItemStack(item, amount, damageValue));
             return drop;
         } else {
             return new ArrayList<ItemStack>(1);
@@ -121,7 +121,7 @@ public final class BlockData {
      * Metadata of the item to be dropped. A negative value means the broken
      * block's data will be used. Only used if drop is non-negative.
      */
-    private int data = -1;
+    private short data = -1;
 
     /**
      * The minimum amount that will be dropped. If 0 or negative, relies on
@@ -422,7 +422,7 @@ public final class BlockData {
         
         set(Material.WOOD_BUTTON.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeFast);
         
-        set(Material.ANVIL.getId()).drillable(true).copyData(true).drillTime(breakTimeTough);
+        set(Material.ANVIL.getId()).copyData(true);
     }
 
     // Private setters to make the initialization look better.
@@ -446,7 +446,7 @@ public final class BlockData {
         return this;
     }
 
-    private final BlockData data(final int data) {
+    private final BlockData data(final short data) {
         this.data = data;
         return this;
     }
@@ -549,7 +549,7 @@ public final class BlockData {
                 }
             }
             data.drop(blockSection.getInt("drop", data.drop));
-            data.data(blockSection.getInt("data", data.data));
+            data.data((short) blockSection.getInt("data", data.data));
             data.dropMin(blockSection.getInt("dropMin", data.dropMin));
             data.dropRandom(blockSection.getInt("dropRandom", data.dropRandom));
             data.copyData(blockSection.getBoolean("copyData", data.copyData));

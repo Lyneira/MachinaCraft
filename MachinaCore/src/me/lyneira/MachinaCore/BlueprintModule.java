@@ -25,11 +25,11 @@ class BlueprintModule {
     /**
      * Constructs a {@link BlueprintModule} from the given Blueprint
      * 
-     * @param blueprintSouth
+     * @param blueprintEast
      *            The blueprint to use
      */
-    BlueprintModule(final ModuleFactory blueprintSouth) {
-        List<BlueprintBlock> blueprintFinal = blueprintSouth.getBlueprintFinal();
+    BlueprintModule(final ModuleFactory blueprintEast) {
+        List<BlueprintBlock> blueprintFinal = blueprintEast.getBlueprintFinal();
         size = blueprintFinal.size();
         blueprint = blueprintFinal.toArray(new BlueprintBlock[size]);
 

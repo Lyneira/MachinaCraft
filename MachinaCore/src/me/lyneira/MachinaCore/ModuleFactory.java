@@ -8,7 +8,7 @@ import org.bukkit.Material;
 /**
  * Factory class for constructing a module for a {@link Movable} machina. The
  * module is specified using the add or addKey functions, pointing towards the
- * south.
+ * east.
  * <p>
  * x+ is forward, y+ is up, z+ is right
  * 

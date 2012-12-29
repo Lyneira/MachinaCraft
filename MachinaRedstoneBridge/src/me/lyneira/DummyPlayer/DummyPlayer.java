@@ -37,6 +37,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.CraftingInventory;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.InventoryView.Property;
@@ -878,6 +879,45 @@ public class DummyPlayer extends PermissibleBase implements Player {
 
     @Override
     public void setBedSpawnLocation(Location arg0, boolean arg1) {
+    }
+
+    @Override
+    public boolean getCanPickupItems() {
+        return false;
+    }
+
+    @Override
+    public EntityEquipment getEquipment() {
+        return new DummyEntityEquipment(this);
+    }
+
+    @Override
+    public boolean getRemoveWhenFarAway() {
+        return false;
+    }
+
+    @Override
+    public void setCanPickupItems(boolean arg0) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void setRemoveWhenFarAway(boolean arg0) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public Location getLocation(Location arg0) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setTexturePack(String arg0) {
+        // TODO Auto-generated method stub
+        
     }
 
 }
