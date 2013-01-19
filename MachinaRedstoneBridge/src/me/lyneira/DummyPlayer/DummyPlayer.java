@@ -898,26 +898,27 @@ public class DummyPlayer extends PermissibleBase implements Player {
 
     @Override
     public void setCanPickupItems(boolean arg0) {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
     public void setRemoveWhenFarAway(boolean arg0) {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
     public Location getLocation(Location arg0) {
-        // TODO Auto-generated method stub
-        return null;
+        return arg0;
     }
 
     @Override
     public void setTexturePack(String arg0) {
-        // TODO Auto-generated method stub
-        
+    }
+
+    @Override
+    public void resetMaxHealth() {
+    }
+
+    @Override
+    public void setMaxHealth(int arg0) {
     }
 
 }
