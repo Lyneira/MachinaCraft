@@ -8,6 +8,12 @@ import org.bukkit.inventory.ItemStack;
  * @author Lyneira
  */
 public class ItemUtils {
+    /**
+     * Magic number that signifies any data value is allowed for a recipe
+     * ingredient
+     */
+    private final static short dataWildcard = 32767;
+
     private ItemUtils() {
         // Can't be instantiated
     }
@@ -27,7 +33,8 @@ public class ItemUtils {
     }
 
     /**
-     * Returns true if the type and data of two item stacks are not null and match.
+     * Returns true if the type and data of two item stacks are not null and
+     * match.
      * <p>
      * This function is safe to call with null items.
      * </p>
@@ -64,7 +71,7 @@ public class ItemUtils {
         if (ingredient.getTypeId() != item.getTypeId())
             return false;
         final int recipeDurability = ingredient.getDurability();
-        return recipeDurability == -1 || recipeDurability == item.getDurability();
+        return recipeDurability == dataWildcard || recipeDurability == item.getDurability();
     }
 
     /**
@@ -91,6 +98,6 @@ public class ItemUtils {
         if (ingredient.getTypeId() != item.getTypeId())
             return false;
         final int recipeDurability = ingredient.getDurability();
-        return recipeDurability == -1 || recipeDurability == item.getDurability();
+        return recipeDurability == dataWildcard || recipeDurability == item.getDurability();
     }
 }

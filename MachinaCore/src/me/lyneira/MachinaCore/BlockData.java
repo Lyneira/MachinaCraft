@@ -205,9 +205,9 @@ public final class BlockData {
 
         set(Material.BED_BLOCK.getId()).copyData(true);
 
-        set(Material.POWERED_RAIL.getId()).drillable(true).copyData(true).attached(true);
+        set(Material.POWERED_RAIL.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeMedium);
 
-        set(Material.DETECTOR_RAIL.getId()).drillable(true).copyData(true).attached(true);
+        set(Material.DETECTOR_RAIL.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeMedium);
 
         set(Material.PISTON_STICKY_BASE.getId()).solid(true).copyData(true);
 
@@ -393,36 +393,62 @@ public final class BlockData {
         set(Material.REDSTONE_LAMP_OFF.getId()).solid(true).drillable(true).drillTime(breakTimeFast);
 
         set(Material.REDSTONE_LAMP_ON.getId()).solid(true).drillable(true).drillTime(breakTimeFast);
-        
+
         set(Material.WOOD_DOUBLE_STEP.getId()).solid(true).drillable(true).copyData(true).drillTime(breakTimeMedium);
-        
+
         set(Material.WOOD_STEP.getId()).solid(true).drillable(true).copyData(true).drillTime(breakTimeMedium);
-        
+
         set(Material.COCOA.getId()).solid(true).drillable(true).drillTime(breakTimeFast);
-        
+
         set(Material.SANDSTONE_STAIRS.getId()).solid(true).drillable(true).copyData(true).drillTime(breakTimeMedium);
-        
+
         set(Material.EMERALD_ORE.getId()).solid(true).drillable(true).drillTime(breakTimeMedium);
-        
+
         set(Material.EMERALD_BLOCK.getId()).solid(true).drillable(true).drillTime(breakTimeMedium);
-        
+
         set(Material.SPRUCE_WOOD_STAIRS.getId()).solid(true).drillable(true).copyData(true).drillTime(breakTimeMedium);
-        
+
         set(Material.BIRCH_WOOD_STAIRS.getId()).solid(true).drillable(true).copyData(true).drillTime(breakTimeMedium);
-        
+
         set(Material.JUNGLE_WOOD_STAIRS.getId()).solid(true).drillable(true).copyData(true).drillTime(breakTimeMedium);
-        
+
         set(Material.COBBLE_WALL.getId()).drillable(true).copyData(true).drillTime(breakTimeMedium);
-        
+
         set(Material.FLOWER_POT.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeFast);
-        
+
         set(Material.CARROT.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeFast);
-        
+
         set(Material.POTATO.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeFast);
-        
+
         set(Material.WOOD_BUTTON.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeFast);
-        
+
         set(Material.ANVIL.getId()).copyData(true);
+
+        set(Material.TRAPPED_CHEST.getId()).solid(true).copyData(true).inventory(true);
+
+        set(Material.GOLD_PLATE.getId()).drillable(true).attached(true).drillTime(breakTimeMedium);
+
+        set(Material.IRON_PLATE.getId()).drillable(true).attached(true).drillTime(breakTimeMedium);
+        
+        set(Material.REDSTONE_COMPARATOR_OFF.getId()).drillable(true).copyData(true).attached(true);
+
+        set(Material.REDSTONE_COMPARATOR_ON.getId()).drillable(true).copyData(true).attached(true);
+        
+        set(Material.DAYLIGHT_DETECTOR.getId()).drillable(true).drillTime(breakTimeFast);
+        
+        set(Material.REDSTONE_BLOCK.getId()).solid(true).drillable(true).drillTime(breakTimeMedium);
+        
+        set(Material.QUARTZ_ORE.getId()).solid(true).drillable(true).drillTime(breakTimeSlow);
+
+        set(Material.DROPPER.getId()).solid(true).inventory(true);
+        
+        set(Material.QUARTZ_BLOCK.getId()).copyData(true).solid(true).drillable(true).drillTime(breakTimeSlow);
+        
+        set(Material.QUARTZ_STAIRS.getId()).copyData(true).solid(true).drillable(true).drillTime(breakTimeSlow);
+        
+        set(Material.ACTIVATOR_RAIL.getId()).copyData(true).attached(true).drillable(true).drillTime(breakTimeMedium);
+        
+        set(Material.DROPPER.getId()).copyData(true).solid(true).inventory(true);
     }
 
     // Private setters to make the initialization look better.

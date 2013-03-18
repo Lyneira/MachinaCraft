@@ -921,4 +921,28 @@ public class DummyPlayer extends PermissibleBase implements Player {
     public void setMaxHealth(int arg0) {
     }
 
+    @Override
+    public String getCustomName() {
+        return "Redstone-Bridge";
+    }
+
+    @Override
+    public boolean isCustomNameVisible() {
+        return false;
+    }
+
+    @Override
+    public void setCustomName(String arg0) {
+    }
+
+    @Override
+    public void setCustomNameVisible(boolean arg0) {
+    }
+
+    @Override
+    @Deprecated
+    public boolean isOnGround() {
+        return false;
+    }
+
 }
