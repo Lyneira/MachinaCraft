@@ -1,5 +1,6 @@
 package me.lyneira.MachinaDrill;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -176,7 +177,7 @@ final class Drill extends Movable {
         if (BlockData.isDrillable(nextTypeId)) {
             Block chestBlock = anchor.getRelative(chest.vector(yaw)).getBlock();
 
-            List<ItemStack> results = BlockData.breakBlock(queuedTarget);
+            Collection<ItemStack> results = BlockData.breakBlock(queuedTarget);
 
             if (!useEnergy(anchor, queuedDrillTime))
                 return false;

@@ -18,7 +18,7 @@ public class MachinaPlanter extends JavaPlugin {
     private MachinaCore machinaCore;
     private Blueprint blueprint;
     
-    static void log(String message) {
+    public static void log(String message) {
         log.info("MachinaPlanter: " + message);
     }
     

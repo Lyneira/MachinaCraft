@@ -83,4 +83,8 @@ public class DummyPlayerInventory extends DummyInventory implements PlayerInvent
     public int clear(int id, int data) {
         return 0;
     }
+
+    @Override
+    public void setHeldItemSlot(int arg0) {
+    }
 }

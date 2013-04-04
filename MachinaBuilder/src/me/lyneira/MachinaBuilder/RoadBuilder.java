@@ -1,6 +1,7 @@
 package me.lyneira.MachinaBuilder;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -66,7 +67,7 @@ public class RoadBuilder extends BlockDropperBuilder {
                 if (!BlockData.isDrillable(typeId))
                     continue;
 
-                List<ItemStack> results = BlockData.breakBlock(target);
+                Collection<ItemStack> results = BlockData.breakBlock(target);
 
                 if (!inputManager.find(isBuildingBlock))
                     return moveState;

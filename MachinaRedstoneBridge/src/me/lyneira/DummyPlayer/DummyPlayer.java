@@ -22,6 +22,7 @@ import org.bukkit.Note;
 import org.bukkit.Server;
 import org.bukkit.Sound;
 import org.bukkit.Statistic;
+import org.bukkit.WeatherType;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.conversations.Conversation;
@@ -943,6 +944,19 @@ public class DummyPlayer extends PermissibleBase implements Player {
     @Deprecated
     public boolean isOnGround() {
         return false;
+    }
+
+    @Override
+    public WeatherType getPlayerWeather() {
+        return WeatherType.CLEAR;
+    }
+
+    @Override
+    public void resetPlayerWeather() {
+    }
+
+    @Override
+    public void setPlayerWeather(WeatherType arg0) {
     }
 
 }

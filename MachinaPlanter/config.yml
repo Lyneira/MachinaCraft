@@ -17,6 +17,7 @@
 # harvest-netherwart: Harvest nether wart.
 # harvest-carrot: Harvest carrots.
 # harvest-potato: Harvest potatoes.
+# harvest-cocoa: Harvest cocoa beans.
 
 action-delay: 20
 max-length: 16
@@ -30,3 +31,4 @@ harvest-melon: true
 harvest-netherwart: true
 harvest-carrot: true
 harvest-potato: true
+harvest-cocoa: true

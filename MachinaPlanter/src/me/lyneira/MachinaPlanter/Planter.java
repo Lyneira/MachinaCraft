@@ -1,18 +1,25 @@
 package me.lyneira.MachinaPlanter;
 
 import java.util.Collection;
-import java.util.Random;
-
+import java.util.EnumMap;
+import java.util.Map;
 import me.lyneira.MachinaCore.BlockLocation;
 import me.lyneira.MachinaCore.BlockRotation;
 import me.lyneira.MachinaCore.Fuel;
 import me.lyneira.MachinaCore.HeartBeatEvent;
 import me.lyneira.MachinaCore.Machina;
 import me.lyneira.MachinaCore.Tool;
+import me.lyneira.MachinaPlanter.crop.CropCarrot;
+import me.lyneira.MachinaPlanter.crop.CropCocoa;
+import me.lyneira.MachinaPlanter.crop.CropHandler;
+import me.lyneira.MachinaPlanter.crop.CropMelon;
+import me.lyneira.MachinaPlanter.crop.CropNetherWart;
+import me.lyneira.MachinaPlanter.crop.CropPotato;
+import me.lyneira.MachinaPlanter.crop.CropPumpkin;
+import me.lyneira.MachinaPlanter.crop.CropWheat;
 import me.lyneira.util.InventoryManager;
 import me.lyneira.util.InventoryTransaction;
 
-import org.bukkit.CropState;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Furnace;
@@ -22,26 +29,18 @@ import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.Crops;
-
 import com.google.common.base.Predicate;
 
-class Planter implements Machina {
-    private final static Random random = new Random();
+public class Planter implements Machina {
     private static int delay = 20;
     private final static int harvestCost = 20;
     private final static int plantingCost = 10;
     static int maxLength = 16;
     static int maxWidth = 10;
-    private static boolean harvestWheat = true;
-    private static boolean harvestWheatSeeds = true;
-    private static boolean harvestPumpkin = true;
-    private static boolean harvestMelon = true;
-    private static boolean harvestNetherWart = true;
-    private static boolean harvestCarrot = true;
-    private static boolean harvestPotato = true;
     private static boolean useEnergy = false;
     private static boolean useTool = true;
+    private static Map<Material, CropHandler> harvestableMap = new EnumMap<Material, CropHandler>(Material.class);
+    private static Map<Material, CropHandler> plantableMap = new EnumMap<Material, CropHandler>(Material.class);
 
     private final Rail rail;
     private final BlockLocation lever;
@@ -99,30 +98,37 @@ class Planter implements Machina {
         Fuel.setFurnace(furnace.getBlock(), furnaceYaw, false);
     }
 
-    private void plant() throws NoEnergyException {
+    /**
+     * Runs all the necessary planter actions for the current tile.
+     * 
+     * @throws NoEnergyException
+     */
+    private void operateOnTile() throws NoEnergyException {
         if (rail.getRowType() == RailType.SKIP)
             return;
         BlockLocation tile = rail.currentTile();
         BlockLocation crop = tile.getRelative(BlockFace.UP);
 
+        // Attempt to till to farmland
+        till(tile, crop);
+
+        if (harvest)
+            harvest(crop);
+
+        plant(tile, crop);
+    }
+
+    /**
+     * Attempts to till the current tile if appropriate.
+     * 
+     * @param tile
+     * @param crop
+     * @throws NoEnergyException
+     */
+    private void till(BlockLocation tile, BlockLocation crop) throws NoEnergyException {
         switch (tile.getType()) {
         case DIRT:
-            // There may be a pumpkin or melon on it.
-            switch (crop.getType()) {
-            case PUMPKIN:
-                if (harvest && harvestPumpkin)
-                    harvestBlock(crop);
-                break;
-            case MELON_BLOCK:
-                if (harvest && harvestMelon)
-                    harvestMelon(crop);
-                break;
-            default:
-                break;
-            }
-            // Fall through to tilling.
         case GRASS:
-            // Till to farmland.
             switch (crop.getType()) {
             case SNOW:
             case LONG_GRASS:
@@ -132,55 +138,8 @@ class Planter implements Machina {
                 try {
                     useTool();
                     tile.setType(Material.SOIL);
-                    plantFarmland(crop);
                 } catch (NoToolException e) {
                 }
-                break;
-            default:
-                break;
-            }
-            break;
-        case SOIL:
-            // Already farmland.
-            switch (crop.getType()) {
-            case LONG_GRASS:
-            case AIR:
-                plantFarmland(crop);
-                break;
-            case CROPS:
-                if (harvest && harvestWheat) {
-                    if (harvestCrops(crop, Material.CROPS))
-                        plantFarmland(crop);
-                }
-                break;
-            case CARROT:
-                if (harvest && harvestCarrot) {
-                    if (harvestCrops(crop, Material.CARROT))
-                        plantFarmland(crop);
-                }
-                break;
-            case POTATO:
-                if (harvest && harvestPotato) {
-                    if (harvestCrops(crop, Material.POTATO))
-                        plantFarmland(crop);
-                }
-                break;
-            default:
-                break;
-            }
-            break;
-        case SOUL_SAND:
-            // Nether wart farming
-            switch (crop.getType()) {
-            case SNOW:
-            case AIR:
-                plantNetherWart(crop);
-                break;
-            case NETHER_WARTS:
-                if (harvest && harvestNetherWart)
-                    if (harvestNetherWart(crop))
-                        plantNetherWart(crop);
-                break;
             default:
                 break;
             }
@@ -188,161 +147,98 @@ class Planter implements Machina {
         default:
             break;
         }
-    }
-
-    private void plantFarmland(BlockLocation crop) throws NoEnergyException {
-        if (rail.getRowType() != RailType.PLANT)
-            return;
-        InventoryManager manager = new InventoryManager(chestInventory());
-        if (!manager.find(seeds))
-            return;
-        useEnergy(plantingCost);
-        ItemStack item = manager.get();
-        Material seedType = item.getType();
-        manager.decrement();
-
-        switch (seedType) {
-        case SEEDS:
-            crop.setTypeId(Material.CROPS.getId());
-            break;
-        case PUMPKIN_SEEDS: {
-            byte cropData = 0;
-            if (manager.findItemTypeAndData(Material.INK_SACK.getId(), (byte) 15)) {
-                // Bonemeal sets the seeds to fully grown.
-                cropData = 7;
-                manager.decrement();
-            }
-            crop.setTypeIdAndData(Material.PUMPKIN_STEM.getId(), cropData, true);
-        }
-            break;
-
-        case MELON_SEEDS: {
-            byte cropData = 0;
-            if (manager.findItemTypeAndData(Material.INK_SACK.getId(), (byte) 15)) {
-                // Bonemeal sets the seeds to fully grown.
-                cropData = 7;
-                manager.decrement();
-            }
-            crop.setTypeIdAndData(Material.MELON_STEM.getId(), cropData, true);
-        }
-            break;
-        case CARROT_ITEM:
-            crop.setTypeId(Material.CARROT.getId());
-            break;
-        case POTATO_ITEM:
-            crop.setTypeId(Material.POTATO.getId());
-            break;
-        default:
-            break;
-        }
-    }
-
-    private void plantNetherWart(BlockLocation crop) throws NoEnergyException {
-        if (rail.getRowType() != RailType.PLANT)
-            return;
-        InventoryManager manager = new InventoryManager(chestInventory());
-        if (!manager.findMaterial(Material.NETHER_STALK))
-            return;
-        useEnergy(plantingCost);
-        crop.setType(Material.NETHER_WARTS);
-        manager.decrement();
-    }
-
-    private boolean harvestCrops(BlockLocation crop, Material material) throws NoEnergyException {
-        Crops crops = new Crops(material);
-        crops.setData(crop.getBlock().getData());
-        if (crops.getState() != CropState.RIPE) {
-            // Use bonemeal if necessary to complete the harvest.
-            InventoryManager manager = new InventoryManager(chestInventory());
-            if (manager.findItemTypeAndData(Material.INK_SACK.getId(), (byte) 15)) {
-                // Crop is now fully grown.
-                crop.setTypeIdAndData(material.getId(), (byte) 7, false);
-                manager.decrement();
-            } else {
-                return false;
-            }
-        }
-
-        InventoryTransaction transaction = new InventoryTransaction(chestInventory());
-
-        switch (material) {
-        case CROPS:
-            // Hardcoded drops for now, as Block.getDrops() does not return the
-            // seeds properly.
-
-            transaction.add(new ItemStack(Material.WHEAT));
-            if (harvestWheatSeeds) {
-                int seedAmount = random.nextInt(4);
-                if (seedAmount > 0) {
-                    transaction.add(new ItemStack(Material.SEEDS, seedAmount));
-                }
-            }
-            break;
-        case CARROT:
-            transaction.add(new ItemStack(Material.CARROT_ITEM, random.nextInt(4) + 1));
-            break;
-        case POTATO:
-            transaction.add(new ItemStack(Material.POTATO_ITEM, random.nextInt(4) + 1));
-            if (random.nextInt(100) < 2) {
-                transaction.add(new ItemStack(Material.POISONOUS_POTATO));
-            }
-            break;
-        default:
-            return false;
-        }
-
-        return doHarvest(crop, transaction);
-    }
-
-    private boolean harvestNetherWart(BlockLocation crop) throws NoEnergyException {
-        byte data = crop.getBlock().getData();
-        // Fully grown stage
-        if (data != 3)
-            return false;
-
-        // Hardcoded drop as Block.getDrops() does not return nether stalk
-        // stacks.
-        InventoryTransaction transaction = new InventoryTransaction(chestInventory());
-        transaction.add(new ItemStack(Material.NETHER_STALK, 2 + random.nextInt(4)));
-        return doHarvest(crop, transaction);
-    }
-
-    private boolean harvestMelon(BlockLocation crop) throws NoEnergyException {
-        // Hardcoded drop as Block.getDrops() returns 3-7 melons rather than
-        // melon slices.
-        InventoryTransaction transaction = new InventoryTransaction(chestInventory());
-        transaction.add(new ItemStack(Material.MELON, 3 + random.nextInt(5)));
-        return doHarvest(crop, transaction);
     }
 
     /**
-     * Attempts to break the given crop block and collect the results.
+     * Attempts to harvest the current crop block.
      * 
      * @param crop
-     *            The block to harvest.
-     * @return True if the results were collected.
+     *            The block being harvested
      * @throws NoEnergyException
      */
-    private boolean harvestBlock(BlockLocation crop) throws NoEnergyException {
-        Collection<ItemStack> drops = crop.getBlock().getDrops();
-        InventoryTransaction transaction = new InventoryTransaction(chestInventory());
-        transaction.add(drops);
-        return doHarvest(crop, transaction);
+    private void harvest(BlockLocation crop) throws NoEnergyException {
+        CropHandler handler = harvestableMap.get(crop.getType());
+        if (handler == null)
+            return;
+
+        boolean canHarvest = handler.isRipe(crop);
+        if (!canHarvest) {
+            if (handler.canUseBonemealAtHarvest()) {
+                /*
+                 * Use bonemeal, but it may still fail to produce a harvestable
+                 * crop.
+                 */
+                InventoryManager manager = new InventoryManager(chestInventory());
+                if (manager.findItemTypeAndData(Material.INK_SACK.getId(), (byte) 15)
+                // Attempt to use bonemeal if found
+                        && handler.useBonemeal(crop)) {
+                    manager.decrement();
+                    canHarvest = handler.isRipe(crop);
+                }
+
+            }
+        }
+        if (canHarvest) {
+            InventoryTransaction transaction = new InventoryTransaction(chestInventory());
+            Collection<ItemStack> drops = handler.getDrops();
+            if (drops == null) {
+                // Ask Bukkit
+                drops = crop.getBlock().getDrops();
+            }
+            transaction.add(drops);
+            useEnergy(harvestCost);
+            try {
+                useTool();
+            } catch (NoToolException e) {
+                return;
+            }
+
+            if (!transaction.execute()) {
+                return;
+            }
+            crop.setEmpty();
+        }
     }
 
-    private boolean doHarvest(BlockLocation crop, InventoryTransaction transaction) throws NoEnergyException {
-        useEnergy(harvestCost);
-        try {
-            useTool();
-        } catch (NoToolException e) {
-            return false;
+    /**
+     * Attempts to plant a crop on the current block.
+     * 
+     * @param tile
+     *            The ground tile being planted in
+     * @param crop
+     *            The block above the tile
+     * @throws NoEnergyException
+     */
+    private void plant(BlockLocation tile, BlockLocation crop) throws NoEnergyException {
+        if (rail.getRowType() != RailType.PLANT)
+            return;
+        // Cannot plant in a non-empty space.
+        if (!crop.isEmpty())
+            return;
+
+        InventoryManager manager = new InventoryManager(chestInventory());
+        if (!manager.find(plantable))
+            return;
+        ItemStack item = manager.get();
+        Material seedType = item.getType();
+        CropHandler handler = plantableMap.get(seedType);
+        if (handler == null) {
+            MachinaPlanter.log("SEVERE: Got a null CropHandler after finding a suitable item to plant!");
+            return;
         }
+        if (!handler.canPlant(tile))
+            return;
 
-        if (!transaction.execute())
-            return false;
-        crop.setEmpty();
-
-        return true;
+        useEnergy(plantingCost);
+        manager.decrement();
+        boolean usedBonemeal = false;
+        if (handler.canUseBonemealWhilePlanting()) {
+            usedBonemeal = manager.findItemTypeAndData(Material.INK_SACK.getId(), (byte) 15);
+            if (usedBonemeal) {
+                manager.decrement();
+            }
+        }
+        handler.plant(crop, usedBonemeal);
     }
 
     private void useTool() throws NoToolException {
@@ -389,7 +285,7 @@ class Planter implements Machina {
         public State run() {
             if (rail.activate()) {
                 try {
-                    plant();
+                    operateOnTile();
                     return plant;
                 } catch (NoEnergyException e) {
                     return deactivate;
@@ -415,7 +311,7 @@ class Planter implements Machina {
         public State run() {
             if (rail.nextTile()) {
                 try {
-                    plant();
+                    operateOnTile();
                     return this;
                 } catch (NoEnergyException e) {
                     return deactivate;
@@ -475,21 +371,33 @@ class Planter implements Machina {
         }
     };
 
-    private static final Predicate<ItemStack> seeds = new Predicate<ItemStack>() {
+    // Statics
+
+    /**
+     * Allows for adding crop types for the planter to handle.
+     * 
+     * @param handler
+     */
+    public static void addCrop(CropHandler handler) {
+        if (harvestableMap.containsKey(handler.getHarvestableMaterial())) {
+            MachinaPlanter.log("Warning: Crophandler " + handler.getClass().getName() + " is overriding existing harvestable mapping for " + handler.getHarvestableMaterial().toString());
+        }
+        harvestableMap.put(handler.getHarvestableMaterial(), handler);
+        if (plantableMap.containsKey(handler.getPlantableItem())) {
+            MachinaPlanter.log("Warning: Crophandler " + handler.getClass().getName() + " is overriding existing plantable mapping for " + handler.getPlantableItem().toString());
+        }
+        plantableMap.put(handler.getPlantableItem(), handler);
+    }
+
+    private static final Predicate<ItemStack> plantable = new Predicate<ItemStack>() {
         @Override
         public boolean apply(ItemStack item) {
             if (item == null)
                 return false;
-            switch (item.getType()) {
-            case SEEDS:
-            case PUMPKIN_SEEDS:
-            case MELON_SEEDS:
-            case CARROT_ITEM:
-            case POTATO_ITEM:
-                return true;
-            default:
+            CropHandler handler = plantableMap.get(item.getType());
+            if (handler == null)
                 return false;
-            }
+            return handler.checkPlantableItemData(item.getData());
         }
     };
 
@@ -520,14 +428,24 @@ class Planter implements Machina {
         delay = Math.max(configuration.getInt("action-delay", delay), 1);
         maxLength = Math.min(Math.max(configuration.getInt("max-length", maxLength), 1), 64);
         maxWidth = Math.min(Math.max(configuration.getInt("max-width", maxWidth), 1), 64);
-        harvestWheat = configuration.getBoolean("harvest-wheat", harvestWheat);
-        harvestWheatSeeds = configuration.getBoolean("harvest-wheat-seeds", harvestWheatSeeds);
-        harvestPumpkin = configuration.getBoolean("harvest-pumpkin", harvestPumpkin);
-        harvestMelon = configuration.getBoolean("harvest-melon", harvestMelon);
-        harvestNetherWart = configuration.getBoolean("harvest-netherwart", harvestNetherWart);
-        harvestCarrot = configuration.getBoolean("harvest-carrot", harvestCarrot);
-        harvestPotato = configuration.getBoolean("harvest-potato", harvestPotato);
+        boolean harvestWheat = configuration.getBoolean("harvest-wheat", true);
+        boolean harvestWheatSeeds = configuration.getBoolean("harvest-wheat-seeds", true);
+        boolean harvestPumpkin = configuration.getBoolean("harvest-pumpkin", true);
+        boolean harvestMelon = configuration.getBoolean("harvest-melon", true);
+        boolean harvestNetherWart = configuration.getBoolean("harvest-netherwart", true);
+        boolean harvestCarrot = configuration.getBoolean("harvest-carrot", true);
+        boolean harvestPotato = configuration.getBoolean("harvest-potato", true);
+        boolean harvestCocoa = configuration.getBoolean("harvest-cocoa", true);
         useEnergy = configuration.getBoolean("use-energy", useEnergy);
         useTool = configuration.getBoolean("use-tool", useTool);
+
+        // Add all the default crops.
+        addCrop(new CropWheat(harvestWheat, harvestWheatSeeds));
+        addCrop(new CropPumpkin(harvestPumpkin));
+        addCrop(new CropMelon(harvestMelon));
+        addCrop(new CropNetherWart(harvestNetherWart));
+        addCrop(new CropCarrot(harvestCarrot));
+        addCrop(new CropPotato(harvestPotato));
+        addCrop(new CropCocoa(harvestCocoa));
     }
 }

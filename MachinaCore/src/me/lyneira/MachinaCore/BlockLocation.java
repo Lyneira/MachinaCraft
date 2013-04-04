@@ -182,7 +182,7 @@ public final class BlockLocation {
      * Sets this {@link BlockLocation} to air.
      */
     public final void setEmpty() {
-        world.getBlockAt(x, y, z).setTypeId(0);
+        world.getBlockAt(x, y, z).setTypeIdAndData(0, (byte) 0, true);
     }
 
     /**

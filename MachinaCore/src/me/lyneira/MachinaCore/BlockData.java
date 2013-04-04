@@ -1,6 +1,7 @@
 package me.lyneira.MachinaCore;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -48,7 +49,7 @@ public final class BlockData {
      * @return The item stack resulting from the block break, or null if there
      *         is no drop
      */
-    public static final List<ItemStack> breakBlock(final BlockLocation location) {
+    public static final Collection<ItemStack> breakBlock(final BlockLocation location) {
         Block block = location.getBlock();
         BlockData data;
         int blockType = block.getTypeId();
@@ -61,7 +62,7 @@ public final class BlockData {
 
         // Simplest case, ask bukkit
         if (data.drop < 0) {
-            return new ArrayList<ItemStack>(block.getDrops());
+            return block.getDrops();
         }
 
         int item;
@@ -257,7 +258,7 @@ public final class BlockData {
 
         set(Material.WOOD_STAIRS.getId()).drillable(true).solid(true).copyData(true).drillTime(breakTimeMedium);
 
-        set(Material.CHEST.getId()).solid(true).copyData(true).inventory(true);
+        set(Material.CHEST.getId()).copyData(true).inventory(true);
 
         set(Material.REDSTONE_WIRE.getId()).drillable(true).attached(true);
 
@@ -338,7 +339,7 @@ public final class BlockData {
 
         set(Material.DIODE_BLOCK_ON.getId()).drillable(true).copyData(true).attached(true);
 
-        set(Material.LOCKED_CHEST.getId()).solid(true);
+        set(Material.LOCKED_CHEST.getId());
 
         set(Material.TRAP_DOOR.getId()).drillable(true).copyData(true).attached(true).drillTime(breakTimeFast);
 
@@ -424,7 +425,7 @@ public final class BlockData {
 
         set(Material.ANVIL.getId()).copyData(true);
 
-        set(Material.TRAPPED_CHEST.getId()).solid(true).copyData(true).inventory(true);
+        set(Material.TRAPPED_CHEST.getId()).copyData(true).inventory(true);
 
         set(Material.GOLD_PLATE.getId()).drillable(true).attached(true).drillTime(breakTimeMedium);
 
