@@ -37,7 +37,7 @@ import org.bukkit.util.permissions.DefaultPermissions;
  */
 public class MachinaRedstoneBridge extends JavaPlugin implements Runnable {
     private final static Logger log = Logger.getLogger("Minecraft");
-    private final static int leverType = Material.LEVER.getId();
+ //   private final static int leverType = Material.LEVER.getId();
 
     private final Set<Block> queuedBlocks = new LinkedHashSet<Block>();
 
@@ -81,7 +81,7 @@ public class MachinaRedstoneBridge extends JavaPlugin implements Runnable {
      * @param block
      */
     void queueDetect(Block block) {
-        if (block.getTypeId() != leverType)
+        if (!block.getType().equals(Material.LEVER))
             return;
         queuedBlocks.add(block);
         if (!queueScheduled) {
@@ -100,7 +100,7 @@ public class MachinaRedstoneBridge extends JavaPlugin implements Runnable {
             Block block = it.next();
             it.remove();
 
-            if (block.getTypeId() != leverType)
+            if (!block.getType().equals(Material.LEVER))
                 continue;
 
             Player player = dummyPlayers.get(block.getWorld());
@@ -136,7 +136,7 @@ public class MachinaRedstoneBridge extends JavaPlugin implements Runnable {
             ConfigurationManager config = new ConfigurationManager(MachinaRedstoneBridge.this);
             ConfigurationSection configuration = config.getAll();
 
-            RedstoneBridgeListener.bridgeBlock = configuration.getInt("bridge-block", RedstoneBridgeListener.bridgeBlock);
+            RedstoneBridgeListener.bridgeBlock =  Material.getMaterial(configuration.getString("bridge-block"));
 
             List<String> permissionStrings = configuration.getStringList("permissions");
             if (permissionStrings == null) {
