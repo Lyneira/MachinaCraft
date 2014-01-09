@@ -10,7 +10,7 @@ import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.material.Diode;
 import org.bukkit.event.block.BlockRedstoneEvent;
 class RedstoneBridgeListener implements Listener {
-    private static final int repeaterOn = Material.DIODE_BLOCK_ON.getId();
+    private static final int repeateroff = Material.DIODE_BLOCK_OFF.getId();
     static int bridgeBlock = Material.BRICK.getId();
 
     private final MachinaRedstoneBridge plugin;
@@ -24,7 +24,7 @@ class RedstoneBridgeListener implements Listener {
        // if (event. != repeaterOn)
        //     return;
         Block block = event.getBlock();
-        if (block.getTypeId() == repeaterOn) {
+        if (block.getTypeId() == repeateroff) {
             if (block.getRelative(BlockFace.DOWN).getTypeId() == bridgeBlock) {
                 BlockFace direction = ((Diode) block.getState().getData()).getFacing();
                 Block target = block.getRelative(direction);
