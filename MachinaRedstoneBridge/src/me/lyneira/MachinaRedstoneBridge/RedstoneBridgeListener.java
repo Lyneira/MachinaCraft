@@ -8,7 +8,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.material.Diode;
-
+import org.bukkit.event.block.BlockRedstoneEvent;
 class RedstoneBridgeListener implements Listener {
     private static final int repeaterOn = Material.DIODE_BLOCK_ON.getId();
     static int bridgeBlock = Material.BRICK.getId();
@@ -20,9 +20,9 @@ class RedstoneBridgeListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onRedstone(BlockPhysicsEvent event) {
-        if (event.getChangedTypeId() != repeaterOn)
-            return;
+    public void onRedstone(BlockRedstoneEvent event) {
+       // if (event. != repeaterOn)
+       //     return;
         Block block = event.getBlock();
         if (block.getTypeId() == repeaterOn) {
             if (block.getRelative(BlockFace.DOWN).getTypeId() == bridgeBlock) {
