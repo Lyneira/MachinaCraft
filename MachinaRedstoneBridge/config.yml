@@ -8,7 +8,7 @@
 # in question registers a permission that ends with .*
 
 # ID of the block needed to be under the repeater. Default is Bricks (45)
-bridge-block: 45
+bridge-block: BRICK
 permissions:
     - machinadrill.all
     - machinabuilder.all
