@@ -325,8 +325,9 @@ public final class BlockData {
         set(Material.DIODE_BLOCK_OFF.getId()).drillable(true).attached(true);
 
         set(Material.DIODE_BLOCK_ON.getId()).drillable(true).attached(true);
-
-        set(Material.LOCKED_CHEST.getId()).solid(true);
+        
+        // No longer in the ancient times, this makes the plugin unusable now!
+        //set(Material.LOCKED_CHEST.getId()).solid(true);
 
         set(Material.TRAP_DOOR.getId()).drillable(true).attached(true).drillTime(breakTimeFast);
 
